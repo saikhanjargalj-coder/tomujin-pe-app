@@ -135,6 +135,7 @@ async function render(loginMsg = null) {
       tests = await must(sb.from("assessment_tests").select("*").eq("active", true).order("sort_order"));
     }
     const { parts, params } = parseHash();
+    if (parts[0] === "password") return passwordView();
     if (!isStaff()) return await studentHome(params);
     const [section, id] = parts;
     const views = { "": dashboard, classes: id ? classDetail : classesList, students: studentReport, assessment: assessmentEntry,
@@ -152,8 +153,8 @@ async function render(loginMsg = null) {
 function shell(content, active = "") {
   const items = isStaff()
     ? [["", "Самбар"], ["classes", "Ангиуд"], ["assessment", "Фитнес тест"], ["grades", "Үнэлгээ"], ["lessons", "Хичээлийн сан"], ["logs", "Дасгалын бүртгэл"]]
-        .concat(isAdmin() ? [["staff", "Багш нар"]] : [])
-    : [["", "Миний хуудас"]];
+        .concat(isAdmin() ? [["staff", "Багш нар"]] : []).concat([["password", "Нууц үг солих"]])
+    : [["", "Миний хуудас"], ["password", "Нууц үг солих"]];
   app.innerHTML = `<div class="layout">
     <aside class="side">
       <div class="brand"><div class="mark">T</div><div><strong>Tomujin PE</strong><small>#JUSTSHOWUP</small></div></div>
@@ -165,39 +166,53 @@ function shell(content, active = "") {
 }
 
 // ---------------------------------------------------------------- auth screens
-function renderLogin(msg) {
+function renderLogin(msg, mode = "login") {
+  const isReg = mode === "register";
   app.innerHTML = `<div class="auth">
     <section class="hero"><div class="tag">TOMUJIN ALTERNATIVE SCHOOL</div>
       <div><h1>Just show up<br>for yourself.</h1><p>Биеийн тамирын хичээл, фитнес тест, дасгалын бүртгэл, хувийн ахиц — нэг дор.</p></div>
       <div class="tag">#JUSTSHOWUP</div></section>
     <section class="panel"><div class="box">
-      <div><h1 style="font-size:26px">Нэвтрэх</h1><p class="sub">Зөвхөн сургуулийн @${esc(DOMAIN)} хаягаар.</p></div>
+      <div class="tabs"><a href="#" data-mode="login" class="${isReg ? "" : "on"}">Нэвтрэх</a><a href="#" data-mode="register" class="${isReg ? "on" : ""}">Анх удаа бүртгүүлэх</a></div>
+      <div><h1 style="font-size:26px">${isReg ? "Бүртгүүлэх" : "Нэвтрэх"}</h1><p class="sub">${isReg ? "PE багшаас авсан 6 оронтой кодоо ашиглана." : "Сургуулийн @" + esc(DOMAIN) + " хаяг, нууц үгээрээ."}</p></div>
       ${msg ? `<div class="msg err">${esc(msg)}</div>` : ""}
-      ${C.GOOGLE_LOGIN !== false ? `<button class="btn primary" id="google" style="justify-content:center;padding:12px">Google-ээр нэвтрэх (@${esc(DOMAIN)})</button><div class="or">ЭСВЭЛ</div>` : ""}
-      <form id="magic" class="form">
+      <form id="authform" class="form">
         <label class="f">Сургуулийн email<input name="email" type="email" required placeholder="нэр@${esc(DOMAIN)}" autocomplete="email"></label>
-        <button class="btn" style="justify-content:center;padding:12px">Нэвтрэх линк email-ээр авах</button>
+        ${isReg ? `<label class="f">Бүртгэлийн код (багшаас)<input name="code" required minlength="6" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em"></label>` : ""}
+        <label class="f">${isReg ? "Шинэ нууц үг (8+ тэмдэгт)" : "Нууц үг"}<input name="password" type="password" required minlength="${isReg ? 8 : 1}" autocomplete="${isReg ? "new-password" : "current-password"}"></label>
+        ${isReg ? `<label class="f">Нууц үгээ давтах<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>` : ""}
+        <button class="btn primary" style="justify-content:center;padding:12px">${isReg ? "Бүртгүүлэх" : "Нэвтрэх"}</button>
       </form>
       <div id="authmsg"></div>
-      <p class="muted" style="font-size:12px">Нууц үг шаардлагагүй. Email-д ирсэн линк дээр дарахад нэвтэрнэ.</p>
+      <p class="muted" style="font-size:12px">${isReg ? "Код нэг л удаа хэрэгтэй. Дараагийн удаа email, нууц үгээрээ нэвтэрнэ." : "Нууц үгээ мартсан бол PE багшдаа хандаж шинэ код авна."}</p>
     </div></section></div>`;
+  $$("[data-mode]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); renderLogin(null, a.dataset.mode); }));
   const out = $("#authmsg");
-  $("#google")?.addEventListener("click", async () => {
-    const { error } = await sb.auth.signInWithOAuth({ provider: "google",
-      options: { redirectTo: location.origin + "/", queryParams: { hd: DOMAIN, prompt: "select_account" } } });
-    if (error) out.innerHTML = `<div class="msg err">${esc(friendlyError(error))}</div>`;
-  });
-  $("#magic").addEventListener("submit", async (e) => {
+  const fail = (t) => (out.innerHTML = `<div class="msg err">${esc(t)}</div>`);
+  $("#authform").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = formData(e.target).email.toLowerCase();
-    if (!email.endsWith("@" + DOMAIN)) { out.innerHTML = `<div class="msg err">Зөвхөн @${esc(DOMAIN)} хаяг ашиглана.</div>`; return; }
-    const btn = e.target.querySelector("button"); btn.disabled = true;
-    const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + "/" } });
+    const f = formData(e.target);
+    const email = f.email.toLowerCase();
+    if (!email.endsWith("@" + DOMAIN)) return fail(`Зөвхөн @${DOMAIN} хаяг ашиглана.`);
+    if (isReg && f.password !== f.password2) return fail("Нууц үг хоорондоо таарахгүй байна.");
+    const btn = e.target.querySelector("button"); btn.disabled = true; out.innerHTML = "";
+    const { data, error } = isReg
+      ? await sb.auth.signUp({ email, password: f.password, options: { data: { access_code: f.code.toUpperCase().trim() } } })
+      : await sb.auth.signInWithPassword({ email, password: f.password });
     btn.disabled = false;
-    out.innerHTML = error
-      ? `<div class="msg err">${esc(/rate limit/i.test(error.message) ? "Хэт олон удаа хүсэлт илгээлээ. Хэдэн минут хүлээгээд дахин оролдоно уу." : loginErrorText(error.message))}</div>`
-      : `<div class="msg ok">Линк ${esc(email)} руу илгээгдлээ. Inbox болон Spam-аа шалгаарай.</div>`;
+    if (error) return fail(authErrorText(error.message, isReg));
+    if (isReg && !data.session) return (out.innerHTML = `<div class="msg ok">Бүртгэл үүслээ. Email-ээ баталгаажуулаад "Нэвтрэх" хэсгээр орно уу.</div>`);
+    session = data.session; profile = null; go("#/");
   });
+}
+function authErrorText(m, isReg) {
+  if (/Invalid login credentials/i.test(m)) return "Email эсвэл нууц үг буруу байна. Анх удаа бол \"Анх удаа бүртгүүлэх\" хэсгийг ашиглана.";
+  if (/Email not confirmed/i.test(m)) return "Email баталгаажаагүй байна. Багшдаа хандана уу.";
+  if (/already registered|already been registered|exists/i.test(m)) return "Энэ email аль хэдийн бүртгэлтэй. \"Нэвтрэх\" хэсгээр орно уу. Нууц үгээ мартсан бол багшаас шинэ код авна.";
+  if (/Database error|not registered|Invalid registration code/i.test(m)) return "Email бүртгэлгүй эсвэл код буруу байна. Кодоо PE багшаасаа шалгана уу.";
+  if (/Password should|weak/i.test(m)) return "Нууц үг хэт сул байна. Дор хаяж 8 тэмдэгт, үсэг тоо холино уу.";
+  if (/rate limit|too many/i.test(m)) return "Хэт олон оролдлого хийлээ. Хэдэн минут хүлээгээд дахин оролдоно уу.";
+  return isReg ? "Бүртгүүлэхэд алдаа гарлаа: " + m : m;
 }
 function renderNoAccess() {
   app.innerHTML = `<div class="auth"><section class="hero"><div class="tag">#JUSTSHOWUP</div><h1>Эрх тохируулаагүй</h1><div></div></section>
@@ -317,12 +332,17 @@ async function classDetail(id) {
     loadClasses(),
   ]);
   if (!cls) return go("#/classes");
+  const registered = new Set((await must(sb.from("profiles").select("student_id").eq("role", "student"))).map((p) => p.student_id));
   shell(`<div class="top"><div><a href="#/classes" class="muted">← Ангиуд</a><h1>${esc(cls.name)}</h1><p class="sub">${cls.grade}-р анги · ${students.filter((s) => s.status === "active").length} идэвхтэй сурагч${cls.location ? " · " + esc(cls.location) : ""}</p></div>
       <div class="row"><a class="btn accent" href="#/assessment?class=${id}">Фитнес тест</a><a class="btn" href="#/grades?class=${id}">Үнэлгээ</a><button class="btn" id="exportCsv">CSV татах</button></div></div>
-    <div class="card"><h2>Сурагчид</h2><div class="tablewrap"><table><thead><tr><th>Код</th><th>Нэр</th><th>Email</th><th>Хүйс</th><th>Төлөв</th><th></th></tr></thead><tbody>
+    <div class="card"><div class="row" style="margin-bottom:8px"><h2 style="margin:0">Сурагчид</h2><span class="spacer"></span><button class="btn sm" id="printCodes">Бүртгэлийн код хэвлэх</button></div>
+    <p class="muted" style="margin:0 0 10px;font-size:13px">Сурагч анх удаа email + <b>бүртгэлийн код</b> + шинэ нууц үгээр бүртгүүлнэ. Нууц үгээ мартвал "Нэвтрэлт сэргээх" дарж шинэ код өгнө (өгөгдөл устахгүй).</p>
+    <div class="tablewrap"><table><thead><tr><th>Код</th><th>Нэр</th><th>Email</th><th>Хүйс</th><th>Төлөв</th><th>Бүртгэлийн код</th><th>Нэвтрэлт</th><th></th></tr></thead><tbody>
       ${students.map((s) => `<tr><td>${esc(s.student_code || "")}</td><td><a href="#/students/${s.id}"><b>${esc(fullName(s))}</b></a></td><td>${esc(s.email || "")}${s.email ? "" : ' <span class="pill">email алга</span>'}</td>
         <td>${esc(s.gender || "")}</td><td><span class="pill">${s.status === "active" ? "идэвхтэй" : "идэвхгүй"}</span></td>
-        <td class="num"><button class="btn sm" data-toggle="${s.id}" data-status="${s.status}">${s.status === "active" ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button></td></tr>`).join("") || `<tr><td colspan="6" class="empty">Сурагч алга.</td></tr>`}
+        <td><code style="letter-spacing:.15em;font-weight:700">${esc(s.access_code || "")}</code></td>
+        <td>${registered.has(s.id) ? '<span class="pill up">бүртгүүлсэн</span>' : '<span class="pill muted">хүлээгдэж буй</span>'}</td>
+        <td class="num" style="white-space:nowrap">${s.email ? `<button class="btn sm" data-reset="${s.id}" data-name="${esc(fullName(s))}">Нэвтрэлт сэргээх</button> ` : ""}<button class="btn sm" data-toggle="${s.id}" data-status="${s.status}">${s.status === "active" ? "Идэвхгүй болгох" : "Идэвхжүүлэх"}</button></td></tr>`).join("") || `<tr><td colspan="8" class="empty">Сурагч алга.</td></tr>`}
     </tbody></table></div></div>
     <div class="grid g2">
       <div class="card"><h2>Сурагч нэмэх</h2><form id="addStudent" class="form grid g2">
@@ -395,6 +415,12 @@ async function classDetail(id) {
     try { await must(sb.from("classes").delete().eq("id", id)); go("#/classes"); } catch (err) { toast(friendlyError(err), true); }
   };
   $("#exportCsv").onclick = () => exportClassCsv(cls, students);
+  $$("[data-reset]").forEach((b) => (b.onclick = async () => {
+    if (!confirm(`${b.dataset.name}-ийн нэвтрэлтийг сэргээх үү? Хуучин нууц үг ажиллахаа больж, шинэ код үүснэ. Тест, үнэлгээ, бүртгэл устахгүй.`)) return;
+    try { const code = await must(sb.rpc("reset_student_login", { p_student: b.dataset.reset })); toast(`Шинэ код: ${code}`); setTimeout(render, 1500); }
+    catch (err) { toast(friendlyError(err), true); }
+  }));
+  $("#printCodes").onclick = () => printCodes(`${cls.name} — бүртгэлийн код`, students.filter((s) => s.status === "active" && s.email).map((s) => [fullName(s), s.email, s.access_code, registered.has(s.id)]));
 }
 
 async function exportClassCsv(cls, students) {
@@ -587,9 +613,13 @@ async function logsView(_, params) {
 async function staffView() {
   if (!isAdmin()) return go("#/");
   const staff = await must(sb.from("staff").select("*").order("created_at"));
-  shell(`<div class="top"><div><h1>Багш нар</h1><p class="sub">Энд нэмсэн @${esc(DOMAIN)} хаягууд багшийн эрхтэй нэвтэрнэ.</p></div></div>
-    <div class="card"><div class="tablewrap"><table><thead><tr><th>Email</th><th>Нэр</th><th>Эрх</th><th></th></tr></thead><tbody>
-    ${staff.map((s) => `<tr><td>${esc(s.email)}</td><td>${esc(s.full_name)}</td><td><span class="pill">${s.role}</span></td><td class="num">${s.email === profile.email ? "" : `<button class="btn sm danger" data-del="${esc(s.email)}">Хасах</button>`}</td></tr>`).join("")}
+  const regStaff = new Set((await must(sb.from("profiles").select("email").in("role", ["admin", "teacher"]))).map((p) => p.email));
+  shell(`<div class="top"><div><h1>Багш нар</h1><p class="sub">Энд нэмсэн @${esc(DOMAIN)} хаягууд бүртгэлийн кодоор анх бүртгүүлж, багшийн эрхтэй нэвтэрнэ.</p></div></div>
+    <div class="card"><div class="tablewrap"><table><thead><tr><th>Email</th><th>Нэр</th><th>Эрх</th><th>Бүртгэлийн код</th><th>Нэвтрэлт</th><th></th></tr></thead><tbody>
+    ${staff.map((s) => `<tr><td>${esc(s.email)}</td><td>${esc(s.full_name)}</td><td><span class="pill">${s.role}</span></td>
+      <td><code style="letter-spacing:.15em;font-weight:700">${esc(s.invite_code || "")}</code></td>
+      <td>${regStaff.has(s.email) ? '<span class="pill up">бүртгүүлсэн</span>' : '<span class="pill muted">хүлээгдэж буй</span>'}</td>
+      <td class="num" style="white-space:nowrap">${s.email === profile.email ? "" : `<button class="btn sm" data-sreset="${esc(s.email)}">Нэвтрэлт сэргээх</button> <button class="btn sm danger" data-del="${esc(s.email)}">Хасах</button>`}</td></tr>`).join("")}
     </tbody></table></div></div>
     <div class="card"><h2>Багш нэмэх</h2><form id="sform" class="form grid g4">
       <label class="f">Email<input name="email" type="email" required placeholder="@${esc(DOMAIN)}"></label><label class="f">Нэр<input name="full_name"></label>
@@ -601,10 +631,41 @@ async function staffView() {
     try { await must(sb.from("staff").insert({ email: f.email.toLowerCase(), full_name: f.full_name || "", role: f.role })); toast("Нэмэгдлээ"); render(); }
     catch (err) { toast(friendlyError(err), true); }
   };
+  $$("[data-sreset]").forEach((b) => (b.onclick = async () => {
+    if (!confirm(`${b.dataset.sreset}-ийн нэвтрэлтийг сэргээх үү? Шинэ код үүснэ.`)) return;
+    try { const code = await must(sb.rpc("reset_staff_login", { p_email: b.dataset.sreset })); toast(`Шинэ код: ${code}`); setTimeout(render, 1500); }
+    catch (err) { toast(friendlyError(err), true); }
+  }));
   $$("[data-del]").forEach((b) => (b.onclick = async () => {
     if (!confirm(`${b.dataset.del}-г хасах уу?`)) return;
     try { await must(sb.from("staff").delete().eq("email", b.dataset.del)); render(); } catch (err) { toast(friendlyError(err), true); }
   }));
+}
+
+// ---------------------------------------------------------------- shared: password + code printing
+function passwordView() {
+  shell(`<div class="top"><div><h1>Нууц үг солих</h1><p class="sub">${esc(profile.email)}</p></div></div>
+    <div class="card" style="max-width:460px"><form id="pwform" class="form">
+      <label class="f">Шинэ нууц үг (8+ тэмдэгт)<input name="p1" type="password" minlength="8" required autocomplete="new-password"></label>
+      <label class="f">Давтах<input name="p2" type="password" minlength="8" required autocomplete="new-password"></label>
+      <button class="btn primary">Хадгалах</button></form></div>`, "password");
+  $("#pwform").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = formData(e.target);
+    if (f.p1 !== f.p2) { toast("Нууц үг хоорондоо таарахгүй байна", true); return; }
+    const { error } = await sb.auth.updateUser({ password: f.p1 });
+    if (error) toast(authErrorText(error.message, false), true); else { toast("Нууц үг шинэчлэгдлээ"); e.target.reset(); }
+  };
+}
+function printCodes(title, rows) {
+  const w = window.open("", "_blank");
+  if (!w) { toast("Popup хаагдсан байна. Browser-ийн popup зөвшөөрнө үү.", true); return; }
+  w.document.write(`<!doctype html><meta charset="utf-8"><title>${esc(title)}</title>
+    <style>body{font-family:system-ui,sans-serif;padding:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:10px;text-align:left}code{font-size:18px;letter-spacing:.2em;font-weight:700}</style>
+    <h2>${esc(title)}</h2><p>Сайт: <b>${esc(location.origin)}</b> → "Анх удаа бүртгүүлэх" → email + код + шинэ нууц үг.</p>
+    <table><tr><th>Нэр</th><th>Email</th><th>Код</th><th></th></tr>${rows.map(([n, e, c, done]) => `<tr><td>${esc(n)}</td><td>${esc(e)}</td><td><code>${esc(c)}</code></td><td>${done ? "бүртгүүлсэн" : ""}</td></tr>`).join("")}</table>
+    <script>print()<\/script>`);
+  w.document.close();
 }
 
 // ---------------------------------------------------------------- student

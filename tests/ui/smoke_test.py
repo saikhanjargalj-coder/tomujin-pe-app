@@ -46,22 +46,42 @@ with sync_playwright() as p:
     page.goto(BASE + "/")
     check("login screen renders", lambda: expect(page.locator("h1").nth(1)).to_have_text("Нэвтрэх"))
     def outside_email():
-        page.fill("input[name=email]", "someone@gmail.com"); page.click("#magic button")
+        page.fill("input[name=email]", "someone@gmail.com"); page.fill("input[name=password]", "x"); page.click("#authform button")
         expect(page.locator("#authmsg")).to_contain_text("Зөвхөн @tomujin.edu.mn")
     check("non-school email rejected in UI", outside_email)
-    def unknown_email():
-        page.fill("input[name=email]", "unknown@tomujin.edu.mn"); page.click("#magic button")
-        expect(page.locator("#authmsg")).to_contain_text("бүртгэлгүй")
-    check("unregistered email gets friendly message", unknown_email)
-    def ok_email():
-        page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.click("#magic button")
-        expect(page.locator("#authmsg")).to_contain_text("илгээгдлээ")
-    check("magic link sent message", ok_email)
-    def google():
-        page.click("#google")
-        calls = page.evaluate("JSON.stringify(window.__calls)")
-        assert '"hd":"tomujin.edu.mn"' in calls, calls
-    check("Google login restricted to school domain", google)
+    def wrong_password():
+        page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=password]", "nope"); page.click("#authform button")
+        expect(page.locator("#authmsg")).to_contain_text("нууц үг буруу")
+    check("wrong password message", wrong_password)
+    def reg_wrong_code():
+        page.click("text=Анх удаа бүртгүүлэх")
+        page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=code]", "zzz999")
+        page.fill("input[name=password]", "secret123"); page.fill("input[name=password2]", "secret123"); page.click("#authform button")
+        expect(page.locator("#authmsg")).to_contain_text("код буруу")
+    check("registration rejects wrong code", reg_wrong_code)
+    def reg_mismatch():
+        page.fill("input[name=code]", "abc123"); page.fill("input[name=password2]", "different1"); page.click("#authform button")
+        expect(page.locator("#authmsg")).to_contain_text("таарахгүй")
+    check("registration checks password repeat", reg_mismatch)
+    def reg_ok():
+        page.fill("input[name=password2]", "secret123"); page.click("#authform button")
+        expect(page.locator("h1")).to_have_text("Сайн уу, Anu!")
+    check("registration with code (lower-case) logs student in", reg_ok)
+    def logout_login():
+        page.click("#signout"); expect(page.locator("#authform")).to_be_visible()
+        page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=password]", "secret123"); page.click("#authform button")
+        expect(page.locator("h1")).to_have_text("Сайн уу, Anu!")
+    check("sign out, then sign in with password", logout_login)
+    def change_pw():
+        page.click("text=Нууц үг солих"); page.fill("input[name=p1]", "newpass123"); page.fill("input[name=p2]", "newpass123")
+        page.click("#pwform button"); toast(page, "шинэчлэгдлээ")
+    check("change password", change_pw)
+    def reg_again():
+        page.click("#signout"); page.click("text=Анх удаа бүртгүүлэх")
+        page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=code]", "ABC123")
+        page.fill("input[name=password]", "secret123"); page.fill("input[name=password2]", "secret123"); page.click("#authform button")
+        expect(page.locator("#authmsg")).to_contain_text("аль хэдийн бүртгэлтэй")
+    check("second registration says already registered", reg_again)
     def url_error():
         page.goto("about:blank"); page.goto(BASE + "/#error=server_error&error_description=Database+error+saving+new+user")
         expect(page.locator(".msg.err")).to_contain_text("бүртгэлгүй")
@@ -91,6 +111,12 @@ with sync_playwright() as p:
         page.locator("[data-toggle]").last.click()
         expect(page.locator("table").first).to_contain_text("идэвхгүй")
     check("deactivate student", deactivate)
+    def codes():
+        expect(page.locator("table").first).to_contain_text("хүлээгдэж буй")
+        page.once("dialog", lambda d: d.accept())
+        page.locator("[data-reset]").first.click(); toast(page, "Шинэ код: NEWCOD")
+        expect(page.locator("table").first).to_contain_text("NEWCOD")
+    check("roster shows codes; reset login gives new code", codes)
     class_url = page.url
     def lesson():
         page.goto(BASE + "/#/lessons/new")
@@ -154,10 +180,11 @@ with sync_playwright() as p:
         page.click("text=Багш нар")
         page.fill("#sform input[name=email]", "New.Teacher@tomujin.edu.mn"); page.click("#sform button"); toast(page, "Нэмэгдлээ")
         expect(page.locator("table")).to_contain_text("new.teacher@tomujin.edu.mn")
+        expect(page.locator("table")).to_contain_text("NEW001")
     check("logs view + add teacher (lowercased)", logs_and_staff)
     def mobile():
         page.set_viewport_size({"width": 375, "height": 800}); page.goto(BASE + "/#/classes")
-        for route in ["#/", "#/classes", "#/assessment", "#/grades", "#/lessons", "#/staff"]:
+        for route in ["#/", "#/classes", "#/assessment", "#/grades", "#/lessons", "#/staff", "#/password"]:
             page.goto(BASE + "/" + route); page.wait_for_selector("h1")
             w = page.evaluate("document.documentElement.scrollWidth")
             wide = page.evaluate("[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>380 && !e.closest('.tablewrap, .nav')).slice(0,3).map(e=>e.tagName+'.'+e.className).join(' ')")
@@ -169,7 +196,7 @@ with sync_playwright() as p:
     page, errs = new_page(browser, "student")
     page.goto(BASE + "/")
     check("student home renders", lambda: expect(page.locator("h1")).to_have_text("Сайн уу, Anu!"))
-    check("student sees no teacher menu", lambda: expect(page.locator(".nav a")).to_have_count(1))
+    check("student sees no teacher menu", lambda: expect(page.locator(".nav a")).to_have_text(["Миний хуудас", "Нууц үг солих"]))
     check("student sees own progress", lambda: expect(page.locator("body")).to_contain_text("▲ +6"))
     check("student sees assigned lesson", lambda: expect(page.locator("body")).to_contain_text("Sprint basics"))
     def submit_log():

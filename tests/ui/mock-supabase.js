@@ -5,7 +5,7 @@ const uid = () => crypto.randomUUID();
 const now = () => new Date().toISOString();
 const ROLE = window.__MOCK_ROLE || "none";
 const db = {
-  staff: [{ email: "saikhanjargal.j@tomujin.edu.mn", full_name: "Jack", role: "admin", created_at: now() }],
+  staff: [{ email: "saikhanjargal.j@tomujin.edu.mn", full_name: "Jack", role: "admin", invite_code: "JACK01", created_at: now() }],
   profiles: [], classes: [], students: [], fitness_results: [], lessons: [], class_lessons: [], training_logs: [], grade_entries: [],
   assessment_tests: [
     ["sprint_50m", "50 м гүйлт", "50 m sprint", "s", false], ["push_ups", "Суниалт", "Push-ups", "reps", true], ["long_jump", "Үсрэлт", "Long jump", "cm", true],
@@ -15,7 +15,8 @@ window.__db = db;
 const fk = { classes: "class_id", students: "student_id", lessons: "lesson_id" };
 const weights = { attendance: .2, performance: .3, showcase: .15, attitude: .15, preparation: .1, load_awareness: .1 };
 const defaults = {
-  classes: () => ({ academic_year: "2026-27" }), students: () => ({ status: "active", last_name: "" }),
+  classes: () => ({ academic_year: "2026-27" }), students: () => ({ status: "active", last_name: "", access_code: Math.random().toString(16).slice(2, 8).toUpperCase() }),
+  staff: () => ({ invite_code: "NEW001" }),
   fitness_results: () => ({ academic_year: "2026-27" }), lessons: () => ({ duration_min: 80, updated_at: now() }),
   grade_entries: () => ({ academic_year: "2026-27", bonus: 0 }), training_logs: () => ({}),
 };
@@ -95,6 +96,12 @@ const users = {
   admin: { id: "u-admin", email: "saikhanjargal.j@tomujin.edu.mn" },
   student: { id: "u-stu", email: "anu@tomujin.edu.mn" },
 };
+if (ROLE === "none") {
+  const c = { id: uid(), name: "11B", grade: 11, academic_year: "2026-27", created_at: now() };
+  db.classes.push(c);
+  db.students.push({ id: uid(), first_name: "Anu", last_name: "Bat", email: "anu@tomujin.edu.mn", class_id: c.id, status: "active", access_code: "ABC123", created_at: now() });
+}
+const passwords = {};
 if (ROLE === "admin") db.profiles.push({ id: "u-admin", email: users.admin.email, role: "admin", student_id: null });
 if (ROLE === "student") {
   const c = { id: uid(), name: "11B", grade: 11, academic_year: "2026-27", created_at: now() };
@@ -114,9 +121,28 @@ export function createClient() {
       getSession: async () => ({ data: { session } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
       signOut: async () => { session = null; return { error: null }; },
-      signInWithOtp: async (a) => { window.__calls.push(["otp", a.email]); return { error: a.email.startsWith("unknown") ? { message: "Database error saving new user" } : null }; },
-      signInWithOAuth: async (a) => { window.__calls.push(["oauth", a]); return { error: null }; },
+      signUp: async ({ email, password, options }) => {
+        if (passwords[email]) return { data: {}, error: { message: "User already registered" } };
+        const code = options?.data?.access_code;
+        const st = db.staff.find((x) => x.email === email), stu = db.students.find((x) => x.email === email && x.status === "active");
+        if (!(st && st.invite_code === code) && !(stu && stu.access_code === code)) return { data: {}, error: { message: "Database error saving new user" } };
+        const user = { id: uid(), email }; passwords[email] = { password, user };
+        db.profiles.push({ id: user.id, email, role: st ? st.role : "student", student_id: st ? null : stu.id });
+        session = { user, access_token: "x" }; return { data: { session, user }, error: null };
+      },
+      signInWithPassword: async ({ email, password }) => {
+        const r = passwords[email];
+        if (!r || r.password !== password) return { data: {}, error: { message: "Invalid login credentials" } };
+        session = { user: r.user, access_token: "x" }; return { data: { session }, error: null };
+      },
+      updateUser: async ({ password }) => { if (session) passwords[session.user.email] = { password, user: session.user }; return { data: {}, error: null }; },
     },
     from: (t) => new Q(t),
+    rpc: (name, args) => ({ then: (res) => {
+      const code = "NEWCOD";
+      if (name === "reset_student_login") { const s = db.students.find((x) => x.id === args.p_student); s.access_code = code; db.profiles = db.profiles.filter((p) => p.student_id !== s.id); }
+      if (name === "reset_staff_login") { db.staff.find((x) => x.email === args.p_email).invite_code = code; db.profiles = db.profiles.filter((p) => p.email !== args.p_email); }
+      return Promise.resolve({ data: code, error: null }).then(res);
+    } }),
   };
 }

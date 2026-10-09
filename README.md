@@ -33,24 +33,19 @@ Tomujin Alternative School-ийн биеийн тамирын веб апп: а�
 3. `supabase/migrations/20261009000001_init.sql` файлын агуулгыг бүхэлд нь хуулж буулгаад → **Run** дарна.
 4. "Success" гарвал болсон. Анхны админ эрх `saikhanjargal.j@tomujin.edu.mn` хаягт автоматаар олгогдоно.
 
-### 2. Supabase: нэвтрэлтийн тохиргоо
-**Authentication → URL Configuration** хэсэгт:
-- **Site URL:** `https://<таны-vercel-хаяг>.vercel.app`
-- **Redirect URLs:** `https://<таны-vercel-хаяг>.vercel.app/**`
+### 2. Нууц үгээр нэвтрэх тохиргоо
+1. **SQL Editor** → `supabase/migrations/20261009000002_password_login.sql` файлын агуулгыг хуулж буулгаад **Run** дарна. Үр дүнд таны (админы) **бүртгэлийн код** гарч ирнэ.
+2. **Authentication → Sign In / Providers → Email** хэсэгт **Confirm email**-ийг **унтраана** → Save.
+   (Бүртгэл бүрийг database-д кодоор шалгадаг тул email баталгаажуулалт шаардлагагүй. Мөн Supabase-ийн үнэгүй email цагт цөөн удаа л илгээх хязгаартай.)
+3. **Authentication → URL Configuration → Site URL** = `https://<таны-vercel-хаяг>.vercel.app`
 
-> Хуучин апп-ийн login эвдэрсэн нэг шалтгаан нь Site URL `localhost:3000` хэвээр үлдсэн байсан явдал. Энэ хэсгийг заавал зөв бөглөөрэй.
-
-### 3. Google-ээр нэвтрэх (сурагчдад хамгийн тохиромжтой)
-Supabase-ийн үнэгүй email үйлчилгээ **цагт хэдхэн email** илгээх хязгаартай. Тиймээс бүтэн анги нэг дор email-ээр нэвтэрвэл хязгаарт хүрнэ. Google login-д ийм хязгаар байхгүй.
-
-1. console.cloud.google.com руу **сургуулийн хаягаараа** нэвтэрч, шинэ project үүсгэнэ.
-2. **APIs & Services → OAuth consent screen** → **Internal** сонгоно. Ингэснээр зөвхөн tomujin.edu.mn хаягтай хүмүүс нэвтэрнэ.
-3. **Credentials → Create credentials → OAuth client ID** → **Web application** сонгоно.
-   - Authorized redirect URI: `https://<supabase-project-ref>.supabase.co/auth/v1/callback`
-4. Үүссэн Client ID болон Client Secret-ийг Supabase → **Authentication → Providers → Google** хэсэгт оруулаад Enable хийнэ.
-
-> Хэрэв сургуулийн IT админ гуравдагч аппыг хязгаарласан бол Google Workspace Admin дээр зөвшөөрөл авах шаардлагатай байж магадгүй.
-> Google тохируулахгүй бол `assets/config.js` файлд `GOOGLE_LOGIN: false` гэж тохируулна. Тэгвэл зөвхөн email линкээр нэвтэрнэ.
+### Нэвтрэлт хэрхэн ажилладаг вэ
+- **Анх удаа:** сайт → "Анх удаа бүртгүүлэх" → сургуулийн email + **6 оронтой бүртгэлийн код** + шинэ нууц үг.
+  - Сурагчийн код: **Ангиуд → анги → Сурагчид** хүснэгтэд харагдана. "Бүртгэлийн код хэвлэх" товчоор хэвлэж тарааж болно.
+  - Багшийн код: **Багш нар** хуудсанд харагдана.
+- **Дараагийн удаа:** email + нууц үг.
+- **Нууц үг мартвал:** багш "Нэвтрэлт сэргээх" дарна. Шинэ код үүсэж, хуучин нууц үг ажиллахаа болино. Тест, үнэлгээ, бүртгэл **устахгүй**. Сурагч шинэ кодоор дахин бүртгүүлнэ.
+- Нэвтэрсэн хүн бүр **Нууц үг солих** хэсгээр нууц үгээ сольж болно.
 
 ### 4. config.js бөглөх
 Supabase → **Project Settings → API** хэсгээс:
