@@ -166,7 +166,7 @@ function shell(content, active = "") {
 }
 
 // ---------------------------------------------------------------- auth screens
-function renderLogin(msg, mode = "login") {
+function renderLogin(msg, mode = "login", prefill = "") {
   const isReg = mode === "register";
   app.innerHTML = `<div class="auth">
     <section class="hero"><div class="tag">TOMUJIN ALTERNATIVE SCHOOL</div>
@@ -177,7 +177,7 @@ function renderLogin(msg, mode = "login") {
       <div><h1 style="font-size:26px">${isReg ? "Бүртгүүлэх" : "Нэвтрэх"}</h1><p class="sub">${isReg ? "PE багшаас авсан 6 оронтой кодоо ашиглана." : "Сургуулийн @" + esc(DOMAIN) + " хаяг, нууц үгээрээ."}</p></div>
       ${msg ? `<div class="msg err">${esc(msg)}</div>` : ""}
       <form id="authform" class="form">
-        <label class="f">Сургуулийн email<input name="email" type="email" required placeholder="нэр@${esc(DOMAIN)}" autocomplete="email"></label>
+        <label class="f">Сургуулийн email<input name="email" type="email" required placeholder="нэр@${esc(DOMAIN)}" autocomplete="email" value="${esc(prefill)}"></label>
         ${isReg ? `<label class="f">Бүртгэлийн код (багшаас)<input name="code" required minlength="6" maxlength="6" autocomplete="off" style="text-transform:uppercase;letter-spacing:.2em"></label>` : ""}
         <label class="f">${isReg ? "Шинэ нууц үг (8+ тэмдэгт)" : "Нууц үг"}<input name="password" type="password" required minlength="${isReg ? 8 : 1}" autocomplete="${isReg ? "new-password" : "current-password"}"></label>
         ${isReg ? `<label class="f">Нууц үгээ давтах<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>` : ""}
@@ -200,7 +200,12 @@ function renderLogin(msg, mode = "login") {
       ? await sb.auth.signUp({ email, password: f.password, options: { data: { access_code: f.code.toUpperCase().trim() } } })
       : await sb.auth.signInWithPassword({ email, password: f.password });
     btn.disabled = false;
-    if (error) { console.warn("auth error", error); fail(authErrorText(error.message, isReg)); out.insertAdjacentHTML("beforeend", `<p class="muted" style="font-size:11px;margin:6px 0 0">Техник мэдээлэл: ${esc(error.message)}${error.status ? " (" + error.status + ")" : ""}</p>`); return; }
+    if (error) { console.warn("auth error", error); fail(authErrorText(error.message, isReg)); out.insertAdjacentHTML("beforeend", `<p class="muted" style="font-size:11px;margin:6px 0 0">Техник мэдээлэл: ${esc(error.message)}${error.status ? " (" + error.status + ")" : ""}</p>`);
+      if (!isReg && /Invalid login credentials/i.test(error.message)) {
+        out.insertAdjacentHTML("beforeend", `<button class="btn accent" id="toReg" style="width:100%;justify-content:center;padding:12px;margin-top:10px">Анх удаа бол энд дарж бүртгүүлнэ үү →</button>`);
+        $("#toReg").onclick = () => renderLogin(null, "register", email);
+      }
+      return; }
     if (isReg && !data.session) return (out.innerHTML = `<div class="msg ok">Бүртгэл үүслээ. Email-ээ баталгаажуулаад "Нэвтрэх" хэсгээр орно уу.</div>`);
     session = data.session; profile = null; go("#/");
   });
