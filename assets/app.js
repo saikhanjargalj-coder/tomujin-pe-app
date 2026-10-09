@@ -200,7 +200,7 @@ function renderLogin(msg, mode = "login") {
       ? await sb.auth.signUp({ email, password: f.password, options: { data: { access_code: f.code.toUpperCase().trim() } } })
       : await sb.auth.signInWithPassword({ email, password: f.password });
     btn.disabled = false;
-    if (error) return fail(authErrorText(error.message, isReg));
+    if (error) { console.warn("auth error", error); fail(authErrorText(error.message, isReg)); out.insertAdjacentHTML("beforeend", `<p class="muted" style="font-size:11px;margin:6px 0 0">Техник мэдээлэл: ${esc(error.message)}${error.status ? " (" + error.status + ")" : ""}</p>`); return; }
     if (isReg && !data.session) return (out.innerHTML = `<div class="msg ok">Бүртгэл үүслээ. Email-ээ баталгаажуулаад "Нэвтрэх" хэсгээр орно уу.</div>`);
     session = data.session; profile = null; go("#/");
   });
