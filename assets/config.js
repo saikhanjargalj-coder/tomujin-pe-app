@@ -6,7 +6,7 @@
 //   SUPABASE_URL  = "Project URL"
 //   SUPABASE_KEY  = "Publishable key" (sb_publishable_...) or the legacy "anon public" key
 window.TOMUJIN_CONFIG = {
-  SUPABASE_URL: "",
+  SUPABASE_URL: "https://pyetbbcnbsglkrqjgujm.supabase.co",
   SUPABASE_KEY: "",
   ACADEMIC_YEAR: "2026-27",
   SCHOOL_DOMAIN: "tomujin.edu.mn",
