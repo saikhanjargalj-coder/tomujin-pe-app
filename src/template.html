@@ -445,7 +445,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Зорилго · Хугацаа · Шат · Хэрэгсэл</span>
     <h1>Миний бэлтгэлийн план</h1>
-    <p class="lede">Өөрийн хичээл, бэлтгэлээ өөрөө бүрдүүл. Зорилгоо сонгоод "Автоматаар бүрдүүлэх" дарахад дулаалт, үндсэн хэсэг, сэргээлтийг таны шатанд тохирох дасгалуудаар бөглөнө. Дараа нь дасгал нэмж, хасаж, дарааллыг өөрчилж, хэмжээг засна. Бие даан бэлтгэл төлөвлөх нь Wellbeing-ийн "Өөрийн" (L3) түвшний гол нотолгоо.</p>
+    <p class="lede">Өөрийн хичээл, бэлтгэлээ өөрөө бүрдүүл. Зорилгоо сонгоод "Автоматаар бүрдүүлэх" дарахад бие халаалт, үндсэн хэсэг, сэргээлтийг таны шатанд тохирох дасгалуудаар бөглөнө. Дараа нь дасгал нэмж, хасаж, дарааллыг өөрчилж, хэмжээг засна. Бие даан бэлтгэл төлөвлөх нь Wellbeing-ийн "Өөрийн" (L3) түвшний гол нотолгоо.</p>
   </div>
   <div class="calcgrid">
     <form class="box" id="planForm" autocomplete="off"><h3>Тохиргоо</h3></form>
@@ -1136,7 +1136,7 @@ function openEditor(kind,item){
     }else if(kind==='les'){
       f.appendChild(h('div',{cls:'fgrid'},[fText('l-title','Хичээлийн нэр',item.title),fText('l-grade','Анги (жишээ "11-р анги")',item.grade)]));
       f.appendChild(fText('l-goal','Зорилго',item.goal,{area:1,rows:2}));
-      f.appendChild(fText('l-blocks','Хичээлийн бүтэц',blocksToText(item.blocks),{area:1,rows:8,help:'Мөр бүр: хугацаа | хэсэг | дасгалууд (таслалаар) | тайлбар. Жишээ: 0–10 | Дулаалт | A-алхаа, Баавгайн алхаа | Баганыг тойрон'}));
+      f.appendChild(fText('l-blocks','Хичээлийн бүтэц',blocksToText(item.blocks),{area:1,rows:8,help:'Мөр бүр: хугацаа | хэсэг | дасгалууд (таслалаар) | тайлбар. Жишээ: 0–10 | Бие халаалт | A-алхаа, Баавгайн алхаа | Баганыг тойрон'}));
       f.appendChild(fChecks('l-ws','Wellbeing чиглэл',strandOpts(),item.ws));
       f.appendChild(fChecks('l-cls','Аль ангид',classOpts(),item.cls));
     }else if(kind==='classes'){
@@ -1267,7 +1267,7 @@ var EQUIP=[['none','Хэрэгсэлгүй'],['band','Резин'],['mb','Мед
 function needsEq(e){var q=(e.eq||'').toLowerCase(),r=[];if(/резин/.test(q))r.push('band');if(/медбол/.test(q)&&!/сонголттой|хэрэгсэлгүй/.test(q))r.push('mb');if(/trx/.test(q))r.push('trx');if(/вандан|хайрцаг/.test(q))r.push('bench');if(/бөмбөг|цохиур|ракетка/.test(q))r.push('ball');if(/конус/.test(q))r.push('cone');if(/турник/.test(q))r.push('bar');return r}
 function eqOk(e,have){return needsEq(e).every(function(x){return have.indexOf(x)>=0})}
 var PLAN=null,MYPLANS=[],PUBPLANS={};
-function newPlan(){return {id:'p'+Date.now().toString(36),name:'Миний бэлтгэл',goal:'str',min:45,lv:3,eq:['none','band','cone'],blocks:[{n:'Дулаалт',items:[]},{n:'Үндсэн хэсэг',items:[]},{n:'Сэргээлт',items:[]}]}}
+function newPlan(){return {id:'p'+Date.now().toString(36),name:'Миний бэлтгэл',goal:'str',min:45,lv:3,eq:['none','band','cone'],blocks:[{n:'Бие халаалт',items:[]},{n:'Үндсэн хэсэг',items:[]},{n:'Сэргээлт',items:[]}]}}
 function pick(pool,n,used){var out=[];pool.forEach(function(e){if(out.length<n&&used.indexOf(e.id)<0){out.push(e);used.push(e.id)}});return out}
 function autoPlan(pl){
   var g=GOALS[pl.goal],used=[],have=pl.eq;
@@ -1278,7 +1278,7 @@ function autoPlan(pl){
   g.cats.forEach(function(c){if(main.length<nMain)main=main.concat(pick(near(EX.filter(function(e){return e.c===c&&!e.p})),nMain-main.length,used))});
   if(main.length<nMain)main=main.concat(pick(near(EX.filter(function(e){return g.cats.indexOf(e.c)>=0})),nMain-main.length,used));
   var cool=pick(near(EX.filter(function(e){return e.c==='flx'})),pl.min>=60?3:2,used);
-  pl.blocks=[{n:'Дулаалт (RAMP)',items:warm.map(function(e){return {id:e.id,d:'1–2 × 30 сек',r:'—'}})},{n:'Үндсэн хэсэг · '+g.n,items:main.map(function(e){return {id:e.id,d:g.dose,r:g.rest}})},{n:'Сэргээлт',items:cool.map(function(e){return {id:e.id,d:'2 × 30 сек',r:'—'}})}];
+  pl.blocks=[{n:'Бие халаалт (RAMP)',items:warm.map(function(e){return {id:e.id,d:'1–2 × 30 сек',r:'—'}})},{n:'Үндсэн хэсэг · '+g.n,items:main.map(function(e){return {id:e.id,d:g.dose,r:g.rest}})},{n:'Сэргээлт',items:cool.map(function(e){return {id:e.id,d:'2 × 30 сек',r:'—'}})}];
   return pl;
 }
 function planMinutes(pl){var m=0;pl.blocks.forEach(function(b,bi){m+=b.items.length*(bi===1?(pl.goal==='end'?3:6):3)});return m}
