@@ -32,6 +32,13 @@ service cloud.firestore {
     match /classes/{id} { allow read: if true; allow write: if isOwner(); }
     match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
     match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    // Team rosters per season (team photo + athletes): public only with parent consent.
+    match /rosters/{id} {
+      allow read: if true;
+      allow create, update: if isOwner() && request.resource.data.consent == true
+        && request.resource.data.athletes is list && request.resource.data.athletes.size() <= 40;
+      allow delete: if isOwner();
+    }
     // Student stories are public only with parent consent.
     match /stories/{id} {
       allow read: if true;
