@@ -27,7 +27,55 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-display);font-size:15px;line-height:1.55}
-body:not(.authed) nav.tabs a:not([data-go=home]){display:none}
+body:not(.authed) nav.tabs a:not([data-go=home]):not(.gl){display:none}
+body.authed nav.tabs a.gl{display:none}
+.bar .wrap>.logo{order:1}
+#acctBar{order:2;margin-left:auto}
+.bar .wrap>nav.tabs{order:3;flex-basis:100%}
+#editBar{order:4}
+@media (min-width:1000px){.bar .wrap>nav.tabs{order:2;flex-basis:auto}#editBar{order:3}#acctBar{order:4}}
+.sec{display:flex;flex-direction:column;gap:14px;scroll-margin-top:90px}
+.sec>.head{display:flex;flex-direction:column;gap:6px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;counter-reset:st}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative}
+.step .num{width:34px;height:34px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;font-weight:900}
+.step .when{font-size:12px;font-weight:800;color:var(--teal);letter-spacing:.06em;text-transform:uppercase}
+.clubgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.club{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
+.club .pic{background:var(--tint);border-radius:12px;aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden}
+.club .pic svg{height:100%;width:auto;max-width:100%}
+.club .badge{font-weight:900;font-size:34px;color:var(--cc,var(--brand));letter-spacing:-.02em}
+.club h3{font-size:16px}
+.club p{margin:0;font-size:13.5px}
+.storygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.story{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0}
+.story .ph{aspect-ratio:4/3;background:var(--tint);display:grid;place-items:center;overflow:hidden}
+.story .ph img{width:100%;height:100%;object-fit:cover}
+.story .ph .ini{font-size:46px;font-weight:900;color:var(--brand)}
+.story .bd{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.story q{font-style:italic;color:var(--muted);font-size:14px}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-left:3px solid var(--line);margin-left:6px}
+.tl li{padding:6px 0 10px 16px;position:relative}
+.tl li::before{content:"";position:absolute;left:-8px;top:11px;width:13px;height:13px;border-radius:50%;background:var(--gold);border:2px solid var(--surface)}
+.tl b{display:block}
+.pblock{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--pc,var(--brand));border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.pblock .ph{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.pblock .time{font-weight:900;color:var(--pc,var(--brand));font-variant-numeric:tabular-nums}
+.pmoves{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.pmove{background:var(--tint);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center;text-align:left;font:inherit;color:inherit;border:0;cursor:default}
+button.pmove{cursor:pointer}
+.pmove .mini{width:64px;flex:0 0 64px;border-radius:8px;overflow:hidden;background:var(--surface)}
+.pmove .mini svg{width:100%;height:auto;display:block}
+.pmove .mini.none{height:58px;display:grid;place-items:center;font-weight:900;color:var(--pc,var(--brand));font-size:20px}
+.pmove b{display:block;font-size:14px}
+.pmove small{color:var(--muted);font-size:12.5px;display:block}
+.ptimer{position:sticky;top:76px;z-index:5;background:var(--brand);color:var(--on-brand);border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.ptimer .clock{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums;min-width:4.5ch}
+.ptimer .now{flex:1 1 200px;font-weight:700}
+.ptimer .btn{background:var(--gold);color:#1c1c1c}
+.pbar{height:6px;border-radius:9999px;background:rgba(255,255,255,.25);overflow:hidden;flex-basis:100%}
+.pbar i{display:block;height:100%;background:var(--gold);width:0}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
 body:not(.authed) .members{display:none!important}
 body.authed .guest{display:none!important}
 .gate{background:var(--tint);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px}
@@ -214,6 +262,11 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
     </a>
     <nav class="tabs" aria-label="Хэсгүүд">
       <a href="#home" data-go="home">Нүүр</a>
+      <a href="#how" class="gl" data-scroll="how">Хэрхэн явагддаг</a>
+      <a href="#clubs" class="gl" data-scroll="clubs">Дугуйлан</a>
+      <a href="#prime" class="gl" data-scroll="prime">Өглөөний 20 минут</a>
+      <a href="#stories" class="gl" data-scroll="stories">Амжилтын түүх</a>
+      <a href="#priming" data-go="priming">Өглөөний priming</a>
       <a href="#wellbeing" data-go="wellbeing">Wellbeing</a>
       <a href="#library" data-go="library">Дасгалын сан</a>
       <a href="#learn" data-go="learn">Мэдлэгийн сан</a>
@@ -238,32 +291,63 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
       <h1>Хөдөлгөөнөөр эхэлдэг 4 талт wellbeing</h1>
       <p class="lede">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Томүжингийн Wellbeing хүрээ, 1–12-р ангийн хөтөлбөр, дасгалын сан, мэдлэгийн сан нэг дор, бүгд хоорондоо уялдсан.</p>
       <div class="chips members"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Wellbeing хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
-      <div class="chips guest"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
+      <div class="chips guest"><a class="btn gold" href="#how" data-scroll="how">Tomujin PE хэрхэн явагддаг</a><a class="btn line" href="#clubs" data-scroll="clubs">Дугуйлангууд</a></div>
     </div>
     <div class="stage" id="heroStage" aria-label="Дасгалын хөдөлгөөнт жишээ"></div>
   </div>
-  <div class="guest" style="display:flex;flex-direction:column;gap:14px">
-    <span class="eyebrow">Бид юу хийдэг вэ</span>
-    <h2 style="margin:0">Хөдөлгөөн бол эрүүл амьдралын эхлэл</h2>
-    <p class="lede">Томүжин Альтернатив Сургуулийн биеийн тамирын хөтөлбөр нь сурагч бүрийг бусадтай харьцуулахгүйгээр өөрийн ахицад нь төвлөрч, насан туршийн хөдөлгөөний дадал, эрүүл амьдралын хэв маягийг төлөвшүүлэхийг зорьдог.</p>
-    <div class="tiles">
-      <div class="tile"><span class="n">1–12</span><h3>Биеийн тамирын хичээл</h3><p class="muted">Суурь хөдөлгөөн, хүч, тэсвэр, уян хатан чанар, спортын тоглоомууд. Анги бүрийн хөгжлийн онцлогт тохирсон хөтөлбөр.</p></div>
-      <div class="tile"><span class="n">4</span><h3>Wellbeing</h3><p class="muted">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Хөдөлгөөнөөр дамжуулан бүгдийг хөгжүүлнэ.</p></div>
-      <div class="tile"><span class="n">RPE</span><h3>Бэлтгэлээ мэдрэх</h3><p class="muted">Сурагчид бэлтгэлийн ачаалал, биеийн мэдрэмжээ тэмдэглэж, өөрийн биеийг ойлгож сурна.</p></div>
-      <div class="tile"><span class="n">PBL</span><h3>Төсөлд суурилсан суралцахуй</h3><p class="muted">Фитнесс үнэлгээ, InBody үр дүнгээ ашиглан өөрийн бэлтгэлийн төлөвлөгөөг өөрөө бүтээнэ.</p></div>
-      <div class="tile"><span class="n">UBAC</span><h3>Спорт ба тэмцээн</h3><p class="muted">Сургуулийн волейбол болон бусад багууд, спортын наадам, тэмцээнд оролцоно.</p></div>
-      <div class="tile"><span class="n">∞</span><h3>"Just Show Up"</h3><p class="muted">Хамгийн чухал нь тогтмол ирж, оролцох. Сахилга бат бол ажиглагдах үйлдэл.</p></div>
+  <div class="dims members" id="homeDims"></div>
+  <div class="tip members" id="tip"></div>
+  <div class="tiles members" id="tiles"></div>
+
+  <section class="sec" id="how" aria-labelledby="howT">
+    <div class="head">
+      <span class="eyebrow">Бидний арга барил</span>
+      <h2 id="howT">Tomujin PE хэрхэн явагддаг вэ</h2>
+      <p class="lede">Биеийн тамир бол зөвхөн 80 минутын хичээл биш. Сурагч бүр бусадтай биш, өчигдрийн өөртэйгөө өрсөлдөж, хөдөлгөөнийг өдөр тутмын амьдралынхаа хэсэг болгоход бид зорьдог.</p>
     </div>
-  </div>
+    <div class="steps" id="howSteps"></div>
+  </section>
+
+  <section class="sec" id="clubs" aria-labelledby="clubsT">
+    <div class="head">
+      <span class="eyebrow">Хичээлээс гадуурх хөдөлгөөн</span>
+      <h2 id="clubsT">Дугуйлангууд</h2>
+      <p class="lede">Спорт, оюун ухаан, тулааны урлаг, бүжиг, фитнесс. Сурагч бүр өөрт таалагдах хөдөлгөөнөө олж, түүндээ тогтмол ирэх нь хамгийн чухал. Карт дээр дарж дэлгэрэнгүйг үзнэ.</p>
+    </div>
+    <div class="chips" id="clubFilter"></div>
+    <div class="chips" id="clubAdd"></div>
+    <div class="clubgrid" id="clubGrid"></div>
+  </section>
+
+  <section class="sec" id="prime" aria-labelledby="primeT">
+    <div class="two-col">
+      <div class="head" style="justify-content:center">
+        <span class="eyebrow">Body &amp; Mind Priming</span>
+        <h2 id="primeT">Өглөөний 20 минут: биеэ сэрээж, оюунаа төвлөрүүлнэ</h2>
+        <p class="lede">Хичээл эхлэхээс өмнө сурагч, багш нар хамтдаа хийх 20 минутын дасгал. Хүнд биш, харин сэргээдэг: амьсгал, биеэ халаах, үе мөчөө хөдөлгөх, булчингаа сэрээх, тархиа идэвхжүүлэх, биеийн байрлалаа засах. Ямар ч хэрэгсэлгүй, 2 × 2 метр зай хангалттай.</p>
+        <div class="chips"><a class="btn gold members" href="#priming" data-go="priming">Дасгалыг эхлүүлэх</a><span class="tag g guest">Бүтэн дасгалыг нэвтэрч үзнэ</span></div>
+      </div>
+      <div class="steps" id="primeTeaser" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="stories" aria-labelledby="storiesT">
+    <div class="head">
+      <span class="eyebrow">UBAC · Тэмцээн · Өөрчлөлт</span>
+      <h2 id="storiesT">Амжилтын түүх</h2>
+      <p class="lede">UBAC-д оролцсон тамирчид, тэмцээн уралдааны замнал, мөн өөрийгөө өөрчилж чадсан сурагчид. Медаль бол нэг хэсэг нь, илүү чухал нь тогтмол ирж, өсөж хөгжсөн түүх.</p>
+    </div>
+    <div class="chips" id="storyFilter"></div>
+    <div class="chips" id="storyAdd"></div>
+    <div class="storygrid" id="storyGrid"></div>
+  </section>
+
   <div class="gate guest" id="gate">
     <span class="eyebrow">Зөвхөн Томүжингийн сурагч, багш нарт</span>
     <h2>Сургуулийн имэйлээрээ нэвтэрч бүх хэсгийг үзнэ</h2>
     <p class="lede">Wellbeing хүрээ, дасгалын сан, мэдлэгийн сан, хоол тооцоолуур, бэлтгэлийн план, хичээлүүд, Loading Form нь зөвхөн @tomujin.edu.mn хаягаар нэвтэрч, имэйлээ баталгаажуулсан хэрэглэгчдэд нээгдэнэ.</p>
     <div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
   </div>
-  <div class="dims members" id="homeDims"></div>
-  <div class="tip members" id="tip"></div>
-  <div class="tiles members" id="tiles"></div>
 </section>
 
 <section class="view" id="v-wellbeing" hidden>
@@ -375,6 +459,15 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
   </div>
   <div class="chips" id="classAdd"></div>
   <div class="artgrid" id="classGrid"></div>
+</section>
+
+<section class="view" id="v-priming" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Body &amp; Mind Priming · 20 минут · Хэрэгсэлгүй</span>
+    <h1>Өглөөний priming</h1>
+    <p class="lede">Сурагч, багш, ажилчид бүгд хамтдаа хийх өглөөний 20 минут. Зорилго нь ядраах биш, сэрээх: хичээлдээ сэргэг, төвлөрсөн, биеэ мэдэрсэн байдлаар орох. Эрчим нь 10-аас 3–5 (амьсгал хурдсана, харин ярьж чадна).</p>
+  </div>
+  <div id="primeOut" style="display:flex;flex-direction:column;gap:16px"></div>
 </section>
 
 <section class="view" id="v-log" hidden>
@@ -797,9 +890,10 @@ function renderMeal(){
 var BASE={ex:EX.slice(),art:ART.slice(),les:LESSONS.slice()};
 var CLASSDEF=[['1a','1A','1'],['6-7a','6A + 7A','6–7'],['8-9a','8A + 9A','8–9'],['10a','10A','10'],['10b','10B','10'],['11a','11A','11'],['11b','11B','11'],['12a','12A','12'],['12b','12B','12'],['12c','12C','12']];
 BASE.les.forEach(function(l){if(l.id==='g11')l.cls=['11a','11b'];if(l.id==='g67')l.cls=['6-7a']});
-var OV={ex:{},art:{},les:{},classes:{}};var CLASSES=[];
+var OV={ex:{},art:{},les:{},classes:{},club:{},story:{}};var CLASSES=[],CLUBS=[],STORIES=[];
 var editMode=false,showHidden=false;
-var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes'};
+var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes',club:'clubs',story:'stories'};
+var PUBLIC_KINDS=['classes','club','story'];
 function merge(kind,base){
   var out=[],seen={};
   base.forEach(function(b){seen[b.id]=1;var o=OV[kind][b.id];if(o&&o.deleted&&!showHidden)return;out.push(Object.assign({},b,o||{},{builtin:true}))});
@@ -814,8 +908,10 @@ function applyCMS(){
   var l=merge('les',BASE.les);LESSONS.length=0;l.forEach(function(x){LESSONS.push(x)});
   var cb=CLASSDEF.map(function(c){return {id:c[0],name:c[1],grade:c[2]}});
   CLASSES=merge('classes',cb);
+  CLUBS=merge('club',CLUBDEF);
+  STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses()}
+function rerenderAll(){applyCMS();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -915,7 +1011,7 @@ function openEditor(kind,item){
   var isNew=!item;item=item||{};var id=item.id||slug();
   var att=attEditor(item.att);var st=h('p',{cls:'status',role:'status'});
   openSheet(function(p){
-    $('sheetEyebrow').textContent=(isNew?'Шинэ ':'Засах · ')+({ex:'дасгал',art:'нийтлэл',les:'хичээл',classes:'анги'})[kind];
+    $('sheetEyebrow').textContent=(isNew?'Шинэ ':'Засах · ')+({ex:'дасгал',art:'нийтлэл',les:'хичээл',classes:'анги',club:'дугуйлан',story:'амжилтын түүх'})[kind];
     p.appendChild(h('h2',{id:'sheetTitle',text:isNew?'Шинээр нэмэх':(item.n||item.t||item.title||item.name)}));
     var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
     if(kind==='ex'){
@@ -947,6 +1043,23 @@ function openEditor(kind,item){
       f.appendChild(h('div',{cls:'fgrid'},[fText('k-name','Ангийн нэр',item.name),fText('k-grade','Анги (тоо)',item.grade)]));
       f.appendChild(fText('k-note','Мэдэгдэл, тэмдэглэл',item.note,{area:1,rows:5,help:'Сурагч, эцэг эхэд харагдана. Мөр бүр тусдаа догол мөр.'}));
       f.appendChild(fText('k-ex','Энэ ангид оноосон дасгалууд',(item.exIds||[]).map(function(i){var e=byId(i);return e?e.n:i}).join(', '),{area:1,rows:2,help:'Дасгалын нэрийг таслалаар. Жишээ: Шалан дээр түлхэлт, TRX хэвтээ татах'}));
+    }else if(kind==='club'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('c-n','Дугуйлангийн нэр',item.n),fSelect('c-cat','Төрөл',Object.keys(CLUBCAT).map(function(k){return [k,CLUBCAT[k][0]]}),item.cat||'sport'),fText('c-gr','Хэдэн анги',item.gr,{ph:'жишээ: 6–12-р анги'})]));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('c-when','Хуваарь',item.when,{ph:'жишээ: Мягмар, Пүрэв 16:30–18:00'}),fText('c-where','Хаана',item.where,{ph:'жишээ: U1 заал'}),fText('c-coach','Багш / дасгалжуулагч',item.coach)]));
+      f.appendChild(fText('c-d','Товч тайлбар',item.d,{area:1,rows:2}));
+      f.appendChild(h('div',{cls:'two'},[fText('c-gain','Юу хөгжүүлдэг (мөр бүрт нэг)',(item.gain||[]).join('\n'),{area:1}),fText('c-do','Юу хийдэг (мөр бүрт нэг)',(item.does||[]).join('\n'),{area:1})]));
+      f.appendChild(fText('c-join','Хэрхэн нэгдэх',item.join,{area:1,rows:2}));
+      f.appendChild(fText('c-img','Зургийн линк (заавал биш)',item.img,{type:'url',ph:'https://… (Google Drive "Anyone with the link" зураг)'}));
+    }else if(kind==='story'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('s-n','Нэр',item.n),fSelect('s-type','Төрөл',Object.keys(STORYTYPE).map(function(k){return [k,STORYTYPE[k]]}),item.type||'ubac'),fText('s-sport','Спорт / чиглэл',item.sport),fText('s-gr','Анги / төгсөлтийн он',item.gr,{ph:'жишээ: 12-р анги эсвэл 2025 оны төгсөгч'})]));
+      f.appendChild(fText('s-img','Зургийн линк',item.img,{type:'url',ph:'https://… (Google Drive "Anyone with the link" зураг)'}));
+      f.appendChild(fText('s-q','Ишлэл (өөрийнх нь үг)',item.q,{area:1,rows:2}));
+      f.appendChild(fText('s-body','Түүх, намтар',bodyToText(item.body),{area:1,rows:8,help:'"## " гарчиг, "- " жагсаалт. Хоосон мөрөөр догол мөр тусгаарлана.'}));
+      f.appendChild(fText('s-path','Тэмцээн, замнал (мөр бүрт: он | тэмцээн | үр дүн)',(item.path||[]).map(function(x){return x.join(' | ')}).join('\n'),{area:1,rows:5,help:'Жишээ: 2025 | UBAC U19 волейбол | 2-р байр'}));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('s-before','Өмнө нь (өөрчлөлт)',item.before,{area:1,rows:2}),fText('s-after','Одоо',item.after,{area:1,rows:2})]));
+      f.appendChild(fText('s-order','Эрэмбэ (1 = хамгийн эхэнд)',item.order,{type:'number',min:1,max:99}));
+      var ok=h('input',{type:'checkbox',id:'s-consent'});ok.checked=!!item.consent;
+      f.appendChild(h('label',{cls:'chk',for:'s-consent'},[ok,' Сурагч болон эцэг эхээс нь нэр, зураг, түүхийг нь нийтэд харуулах зөвшөөрөл авсан']));
     }
     f.appendChild(att.el);
     var save=h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
@@ -958,10 +1071,15 @@ function openEditor(kind,item){
         d={t:t,topic:val('a-topic')||'Ерөнхий',big:val('a-big'),aud:checked('a-aud'),sum:val('a-sum'),body:textToBody($('a-body').value),src:val('a-src')||'Coach Jack · Tomujin PE',ws:checked('a-ws'),cls:checked('a-cls')};if(!item.builtin)d.custom=true}
       else if(kind==='les'){var tt=val('l-title');if(!tt){st.className='status err';st.textContent='Нэр оруулна уу.';return}
         d={title:tt,grade:val('l-grade'),goal:val('l-goal'),blocks:textToBlocks($('l-blocks').value),ws:checked('l-ws'),cls:checked('l-cls')};if(!item.builtin)d.custom=true}
+      else if(kind==='club'){var cn=val('c-n');if(!cn){st.className='status err';st.textContent='Нэр оруулна уу.';return}
+        d={n:cn,cat:val('c-cat'),gr:val('c-gr'),when:val('c-when'),where:val('c-where'),coach:val('c-coach'),d:val('c-d'),gain:lines(val('c-gain')),does:lines(val('c-do')),join:val('c-join'),img:val('c-img')};if(!item.builtin)d.custom=true}
+      else if(kind==='story'){var sn=val('s-n');if(!sn){st.className='status err';st.textContent='Нэр оруулна уу.';return}
+        if(!$('s-consent').checked){st.className='status err';st.textContent='Нийтлэхийн өмнө сурагч, эцэг эхийн зөвшөөрөл авсан байх шаардлагатай.';return}
+        d={n:sn,type:val('s-type'),sport:val('s-sport'),gr:val('s-gr'),img:val('s-img'),q:val('s-q'),body:textToBody($('s-body').value),path:lines(val('s-path')).map(function(l){var p=l.split('|').map(function(x){return x.trim()});return [p[0]||'',p[1]||'',p[2]||'']}),before:val('s-before'),after:val('s-after'),order:+val('s-order')||99,consent:true,custom:true,year:(lines(val('s-path'))[0]||'').split('|')[0].trim()}}
       else{var nm=val('k-name');if(!nm){st.className='status err';st.textContent='Нэр оруулна уу.';return}
         d={name:nm,grade:val('k-grade'),note:$('k-note').value,exIds:val('k-ex').split(',').map(function(s){s=s.trim();var hit=EX.filter(function(e){return e.n===s||e.id===s})[0];return hit?hit.id:null}).filter(Boolean)};if(!item.builtin)d.custom=true}
       d.att=att.get();if(item.deleted)d.deleted=true;
-      saveDoc(kind,id,d,st,true).then(function(){att.commit();closeSheet();if(kind==='ex')openEx(id);else if(kind==='art')openArt(id);else if(kind==='classes')openClass(id)},function(){});
+      saveDoc(kind,id,d,st,true).then(function(){att.commit();closeSheet();if(kind==='ex')openEx(id);else if(kind==='art')openArt(id);else if(kind==='classes')openClass(id);else if(kind==='club')openClub(id);else if(kind==='story')openStory(id)},function(){});
     }});
     var cancel=h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){att.discard();closeSheet()}});
     f.appendChild(h('div',{cls:'editrow'},[save,cancel,st]));
@@ -1118,7 +1236,7 @@ function authErr(e){var c=e&&e.code||'';return c==='tpe/domain'?'Зөвхөн @'
 function renderAccount(){
   var b=$('acctBar');if(!b)return;b.innerHTML='';
   if(!window.TPE||!TPE.configured){return}
-  if(!ME){b.appendChild(h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:openLogin}));return}
+  if(!ME){b.appendChild(h('button',{type:'button',cls:'btn line small',text:'Бүртгүүлэх',onclick:function(){openLogin('up')}}));b.appendChild(h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:function(){openLogin('in')}}));return}
   var label=(MYPROFILE&&MYPROFILE.name)||ME.name||ME.email.split('@')[0];
   b.appendChild(h('button',{type:'button',cls:'chip',text:(MYROLE==='admin'?'Админ · ':MYROLE==='teacher'?'Багш · ':'')+label,onclick:openAccount}));
 }
@@ -1276,7 +1394,7 @@ async function fbInit(){
   await new Promise(function(r){if(window.TPE)r();else window.addEventListener('tpe-ready',r,{once:true})});
   if(!TPE.configured){renderAccount();renderLog();return}
   db=TPE.db;
-  db.collection('classes').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV.classes=m;rerenderAll()},function(){});
+  PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
     ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='teacher'||role==='admin';if(!canEdit)editMode=false;
     setAuthed(!!(u&&u.emailVerified&&role));
@@ -1286,11 +1404,198 @@ async function fbInit(){
   });
 }
 
+/* ---------- landing: how it works ---------- */
+var HOW=[
+ ['Жилийн эхэнд','Эхлэлийн үнэлгээ','Сурагч бүр суурь үнэлгээ өгнө: 50 м гүйлт, урт харайлт, түлхэлт, уян хатан чанар, тэсвэр, хариу үйлдэл, InBody. Энэ бол дүн биш, өөрийнхөө эхлэх цэгийг мэдэх арга.'],
+ ['Долоо хоног бүр','80 минутын хичээл','1–12-р анги. Эхлээд суурь хөдөлгөөн (гүйх, үсрэх, шидэх, барих, тэнцвэр), дараа нь хүч, функционал фитнесс, спортын тоглоом. Жилд 4 улирал: гадаа хөнгөн атлетик, заалны спорт, хэрэглээ, тусгал.'],
+ ['Өдөр бүр','Өглөөний 20 минут ба дадал','Хичээл эхлэхийн өмнө Body & Mind Priming. Нойр, хоол, дэлгэц, биеийн байрлал зэрэг өдөр тутмын дадлаа мэдлэгийн сангаас суралцаж, өөрөө хэрэгжүүлнэ.'],
+ ['Бэлтгэл бүрийн дараа','Биеэ мэдрэх: Loading Form','Сурагч бүр ачаалал (RPE × минут), биеийн мэдрэмж, тусгалаа тэмдэглэнэ. Ахлах ангийнхан өөрийн төлөвлөгөөгөөр бие даан бэлтгэл хийж сурдаг.'],
+ ['Хичээлээс гадуур','Дугуйлан ба сургуулийн баг','13 дугуйлан: спорт, шатар, тулааны урлаг, бүжиг, фитнесс. Сургуулийн багууд UBAC-ын тэмцээнд оролцож, өрсөлдөх, хамтран ажиллах туршлага хуримтлуулна.'],
+ ['Улирал бүр','Ахиц ба тусгал','Wellbeing-ийн 4 хэмжээс, L1–L6 түвшин. Бусадтай харьцуулахгүй, өөрийн ахицаа харна. Төсөлд суурилсан суралцахуйгаар (PBL) өөрийн системээ өөрөө бүтээнэ.']
+];
+function renderHow(){var W=$('howSteps');if(!W)return;W.innerHTML='';HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
+
+/* ---------- clubs ---------- */
+var CLUBCAT={sport:['Спорт','var(--brand)'],mind:['Оюун ухаан','var(--teal)'],fight:['Тулааны урлаг','var(--orange)'],art:['Урлаг ба хөдөлгөөн','#be185d'],fit:['Фитнесс','#15803d']};
+var CLUBDEF=[
+ {id:'basketball',n:'Сагсан бөмбөг',cat:'sport',fig:'bb-set-shot',gr:'',d:'Дриблинг, дамжуулалт, шидэлт, хамгаалалт. Хурд, авхаалж, багаар тоглох чадварыг хөгжүүлнэ.',gain:['Хурд, авхаалж, үсрэлт','Шийдвэр гаргах, багийн тактик','Харилцаа, манлайлал'],does:['Суурь техник: дриблинг, дамжуулалт, BEEF шидэлт, лей-ап','Багийн довтолгоо, хамгаалалтын систем','Тоглолт, UBAC тэмцээнд бэлтгэх']},
+ {id:'volleyball',n:'Волейбол',cat:'sport',fig:'vb-set',gr:'',d:'Тосолт, сервис, довтолгоо, хаалт. Охид, хөвгүүдийн баг UBAC-ын тэмцээнд оролцдог.',gain:['Хариу үйлдэл, үсрэлтийн хүч','Харилцаа, бие биедээ итгэх','Тэвчээр, төвлөрөл'],does:['Бэлэн байрлал, доороос ба дээрээс тосох','Сервис, довтолгооны гүйлт ба цохилт','Багийн байрлал, тоглолт']},
+ {id:'football',n:'Хөл бөмбөг',cat:'sport',fig:'fb-instep',gr:'',d:'Дамжуулалт, хүлээн авалт, дриблинг, цохилт. Орон зайг уншиж, хамтдаа довтлох, хамгаалах.',gain:['Тэсвэр, хурд, хөлийн ур чадвар','Орон зайн мэдрэмж','Багаар ажиллах'],does:['Хөлийн дотор талаар дамжуулах, хүлээн авах','1 эсрэг 1, рондо, жижиг тоглолт','Байрлал, тактик, тоглолт']},
+ {id:'tennis',n:'Теннис',cat:'sport',fig:'tn-forehand',gr:'',d:'Заалны мини теннисээс эхэлж, форхэнд, бэкхэнд, воллей, сервис суралцана.',gain:['Нүд гарын зохицуулалт','Хөлийн ажил, тэнцвэр','Өөрийгөө удирдах, тэвчээр'],does:['Цохиураар бөмбөг удирдах','Форхэнд, бэкхэнд, воллей, сервис','Мини теннисийн тоглолт']},
+ {id:'table-tennis',n:'Ширээний теннис',cat:'sport',fig:'tt-forehand',gr:'',d:'Хурдан хариу үйлдэл, нарийн хяналт. Бүх насныханд тохиромжтой.',gain:['Хариу үйлдлийн хурд','Төвлөрөл, нарийн хяналт','Хөлийн ажил'],does:['Бэлэн байрлал, форхэнд, бэкхэнд түлхэлт','Сервис, эргэлт','Ганцаарчилсан ба хосын тоглолт']},
+ {id:'chess',n:'Шатар',cat:'mind',badge:'♞',gr:'',d:'Урьдчилан бодох, стратеги төлөвлөх, анхаарлаа удаан төвлөрүүлэх. Оюуны "фитнесс".',gain:['Стратеги, логик сэтгэлгээ','Төвлөрөл, тэвчээр','Ялагдлаас суралцах'],does:['Нүүдэл, нээлт, эндшпилийн үндэс','Бодлого, тактикийн дасгал','Дотоод тэмцээн']},
+ {id:'checkers',n:'Даам',cat:'mind',badge:'◉',gr:'',d:'Монголд түгээмэл оюуны тоглоом. Тооцоолол, хурдан шийдвэр гаргахыг хөгжүүлнэ.',gain:['Тооцоолох, урьдчилан харах','Хурдан шийдвэр гаргах','Шударга тоглох'],does:['Дүрэм, суурь тактик','Бодлого, хосын тоглолт','Дотоод тэмцээн']},
+ {id:'muay-thai',n:'Муай тай',cat:'fight',badge:'MT',gr:'',d:'Тайландын тулааны урлаг. Техник, сахилга бат, өөртөө итгэх итгэл, бүтэн биеийн хүч тэсвэр.',gain:['Сахилга бат, өөрийгөө хянах','Хүч, тэсвэр, уян хатан','Өөртөө итгэх итгэл'],does:['Зогсолт, хөлийн ажил, хамгаалалт','Гар, хөл, өвдөг, тохойн техник (жийргэвч дээр)','Хүч тэсвэрийн бэлтгэл','Аюулгүй байдал: хамгаалах хэрэгсэлтэй, багшийн хяналтан дор']},
+ {id:'dance',n:'Бүжиг',cat:'art',badge:'♪',gr:'',d:'Хэмнэл, зохицуулалт, өөрийгөө илэрхийлэх. Толинтой заалд хөгжмийн хэмнэлээр хөдөлнө.',gain:['Хэмнэл, зохицуулалт','Өөрийгөө илэрхийлэх, бүтээлч байдал','Тэсвэр, биеийн байрлал'],does:['Суурь алхам, хэмнэл','Хореограф сурах, өөрөө зохиох','Сургуулийн арга хэмжээнд тоглолт']},
+ {id:'cheer',n:'Cheerleading',cat:'art',badge:'★',gr:'',d:'Бүжиг, акробат, хамтын хөдөлгөөн. Багийн итгэлцэл, хүч, уян хатан чанар.',gain:['Хамтын ажиллагаа, итгэлцэл','Хүч, тэнцвэр, уян хатан','Урам зориг, манлайлал'],does:['Хөдөлгөөн, уриа, хэмнэл','Суурь акробат, тэнцвэр (дэвсгэр дээр, хамгаалагчтай)','Тэмцээн, арга хэмжээнд дэмжих']},
+ {id:'functional',n:'Functional fitness',cat:'fit',fig:'burpee',gr:'',d:'Амьдралын 8 үндсэн хөдөлгөөн: суулт, хинж, түлхэх, татах, нэг хөл, core, үсрэлт, гүйлт.',gain:['Бүтэн биеийн хүч','Зөв хөдөлгөөний хэв','Бие даан бэлтгэл хийх чадвар'],does:['Хөдөлгөөний хэв бүрийн 6 шат','Станц, тойрог бэлтгэл','Өөрийн бэлтгэлийн төлөвлөгөө']},
+ {id:'conditioning',n:'Conditioning training',cat:'fit',fig:'mountain-climber',gr:'',d:'Зүрх уушиг, тэсвэр, хурд. Тамирчид болон бие бялдраа сайжруулах хүссэн бүх хүнд.',gain:['Аэробик ба анаэробик тэсвэр','Хурд, хурдатгал','Сэргэлт, ачааллаа мэдрэх'],does:['Интервал, шаттл гүйлт','Хурд, авхаалжийн дасгал','Зүрхний цохилт, RPE-гээр эрчмээ хянах']},
+ {id:'correction',n:'Individual correction training',cat:'fit',fig:'bird-dog',gr:'',d:'Хувь хүнд тохирсон засах бэлтгэл: биеийн байрлал, хөдөлгөөний хэв, тэнцвэргүй байдал.',gain:['Зөв биеийн байрлал','Үе мөчний хяналт, тогтворжилт','Гэмтлээс урьдчилан сэргийлэх'],does:['Үнэлгээ, InBody-д суурилсан хувийн хөтөлбөр','Нуруу, мөр, ташаа, шагайн засах дасгал','Тогтмол хяналт, ахицын тэмдэглэл']}
+];
+var clubCat='all';
+function clubPic(c){
+  if(c.img)return h('img',{src:imgSrc(c.img),alt:c.n,loading:'lazy',style:'width:100%;height:100%;object-fit:cover'});
+  var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}
+  return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)});
+}
+function renderClubs(){
+  var W=$('clubGrid');if(!W)return;W.innerHTML='';
+  var F=$('clubFilter');F.innerHTML='';[['all','Бүгд']].concat(Object.keys(CLUBCAT).map(function(k){return [k,CLUBCAT[k][0]]})).forEach(function(o){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(clubCat===o[0]),text:o[1],onclick:function(){clubCat=o[0];renderClubs()}}))});
+  var add=$('clubAdd');add.innerHTML='';var b=addBtn('Дугуйлан нэмэх',function(){openEditor('club',null)});if(b)add.appendChild(b);
+  CLUBS.filter(function(c){return clubCat==='all'||c.cat===clubCat}).forEach(function(c){var cc=(CLUBCAT[c.cat]||CLUBCAT.sport);
+    W.appendChild(h('button',{type:'button',cls:'club'+(c.deleted?' hiddenitem':''),style:'--cc:'+cc[1],onclick:function(){openClub(c.id)}},[h('div',{cls:'pic'},[clubPic(c)]),
+      h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+cc[1],text:cc[0]}),c.gr?h('span',{cls:'tag t',text:c.gr}):null]),
+      h('h3',{text:c.n}),h('p',{cls:'muted',text:c.d}),c.when?h('p',{style:'font-weight:700;font-size:13px',text:'Хуваарь: '+c.when}):null]))});
+}
+function openClub(id){
+  var c=CLUBS.filter(function(x){return x.id===id})[0];if(!c)return;var cc=CLUBCAT[c.cat]||CLUBCAT.sport;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Дугуйлан · '+cc[0];
+    p.appendChild(h('h2',{id:'sheetTitle',text:c.n,style:'font-size:30px'}));
+    var er=editRow('club',c,openClub);if(er)p.appendChild(er);
+    p.appendChild(h('div',{cls:'club',style:'cursor:default;--cc:'+cc[1]},[h('div',{cls:'pic',style:'aspect-ratio:16/8'},[clubPic(c)])]));
+    p.appendChild(h('p',{cls:'lede',text:c.d}));
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хуваарь'}),h('div',{cls:'fgrid'},[
+      h('div',{},[h('small',{cls:'muted',text:'Хэзээ'}),h('p',{style:'margin:0;font-weight:700',text:c.when||'Удахгүй зарлана'})]),
+      h('div',{},[h('small',{cls:'muted',text:'Хаана'}),h('p',{style:'margin:0;font-weight:700',text:c.where||'—'})]),
+      h('div',{},[h('small',{cls:'muted',text:'Хэдэн анги'}),h('p',{style:'margin:0;font-weight:700',text:c.gr||'—'})]),
+      h('div',{},[h('small',{cls:'muted',text:'Багш / дасгалжуулагч'}),h('p',{style:'margin:0;font-weight:700',text:c.coach||'—'})])])]));
+    p.appendChild(h('div',{cls:'two'},[
+      h('div',{cls:'box'},[h('h3',{text:'Юу хөгжүүлдэг'}),h('ul',{cls:'cues'},(c.gain||[]).map(function(x){return h('li',{text:x})}))]),
+      h('div',{cls:'box'},[h('h3',{text:'Юу хийдэг'}),h('ul',{cls:'cues'},(c.does||[]).map(function(x){return h('li',{text:x})}))])]));
+    p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Хэрхэн нэгдэх'}),h('p',{style:'margin:0',text:c.join||'Биеийн тамирын багш Coach Jack-д хандаж бүртгүүлнэ. Туршиж үзэхийн тулд эхний хичээлд нь ирээрэй.'})]));
+    var at=attView(c.att);if(at)p.appendChild(at);
+  });
+}
+
+/* ---------- stories ---------- */
+var STORYTYPE={ubac:'UBAC тамирчин',comp:'Тэмцээн уралдаан',change:'Өөрчлөлт хийсэн сурагч',alumni:'Төгсөгч'};
+var storyType='all';
+function imgSrc(u){u=String(u||'');var m=u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{20,})/)||u.match(/[?&]id=([\w-]{20,})/);return m&&/google\.com/.test(u)?'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1200':u}
+function initials(n){return String(n||'?').split(/\s+/).filter(Boolean).map(function(w){return w[0]}).slice(0,2).join('').toUpperCase()}
+function storyPh(x,big){return h('div',{cls:'ph',style:big?'aspect-ratio:16/10;border-radius:14px':''},[x.img?h('img',{src:imgSrc(x.img),alt:x.n,loading:'lazy'}):h('span',{cls:'ini',text:initials(x.n)})])}
+function renderStories(){
+  var sec=$('stories'),W=$('storyGrid');if(!W)return;W.innerHTML='';
+  var add=$('storyAdd');add.innerHTML='';var b=addBtn('Амжилтын түүх нэмэх',function(){openEditor('story',null)});if(b)add.appendChild(b);
+  var F=$('storyFilter');F.innerHTML='';
+  var used=Object.keys(STORYTYPE).filter(function(k){return STORIES.some(function(s){return s.type===k})});
+  if(used.length>1)[['all','Бүгд']].concat(used.map(function(k){return [k,STORYTYPE[k]]})).forEach(function(o){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(storyType===o[0]),text:o[1],onclick:function(){storyType=o[0];renderStories()}}))});
+  var list=STORIES.filter(function(s){return storyType==='all'||s.type===storyType});
+  sec.hidden=!STORIES.length&&!editMode;[].forEach.call(document.querySelectorAll('[data-scroll=stories]'),function(a){a.hidden=!STORIES.length});
+  if(!STORIES.length&&editMode)W.appendChild(h('p',{cls:'muted',text:'Одоогоор түүх алга. "+ Амжилтын түүх нэмэх" дарж эхний сурагчаа оруулаарай. Нийтлэхээс өмнө сурагч, эцэг эхийн зөвшөөрөл авна.'}));
+  list.forEach(function(x){
+    W.appendChild(h('button',{type:'button',cls:'story'+(x.deleted?' hiddenitem':''),onclick:function(){openStory(x.id)}},[storyPh(x),h('div',{cls:'bd'},[
+      h('div',{cls:'chips'},[h('span',{cls:'tag g',text:STORYTYPE[x.type]||''}),x.sport?h('span',{cls:'tag t',text:x.sport}):null]),
+      h('h3',{text:x.n}),x.gr?h('span',{cls:'muted',style:'font-size:13px',text:x.gr}):null,x.q?h('q',{text:x.q}):null])]))});
+}
+function openStory(id){
+  var x=STORIES.filter(function(s){return s.id===id})[0];if(!x)return;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=(STORYTYPE[x.type]||'Амжилтын түүх')+(x.sport?' · '+x.sport:'');
+    p.appendChild(h('h2',{id:'sheetTitle',text:x.n,style:'font-size:30px'}));
+    var er=editRow('story',x,openStory);if(er)p.appendChild(er);
+    p.appendChild(h('div',{cls:'story',style:'cursor:default;border:0'},[storyPh(x,true)]));
+    if(x.gr)p.appendChild(h('p',{cls:'muted',style:'margin:0',text:x.gr}));
+    if(x.q)p.appendChild(h('div',{cls:'tip'},[h('strong',{text:'“'+x.q+'”'})]));
+    if(x.before||x.after)p.appendChild(h('div',{cls:'two'},[h('div',{cls:'box'},[h('h3',{text:'Өмнө нь'}),h('p',{style:'margin:0',text:x.before||'—'})]),h('div',{cls:'box',style:'background:var(--teal-soft);border-color:transparent'},[h('h3',{text:'Одоо'}),h('p',{style:'margin:0',text:x.after||'—'})])]));
+    if(x.body&&x.body.length){var bx=h('div',{cls:'box'},[h('h3',{text:'Түүх'})]);x.body.forEach(function(b){if(b[0]==='p')bx.appendChild(h('p',{style:'margin:0',text:b[1]}));else if(b[0]==='h')bx.appendChild(h('h3',{text:b[1]}));else bx.appendChild(h(b[0],{cls:'cues'},b[1].map(function(l){return h('li',{text:l})})))});p.appendChild(bx)}
+    if(x.path&&x.path.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тэмцээн, замнал'}),h('ol',{cls:'tl'},x.path.map(function(r){return h('li',{},[h('b',{text:(r[0]?r[0]+' · ':'')+r[1]}),r[2]?h('span',{cls:'muted',text:r[2]}):null])}))]));
+    var at=attView(x.att);if(at)p.appendChild(at);
+  });
+}
+
+/* ---------- morning priming ---------- */
+var PRIME=[
+ {t:120,c:'var(--teal)',k:'Mind',n:'Ирэх ба амьсгал',w:'Тархи, биеэ "өнөөдөр" рүү авчирна. Удаан гаргах амьсгал мэдрэлийн системийг тайвшруулж, анхаарлыг төвлөрүүлдэг.',m:[
+   [null,'Чимээгүй зогсох','30 сек','Хөл мөрний өргөн, нуруу шулуун, нүдээ ань эсвэл шалан дээр нэг цэг ажигла'],
+   [null,'4–4–6 амьсгал','5 удаа','Хамраар 4 тоолж авна, 4 барина, амаар 6 тоолж аажуухан гаргана'],
+   [null,'Өнөөдрийн зорилго','30 сек','Дотроо: "Өнөөдөр би …" Нэг жижиг, хийж чадах зорилго']]},
+ {t:240,c:'var(--orange)',k:'Raise',n:'Биеэ халаах',w:'Зүрхний цохилт, булчингийн температур аажмаар өснө. Амьсгал хурдсана, гэхдээ ярьж чадна.',m:[
+   ['a-march','A-алхаа','45 сек','Өвдөг ташааны түвшинд, эсрэг гар, хөлийн хуруун дээр'],
+   ['jumping-jack','Jumping jack','30 сек','Зөөлөн газардах. Хөнгөн хувилбар: алхаж хийх'],
+   ['butt-kick','Өсгийгөөр бөгс цохих','30 сек','Байрандаа хөнгөн гүйж, өсгий бөгс рүү'],
+   ['skip','Байрандаа skip','45 сек','Алхам-үсрэлт, гар хөлийн хэмнэл'],
+   ['lateral-shuffle','Хажуу тийш шилжих','30 сек / тал','Бага суугаад, хөлөө хөндлөн тавихгүй']]},
+ {t:300,c:'#15803d',k:'Mobilize',n:'Үе мөчөө хөдөлгөх',w:'Суугаад өнгөрөөх өдрийн өмнө нуруу, ташаа, мөр, шагайг бүрэн хүрээгээр нь хөдөлгөнө.',m:[
+   ['arm-circles','Мөр тойруулах','10 урагш, 10 хойш','Жижгээс том тойрог руу'],
+   ['cat-cow','Муур-үнээ','6 удаа','Амьсгал авахдаа цээж нээнэ, гаргахдаа нуруу бөгтийлгөнө. Зогсоод ч хийж болно'],
+   ['worlds-greatest','Дэлхийн шилдэг сунгалт','3 / тал','Урт алхам, тохойг шалруу, дараа нь гараа тэнгэр өөд эргүүлнэ'],
+   ['leg-swing','Хөл савлах','8 / хөл','Ханаас барьж, урагш хойш, дараа нь хажуу тийш'],
+   ['ankle-rock','Шагай урагшлуулах','8 / тал','Өсгий газраас хөндийрөхгүй'],
+   ['deep-squat-hold','Гүн суултаар барих','30 сек','Өсгий газарт, цээж дээш. Хэцүү бол ямар нэг юмнаас барина']]},
+ {t:240,c:'var(--brand)',k:'Activate',n:'Булчингаа сэрээх',w:'Биеийн том булчингууд (бөгс, хөл, core, нуруу) "асна". Энэ нь өдрийн турш зөв байрлалтай суух, зогсоход тусална.',m:[
+   ['squat','Биеийн жингийн суулт','10 удаа','Өвдөг хөлийн хурууны чиглэлд, цээж дээш'],
+   ['bridge','Гүүр','10 удаа','Бөгсөө шахаж дээш, 2 сек барина'],
+   ['bird-dog','Bird dog','5 / тал','Нуруу ширээ шиг тэгш, удаан'],
+   ['plank','Тохойн банз','20–30 сек','Толгойноос өсгий хүртэл нэг шугам'],
+   ['inchworm','Хорхойн алхаа','4 удаа','Гараараа урагш алхаж банз болоод буцна']]},
+ {t:180,c:'#be185d',k:'Brain',n:'Тархиа идэвхжүүлэх',w:'Зохицуулалт, тэнцвэр, хариу үйлдлийн дасгал тархины хоёр талыг зэрэг ажиллуулж, анхаарлыг сэргээдэг.',m:[
+   [null,'Cross-crawl','45 сек','Баруун тохой зүүн өвдөгт, зүүн тохой баруун өвдөгт хүрнэ. Хурдаа аажмаар нэмнэ'],
+   ['balance','Нэг хөл дээр тэнцвэр','20 сек / хөл','Хүндрүүлэх: нүдээ аниад эсвэл толгойгоо эргүүлэх'],
+   ['mirror','Тольны дасгал (хосоор)','45 сек','Нэг нь удирдаж, нөгөө нь толь шиг давтана. Дараа нь солино'],
+   [null,'"1-2-3" хариу үйлдэл','45 сек','Багш "1" гэвэл алга ташина, "2" үсэрнэ, "3" суугаад босно. Дараа нь утгыг нь сольж хүндрүүлнэ']]},
+ {t:120,c:'var(--teal)',k:'Reset',n:'Биеийн байрлал ба оюун ухаан',w:'Сандал, дэлгэцийн өмнөх өдрийн эсрэг: мөр, хүзүүгээ засаж, тайван төвлөрсөн байдлаар хичээлдээ орно.',m:[
+   [null,'Хананд сахиусан тэнгэр (wall angel)','8 удаа','Нуруу, толгой, гар ханатай наалттай, гараа аажуухан дээш доош'],
+   [null,'Эрүү татах (chin tuck)','5 удаа × 3 сек','Толгойгоо хойш "давхар эрүү" болгоно, хүзүүний ар сунана'],
+   [null,'Далны шахалт','8 удаа','Далаа хамтад нь шахаж, мөрөө чихнээс холдуулна'],
+   [null,'3 удаан амьсгал','4 авах – 6 гаргах','Өнөөдрийн зорилгоо дахин санаад хичээлдээ ор']]}
+];
+var PRIMEVAR=[
+ ['1–5-р анги','Амьтдын дүрээр: баавгайн алхаа, мэлхийн үсрэлт, хавчны алхаа. Багш түүх ярьж, хүүхдүүд дүрсэлнэ. Хугацааг 15 минут болгож, тоглоомоор дуусгана.'],
+ ['6–9-р анги','Хөгжимтэй, хосоор, сонголттой. Сурагч ээлжлэн удирдагч болно. "Brain" хэсгийг өрсөлдөөнт тоглоом болгож болно.'],
+ ['10–12-р анги, багш нар','Эрчим нэмэх сонголт: суугаад үсрэх, шалан дээр түлхэлт, хойш алхам. Ахлах ангийн сурагчид бага ангийнхныг удирдаж болно.'],
+ ['Анги дотор (10 мин)','Сандал дээрээс: суугаа байрандаа алхах, их бие эргүүлэх, мөр хүзүү тойруулах, шагай эргүүлэх, сандлаас 10 удаа босож суух, 4–4–6 амьсгал.']
+];
+var PRIMERULE=['Хүнд биш, сэргээдэг: эрчим 10-аас 3–5. Хөлрөхгүй, амьсгал хурдсана, гэхдээ ярьж чадна.','Өдөр бүр, нэг цагт: тогтмол байдал эрчмээс чухал.','Багш нар хамт хийнэ: том хүн үлгэр жишээ үзүүлбэл хүүхдүүд дагана.','Өвдөж байвал зогсоно: өвдөлт биш, хөдөлгөөн бол зорилго.','Хөгжим нэм: хэмнэл нь хамтдаа хөдлөхийг амар болгодог.'];
+var primeT=null,primeLeft=0,primeIdx=0,primeRun=false;
+function primeTotal(){return PRIME.reduce(function(a,b){return a+b.t},0)}
+function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function renderPrimeTeaser(){var W=$('primeTeaser');if(!W)return;W.innerHTML='';var t0=0;PRIME.forEach(function(b){W.appendChild(h('div',{cls:'step',style:'border-left:5px solid '+b.c},[h('span',{cls:'when',text:fmt(t0)+' – '+fmt(t0+b.t)}),h('h3',{text:b.n}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:b.k})]));t0+=b.t})}
+function renderPriming(){
+  var W=$('primeOut');if(!W)return;W.innerHTML='';
+  var clock=h('span',{cls:'clock',id:'pClock',text:fmt(primeTotal())}),now=h('span',{cls:'now',id:'pNow',text:'Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}),bar=h('div',{cls:'pbar'},[h('i',{id:'pBar'})]);
+  var go=h('button',{type:'button',cls:'btn small',id:'pGo',text:'▶ Эхлэх',onclick:function(){primeRun?primePause():primeStart()}});
+  var rs=h('button',{type:'button',cls:'btn line small',style:'background:transparent;color:var(--on-brand);border:1.5px solid var(--on-brand)',text:'↺ Дахин',onclick:primeReset});
+  W.appendChild(h('div',{cls:'ptimer'},[clock,now,go,rs,bar]));
+  var t0=0;
+  PRIME.forEach(function(b,i){
+    var mv=h('div',{cls:'pmoves'});
+    b.m.forEach(function(m){var e=m[0]&&byId(m[0]);var mini=e?h('div',{cls:'mini'},[makeVis(e,{phase:.2}).svg]):h('div',{cls:'mini none',text:'•'});
+      mv.appendChild(h(e?'button':'div',e?{type:'button',cls:'pmove',onclick:function(){openEx(e.id)}}:{cls:'pmove'},[mini,h('div',{},[h('b',{text:m[1]}),h('small',{text:m[2]}),h('small',{text:m[3]})])]))});
+    W.appendChild(h('div',{cls:'pblock',id:'pb-'+i,style:'--pc:'+b.c},[h('div',{cls:'ph'},[h('div',{},[h('span',{cls:'eyebrow',style:'color:'+b.c,text:(i+1)+' · '+b.k}),h('h2',{text:b.n})]),h('span',{cls:'time',text:fmt(t0)+' – '+fmt(t0+b.t)})]),h('p',{cls:'muted',style:'margin:0',text:b.w}),mv]));t0+=b.t;
+  });
+  W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Нас, орчинд тохируулах'}),h('div',{cls:'two-col'},PRIMEVAR.map(function(v){return h('div',{cls:'step'},[h('h3',{text:v[0]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:v[1]})])}))]));
+  W.appendChild(h('div',{cls:'two-col'},[
+    h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'5 дүрэм'}),h('ul',{cls:'cues'},PRIMERULE.map(function(x){return h('li',{text:x})}))]),
+    h('div',{cls:'box'},[h('h3',{text:'Яагаад үр дүнтэй вэ'}),h('ul',{cls:'cues'},[
+      h('li',{text:'Бүтэц нь NSCA-ийн RAMP зарчимд суурилсан: Raise (халаах) → Activate & Mobilize (сэрээх, хөдөлгөх) → Potentiate (идэвхжүүлэх).'}),
+      h('li',{text:'Богино хугацааны идэвхтэй хөдөлгөөн анхаарал төвлөрөл, сэтгэл санааг тухайн өдөртөө сайжруулдаг болохыг олон судалгаа харуулдаг.'}),
+      h('li',{text:'Удаан гаргах амьсгал зүрхний цохилтыг тайвшруулж, сандрал, стрессийг бууруулахад тусалдаг.'}),
+      h('li',{text:'Зохицуулалт, тэнцвэрийн дасгал суурь хөдөлгөөний чадварыг (FMS) өдөр бүр бага багаар бэхжүүлдэг.'})])])]));
+  primePaint();
+}
+function primeAt(elapsed){var t=0;for(var i=0;i<PRIME.length;i++){if(elapsed<t+PRIME[i].t)return [i,t+PRIME[i].t-elapsed];t+=PRIME[i].t}return [PRIME.length,0]}
+function primePaint(){var tot=primeTotal(),el=tot-primeLeft;var a=primeAt(el);var c=$('pClock');if(!c)return;
+  c.textContent=fmt(primeLeft);$('pBar').style.width=(100*el/tot)+'%';
+  if(!primeRun&&primeLeft===tot){$('pNow').textContent='Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}
+  else if(a[0]>=PRIME.length){$('pNow').textContent='Дууслаа! Сайхан өдөр болоорой.'}
+  else $('pNow').textContent=(a[0]+1)+'/'+PRIME.length+' · '+PRIME[a[0]].n+' · '+fmt(a[1])+' үлдсэн';
+  PRIME.forEach(function(b,i){var e=$('pb-'+i);if(e)e.style.outline=(primeRun||el>0)&&i===a[0]?'3px solid '+b.c:'none'});
+  $('pGo').textContent=primeRun?'❚❚ Түр зогсоох':(primeLeft<tot&&primeLeft>0?'▶ Үргэлжлүүлэх':'▶ Эхлэх');}
+function primeStart(){if(primeLeft<=0)primeLeft=primeTotal();primeRun=true;var last=primeAt(primeTotal()-primeLeft)[0];
+  primeT=setInterval(function(){primeLeft--;var cur=primeAt(primeTotal()-primeLeft)[0];if(cur!==last){last=cur;var e=$('pb-'+cur);if(e)e.scrollIntoView({behavior:'smooth',block:'center'})}if(primeLeft<=0){primeLeft=0;primePause()}primePaint()},1000);primePaint()}
+function primePause(){primeRun=false;clearInterval(primeT);primePaint()}
+function primeReset(){primePause();primeLeft=primeTotal();primePaint()}
+primeLeft=primeTotal();
+
+/* smooth scroll for landing anchors */
+[].forEach.call(document.querySelectorAll('[data-scroll]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();if($('v-home').hidden)show('home');var t=$(a.dataset.scroll);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
+
 /* ---------- members-only gate ---------- */
 var AUTHED=false,PENDING=null,contentSubs=[];
 function startContentSubs(){
   stopContentSubs();if(!db)return;
-  Object.keys(COLL).filter(function(k){return k!=='classes'}).forEach(function(kind){contentSubs.push(db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){}))});
+  Object.keys(COLL).filter(function(k){return PUBLIC_KINDS.indexOf(k)<0}).forEach(function(kind){contentSubs.push(db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){}))});
   contentSubs.push(db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){var x=d.data();if(GOALS[x.goal])m[d.id]=x});PUBPLANS=m;renderMyPlans()},function(){}));
 }
 function stopContentSubs(){contentSubs.forEach(function(f){try{f()}catch(e){}});contentSubs=[]}
@@ -1302,7 +1607,7 @@ function setAuthed(on){
 [].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
 
 /* ---------- routing ---------- */
-var VIEWS=['home','wellbeing','library','learn','plan','calc','lessons','classes','log','coach'];
+var VIEWS=['home','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&v!=='home'){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
@@ -1311,7 +1616,7 @@ VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
 function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
 bindGo(document.querySelector('header'));bindGo($('v-home'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
-var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();initCalc();initPlan();
+var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderPrimeTeaser();renderPriming();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
 show((location.hash||'').slice(1));show.ready=true;
