@@ -270,6 +270,11 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 .av{width:84px;height:84px;border-radius:50%;background:var(--tint);border:2px solid var(--line);overflow:hidden;display:grid;place-items:center;font-weight:900;color:var(--brand);font-size:24px;flex:none}
 .av img{width:100%;height:100%;object-fit:cover}.av.big{width:52px;height:52px;font-size:18px}
 .athrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:8px}.athrow input{flex:1;min-width:110px;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
+body.editing [data-cms]{outline:2px dashed var(--gold);outline-offset:3px;cursor:text;border-radius:4px}
+body.editing [data-cms]:hover{background:var(--gold-soft)}
+body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
+.lrow{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.lrow .ctl{display:flex;gap:6px;justify-content:flex-end}
 .imgprev{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.imgprev img{max-width:260px;max-height:180px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
 .ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
 .rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
@@ -461,6 +466,7 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
     <h1>Өглөөний 20 минут</h1>
     <p class="lede">Хичээл эхлэхээс өмнө сурагч, багш, ажилчид бүгд хамтдаа хийх 20 минутын дасгал. Зорилго нь ядраах биш, сэрээх: амьсгал, биеэ халаах, үе мөчөө хөдөлгөх, булчингаа сэрээх, тархиа идэвхжүүлэх, биеийн байрлалаа засах. Ямар ч хэрэгсэлгүй, 2 × 2 метр зай хангалттай. Эрчим нь 10-аас 3–5 (амьсгал хурдсана, харин ярьж чадна).</p>
   </div>
+  <div class="chips" id="primeEdit"></div>
   <div class="guest" style="display:flex;flex-direction:column;gap:14px">
     <div class="steps" id="primeTeaser" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
     <div class="gate"><h2>Бүтэн дасгал, таймерыг нэвтэрч үзнэ</h2><p class="lede">Дасгал бүрийн хөдөлгөөнт дүрс, 20 минутын таймер, нас ба орчинд тохируулах хувилбарууд сургуулийн имэйлээр нэвтэрсний дараа нээгдэнэ.</p><div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button></div></div>
@@ -474,6 +480,7 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
       <h2 id="howT">Tomujin PE хэрхэн явагддаг вэ</h2>
       <p class="lede">Биеийн тамир бол зөвхөн 80 минутын хичээл биш. Сурагч бүр бусадтай биш, өчигдрийн өөртэйгөө өрсөлдөж, хөдөлгөөнийг өдөр тутмын амьдралынхаа хэсэг болгоход бид зорьдог.</p>
     </div>
+    <div class="chips" id="howEdit"></div>
     <div class="steps" id="howSteps"></div>
   </section>
 
@@ -701,8 +708,8 @@ function dimCard(d,compact){
 function renderHome(){
   var st=$('heroStage');st.innerHTML='';['bb-set-shot','vb-set','squat','fb-instep','tn-forehand','a-march'].forEach(function(id,i){st.appendChild(makeVis(byId(id),{phase:i*0.4}).svg)});
   var hd=$('homeDims');hd.innerHTML='';WBDIM.forEach(function(d){hd.appendChild(dimCard(d,true))});
-  var dd=new Date(),tp=TIPS[(dd.getDate()+dd.getMonth())%TIPS.length];
-  $('tip').innerHTML='';$('tip').appendChild(h('span',{cls:'tag g',text:'Өнөөдрийн дадал · '+tp[0]}));$('tip').appendChild(h('strong',{text:tp[1]}));
+  var dd=new Date(),tp=TIPS.length?TIPS[(dd.getDate()+dd.getMonth())%TIPS.length]:null;
+  $('tip').innerHTML='';if(tp){$('tip').appendChild(h('span',{cls:'tag g',text:'Өнөөдрийн дадал · '+tp[0]}));$('tip').appendChild(h('strong',{text:tp[1]}))}if(editMode)$('tip').appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Өдрийн дадлууд засах',onclick:function(){editList('tips')}}));
   var T=$('tiles');T.innerHTML='';
   [[EX.length,'Дасгалын сан',CATS.length+' ангилал: суурь хөдөлгөөн, хүч, спорт, мобилити','library'],[ART.length,'Мэдлэгийн сан','Нойр, хоол, хөдөлгөөн, дэлгэц','learn'],['ккал','Хоол тооцоолуур','Нас, жин, InBody-оор өдрийн хэрэгцээ','calc'],['+','Миний бэлтгэл','Өөрийн бэлтгэлийн планаа бүрдүүл','plan'],[LESSONS.length,'Хичээлүүд','U1 заалны диаграмтай','lessons']].forEach(function(r){
     T.appendChild(h('a',{cls:'tile',href:'#'+r[3],'data-go':r[3]},[h('span',{cls:'n',text:String(r[0])}),h('h3',{text:r[1]}),h('p',{cls:'muted',text:r[2]})]))});
@@ -951,7 +958,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -978,7 +985,7 @@ function renderEditBar(){
   var b=$('editBar');if(!b)return;b.innerHTML='';
   if(!canEdit){return}
   b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(editMode),text:editMode?'✎ Засах горим: идэвхтэй':'✎ Засах горим',onclick:function(){editMode=!editMode;if(!editMode)showHidden=false;rerenderAll()}}));
-  if(editMode)b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(showHidden),text:showHidden?'Нуусныг харуулж байна':'Нуусныг харах',onclick:function(){showHidden=!showHidden;rerenderAll()}}));
+  if(editMode)b.appendChild(h('span',{cls:'tag',style:'background:var(--gold-soft);color:#1c1c1c',text:'Шар тасархай хүрээтэй текст дээр дарж засна'}));if(editMode)b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(showHidden),text:showHidden?'Нуусныг харуулж байна':'Нуусныг харах',onclick:function(){showHidden=!showHidden;rerenderAll()}}));
 }
 function addBtn(label,fn){return editMode?h('button',{type:'button',cls:'btn gold small',text:'+ '+label,onclick:fn}):null}
 function editRow(kind,item,openFn){
@@ -1458,6 +1465,7 @@ async function fbInit(){
   await new Promise(function(r){if(window.TPE)r();else window.addEventListener('tpe-ready',r,{once:true})});
   if(!TPE.configured){renderAccount();renderLog();return}
   db=TPE.db;
+  db.collection('site').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});SITE=m;applySite();rerenderAll()},function(){});
   PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
     ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='admin';if(!canEdit)editMode=false;
@@ -1477,7 +1485,7 @@ var HOW=[
  ['Хичээлээс гадуур','Дугуйлан ба сургуулийн баг','13 дугуйлан: спорт, шатар, тулааны урлаг, бүжиг, фитнесс. Сургуулийн багууд UBAC-ын тэмцээнд оролцож, өрсөлдөх, хамтран ажиллах туршлага хуримтлуулна.'],
  ['Улирал бүр','Ахиц ба тусгал','Wellbeing-ийн 4 хэмжээс, L1–L6 түвшин. Бусадтай харьцуулахгүй, өөрийн ахицаа харна. Төсөлд суурилсан суралцахуйгаар (PBL) өөрийн системээ өөрөө бүтээнэ.']
 ];
-function renderHow(){var W=$('howSteps');if(!W)return;W.innerHTML='';HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
+function renderHow(){var W=$('howSteps');if(!W)return;W.innerHTML='';var E=$('howEdit');if(E){E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Алхмуудыг засах / нэмэх / хасах',onclick:function(){editList('how')}}))}HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
 
 /* ---------- clubs ---------- */
 var CLUBCAT={sport:['Спорт','var(--brand)'],mind:['Оюун ухаан','var(--teal)'],fight:['Тулааны урлаг','var(--orange)'],art:['Урлаг ба хөдөлгөөн','#be185d'],fit:['Фитнесс','#15803d']};
@@ -1722,7 +1730,8 @@ var PRIMERULE=['Хүнд биш, сэргээдэг: эрчим 10-аас 3–5.
 var primeT=null,primeLeft=0,primeIdx=0,primeRun=false;
 function primeTotal(){return PRIME.reduce(function(a,b){return a+b.t},0)}
 function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
-function renderPrimeTeaser(){var W=$('primeTeaser');if(!W)return;W.innerHTML='';var t0=0;PRIME.forEach(function(b){W.appendChild(h('div',{cls:'step',style:'border-left:5px solid '+b.c},[h('span',{cls:'when',text:fmt(t0)+' – '+fmt(t0+b.t)}),h('h3',{text:b.n}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:b.k})]));t0+=b.t})}
+function renderPrimeTeaser(){var E=$('primeEdit');if(E){E.innerHTML='';if(editMode){E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Дасгалын хэсгүүд',onclick:function(){editList('prime')}}));E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Нас, орчны тохируулга',onclick:function(){editList('primevar')}}));E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Дүрэм',onclick:function(){editList('primerule')}}))}}
+  var W=$('primeTeaser');if(!W)return;W.innerHTML='';var t0=0;PRIME.forEach(function(b){W.appendChild(h('div',{cls:'step',style:'border-left:5px solid '+b.c},[h('span',{cls:'when',text:fmt(t0)+' – '+fmt(t0+b.t)}),h('h3',{text:b.n}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:b.k})]));t0+=b.t})}
 function renderPriming(){
   var W=$('primeOut');if(!W)return;W.innerHTML='';
   var clock=h('span',{cls:'clock',id:'pClock',text:fmt(primeTotal())}),now=h('span',{cls:'now',id:'pNow',text:'Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}),bar=h('div',{cls:'pbar'},[h('i',{id:'pBar'})]);
@@ -1763,6 +1772,84 @@ primeLeft=primeTotal();
 /* smooth scroll for landing anchors */
 [].forEach.call(document.querySelectorAll('[data-scroll]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();if($('v-home').hidden)show('home');var t=$(a.dataset.scroll);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
 
+/* ---------- site CMS: every static text + lists, owner edits ---------- */
+var SITE={},TXT={};
+var DEF={how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice()};
+var LISTS={
+  how:{title:'Хэрхэн явагддаг: алхмууд',fields:[['when','Хэзээ'],['title','Гарчиг'],['text','Тайлбар',1]],
+    toRow:function(x){return {when:x[0],title:x[1],text:x[2]}},fromRow:function(r){return [r.when||'',r.title||'',r.text||'']},arr:HOW},
+  tips:{title:'Өдрийн дадлууд (нүүр хуудас)',fields:[['topic','Сэдэв'],['text','Дадал',1]],
+    toRow:function(x){return {topic:x[0],text:x[1]}},fromRow:function(r){return [r.topic||'',r.text||'']},arr:TIPS},
+  primevar:{title:'Нас, орчинд тохируулах',fields:[['title','Гарчиг'],['text','Тайлбар',1]],
+    toRow:function(x){return {title:x[0],text:x[1]}},fromRow:function(r){return [r.title||'',r.text||'']},arr:PRIMEVAR},
+  primerule:{title:'Өглөөний дасгалын дүрэм',fields:[['text','Дүрэм',1]],
+    toRow:function(x){return {text:x}},fromRow:function(r){return r.text||''},arr:PRIMERULE},
+  prime:{title:'Өглөөний 20 минут: хэсгүүд',fields:[['n','Хэсгийн нэр'],['k','Шошго (англи)'],['min','Хугацаа (минут)','num'],['c','Өнгө','color'],['w','Яагаад / тайлбар',1],['moves','Дасгалууд: мөр бүрт "нэр | хэмжээ | заавар | дасгалын сангийн нэр (заавал биш)"',2]],
+    toRow:function(x){return {n:x.n,k:x.k,min:Math.round(x.t/6)/10,c:x.c,w:x.w,moves:(x.m||[]).map(function(m){var e=m[0]&&byId(m[0]);return [m[1],m[2],m[3],e?e.n:''].join(' | ')}).join('\n')}},
+    fromRow:function(r){return {n:r.n||'',k:r.k||'',t:Math.max(10,Math.round((+r.min||1)*60)),c:r.c||'var(--brand)',w:r.w||'',m:lines(r.moves||'').map(function(l){var q=l.split('|').map(function(x){return x.trim()});var e=q[3]?EX.filter(function(x){return x.n===q[3]||x.id===q[3]})[0]:null;return [e?e.id:null,q[0]||'',q[1]||'',q[2]||'']})}},arr:PRIME}
+};
+var COLORS=[['var(--teal)','Цэнхэр'],['var(--orange)','Улбар шар'],['#15803d','Ногоон'],['var(--brand)','Нил ягаан'],['#be185d','Ягаан'],['var(--gold)','Шар']];
+function applySite(){
+  TXT=(SITE.texts&&SITE.texts.t)||{};
+  Object.keys(LISTS).forEach(function(k){var L=LISTS[k],d=SITE[k];var src=d&&d.items?d.items.map(L.fromRow):DEF[k];L.arr.length=0;src.forEach(function(x){L.arr.push(x)})});
+  if(typeof primeRun!=='undefined'&&!primeRun)primeLeft=primeTotal();
+}
+function tagTexts(){var n=0;[].forEach.call(document.querySelectorAll('main h1, main h2, main h3, main .eyebrow, main .lede, main a.step.link p, main a.step.link .go, main .hero .btn, main .gate .btn, footer span'),function(el){
+  if(el.children.length||el.hasAttribute('data-cms')||el.closest('[id$=Grid],[id$=Out],[id$=Steps],#tip,#tiles,#homeDims,#heroStage,#sheet'))return;
+  var v=el.closest('.view,footer,section');el.setAttribute('data-cms',(v&&v.id?v.id:'x')+'_'+(n++));el._def=el.textContent})}
+function applyTexts(){[].forEach.call(document.querySelectorAll('[data-cms]'),function(el){var k=el.getAttribute('data-cms');var has=Object.prototype.hasOwnProperty.call(TXT,k);
+  el.textContent=has?TXT[k]:el._def;if(has&&TXT[k]===''){el.setAttribute('data-off','1');el.style.display='none'}else{el.removeAttribute('data-off');el.style.display=''}
+  if(editMode&&el.getAttribute('data-off'))el.style.display='';if(editMode&&el.getAttribute('data-off')&&!el.textContent)el.textContent='(нуусан) '+el._def})}
+document.addEventListener('click',function(ev){if(!editMode)return;var el=ev.target.closest&&ev.target.closest('[data-cms]');if(!el)return;ev.preventDefault();ev.stopPropagation();editText(el)},true);
+function saveSite(id,data,st){
+  if(!db)return Promise.reject();data.updatedAt=new Date().toISOString();if(st){st.className='status';st.textContent='Хадгалж байна…'}
+  var to;var slow=new Promise(function(_,rej){to=setTimeout(function(){rej({code:'tpe/timeout'})},20000)});
+  return Promise.race([db.doc('site/'+id).set(data),slow]).then(function(){clearTimeout(to);SITE[id]=data;applySite();rerenderAll();if(st)st.textContent='Хадгалагдлаа.'},function(err){clearTimeout(to);if(st){st.className='status err';st.textContent=err&&err.code==='permission_denied'?'Засах эрх алга.':'Хадгалж чадсангүй. Дахин оролдоно уу.'}throw err});
+}
+function editText(el){
+  var k=el.getAttribute('data-cms');var has=Object.prototype.hasOwnProperty.call(TXT,k);var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Текст засах';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Энэ хэсгийн текст'}));
+    var ta=h('textarea',{rows:'5',id:'tx-v'});ta.value=has&&TXT[k]!==''?TXT[k]:el._def;
+    p.appendChild(h('label',{cls:'ff',for:'tx-v'},['Текст',ta]));
+    p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Анхны текст: '+el._def}));
+    function put(v){var t=Object.assign({},TXT);if(v===undefined)delete t[k];else t[k]=v;return saveSite('texts',{t:t},st).then(function(){closeSheet()},function(){})}
+    p.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){put(ta.value.trim())}}),
+      h('button',{type:'button',cls:'btn line',text:'🙈 Нуух',onclick:function(){put('')}}),
+      has?h('button',{type:'button',cls:'btn line',text:'↺ Анхны текст',onclick:function(){put(undefined)}}):null,
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+  });
+}
+function editList(name){
+  var L=LISTS[name];var rows=L.arr.map(L.toRow);var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Жагсаалт засах';
+    p.appendChild(h('h2',{id:'sheetTitle',text:L.title}));
+    var box=h('div',{cls:'sub'});
+    function draw(){box.innerHTML='';rows.forEach(function(r,i){
+      var card=h('div',{cls:'lrow'});
+      L.fields.forEach(function(f){var inp;
+        if(f[2]==='color'){inp=h('select',{},COLORS.map(function(c){return h('option',{value:c[0],text:c[1]})}));inp.value=r[f[0]]||COLORS[0][0]}
+        else if(f[2]===1||f[2]===2){inp=h('textarea',{rows:f[2]===2?'6':'3'});inp.value=r[f[0]]||''}
+        else{inp=h('input',{type:f[2]==='num'?'number':'text',step:'0.5'});inp.value=r[f[0]]==null?'':r[f[0]]}
+        inp.addEventListener('input',function(){r[f[0]]=inp.value});inp.addEventListener('change',function(){r[f[0]]=inp.value});
+        card.appendChild(h('label',{cls:'ff'},[f[1],inp]))});
+      card.appendChild(h('div',{cls:'ctl'},[
+        i>0?h('button',{type:'button',cls:'btn line small',text:'↑',onclick:function(){rows.splice(i-1,0,rows.splice(i,1)[0]);draw()}}):null,
+        i<rows.length-1?h('button',{type:'button',cls:'btn line small',text:'↓',onclick:function(){rows.splice(i+1,0,rows.splice(i,1)[0]);draw()}}):null,
+        h('button',{type:'button',cls:'btn line small danger',text:'🗑 Хасах',onclick:function(){rows.splice(i,1);draw()}})]));
+      box.appendChild(card)})}
+    draw();p.appendChild(box);
+    p.appendChild(h('button',{type:'button',cls:'btn line',text:'+ Шинээр нэмэх',onclick:function(){rows.push({});draw()}}));
+    p.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var items=rows.map(function(r){var o={};L.fields.forEach(function(f){o[f[0]]=r[f[0]]==null?'':String(r[f[0]])});return o});saveSite(name,{items:items},st).then(function(){closeSheet()},function(){})}}),
+      SITE[name]?h('button',{type:'button',cls:'btn line',text:'↺ Анхны хувилбар',onclick:function(){if(!db)return;db.doc('site/'+name).delete().then(function(){delete SITE[name];applySite();rerenderAll();closeSheet()})}}):null,
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+  });
+}
+
 /* ---------- members-only gate ---------- */
 var AUTHED=false,PENDING=null,contentSubs=[];
 function startContentSubs(){
@@ -1790,7 +1877,7 @@ window.addEventListener('popstate',function(){show((location.hash||'').slice(1))
 function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
 bindGo(document.querySelector('header'));bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
-var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();initCalc();initPlan();
+var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
 show((location.hash||'').slice(1));show.ready=true;
