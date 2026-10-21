@@ -1854,7 +1854,7 @@ var CLUBDEF=[
  {id:'correction',n:'Individual correction training',cat:'fit',fig:'bird-dog',gr:'',d:'Хувь хүнд тохирсон засах бэлтгэл: биеийн байрлал, хөдөлгөөний хэв, тэнцвэргүй байдал.',gain:['Зөв биеийн байрлал','Үе мөчний хяналт, тогтворжилт','Гэмтлээс урьдчилан сэргийлэх'],does:['Үнэлгээ, InBody-д суурилсан хувийн хөтөлбөр','Нуруу, мөр, ташаа, шагайн засах дасгал','Тогтмол хяналт, ахицын тэмдэглэл']}
 ];
 var clubCat='all';
-function card(cls,style,fn,kids){return h('div',{cls:cls,style:style,role:'button',tabindex:'0',onclick:fn,onkeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}}},kids)}
+function tapCard(cls,style,fn,kids){return h('div',{cls:cls,style:style,role:'button',tabindex:'0',onclick:fn,onkeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}}},kids)}
 function clubPic(c){
   if(c.img)return h('img',{src:imgSrc(c.img),alt:c.n,loading:'lazy',style:'width:100%;height:100%;object-fit:cover'});
   var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}
@@ -1865,7 +1865,7 @@ function renderClubs(){
   var F=$('clubFilter');F.innerHTML='';[['all','Бүгд']].concat(Object.keys(CLUBCAT).map(function(k){return [k,CLUBCAT[k][0]]})).forEach(function(o){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(clubCat===o[0]),text:o[1],onclick:function(){clubCat=o[0];renderClubs()}}))});
   var add=$('clubAdd');add.innerHTML='';var b=addBtn('Дугуйлан нэмэх',function(){openEditor('club',null)});if(b)add.appendChild(b);
   CLUBS.filter(function(c){return clubCat==='all'||c.cat===clubCat}).forEach(function(c){var cc=(CLUBCAT[c.cat]||CLUBCAT.sport);
-    W.appendChild(card('club'+(c.deleted?' hiddenitem':''),'--cc:'+cc[1],function(){openClub(c.id)},[h('div',{cls:'pic'},[clubPic(c)]),
+    W.appendChild(tapCard('club'+(c.deleted?' hiddenitem':''),'--cc:'+cc[1],function(){openClub(c.id)},[h('div',{cls:'pic'},[clubPic(c)]),
       h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+cc[1],text:cc[0]}),c.gr?h('span',{cls:'tag t',text:c.gr}):null]),
       h('h3',{text:c.n}),h('p',{cls:'muted',text:c.d}),c.when?h('p',{style:'font-weight:700;font-size:13px',text:'Хуваарь: '+c.when}):null]))});
 }
@@ -1902,7 +1902,7 @@ function renderTeams(){
   var W=$('teamGrid');if(!W)return;W.innerHTML='';
   var add=$('teamAdd');add.innerHTML='';var b=addBtn('Шигшээ баг нэмэх',function(){openEditor('team',null)});if(b)add.appendChild(b);
   TEAMS.forEach(function(t){var n=STORIES.filter(function(s){return s.team===t.id}).length;
-    W.appendChild(card('team'+(t.deleted?' hiddenitem':''),'--cc:'+teamColor(t),function(){openTeam(t.id)},[h('div',{cls:'pic'},[teamPic(t)]),
+    W.appendChild(tapCard('team'+(t.deleted?' hiddenitem':''),'--cc:'+teamColor(t),function(){openTeam(t.id)},[h('div',{cls:'pic'},[teamPic(t)]),
       h('div',{cls:'chips'},[t.league?h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+teamColor(t),text:t.league}):null,t.div?h('span',{cls:'tag t',text:t.div}):null]),
       h('h3',{text:t.n}),h('p',{cls:'muted',text:t.d}),
       h('p',{style:'font-weight:700;font-size:13px',text:'Дасгалжуулагч: '+(t.coach||'удахгүй зарлана')}),
@@ -1988,7 +1988,7 @@ function openRosterEditor(t,item){
     p.appendChild(f);
   });
 }
-function storyCard(x){return card('story'+(x.deleted?' hiddenitem':''),null,function(){openStory(x.id)},[storyPh(x),h('div',{cls:'bd'},[
+function storyCard(x){return tapCard('story'+(x.deleted?' hiddenitem':''),null,function(){openStory(x.id)},[storyPh(x),h('div',{cls:'bd'},[
   h('div',{cls:'chips'},[x.top?h('span',{cls:'tag',style:'background:var(--gold);color:#1c1c1c',text:'★ Top Athlete'}):null,h('span',{cls:'tag g',text:STORYTYPE[x.type]||''}),x.sport?h('span',{cls:'tag t',text:x.sport}):null]),
   h('h3',{text:x.n}),x.gr?h('span',{cls:'muted',style:'font-size:13px',text:x.gr}):null,x.q?h('q',{text:x.q}):null])])}
 function renderTop(){
