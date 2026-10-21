@@ -7,7 +7,7 @@
   --bg:#faf7ff; --surface:#ffffff; --fg:#1c1c1c; --muted:#62537d; --line:#e5d8f5; --tint:#f3eeff;
   --brand:#5c1090; --brand-ink:#3d1b6e; --on-brand:#ffffff;
   --gold:#f2cd30; --gold-soft:#fdf3c4; --teal:#0e7490; --teal-soft:#e0f7fa; --orange:#c2410c; --orange-soft:#ffedd5;
-  --fig:#3d1b6e; --fig-far:#c4a8e8; --ground:#d9c8f0; --prop:#0e7490; --field:#eef7ee; --fieldline:#9cc59c;
+  --fig:#3d1b6e; --fig-far:#c4a8e8; --skin:#e3a87c; --skin-far:#c98d63; --shirt:#5c1090; --shirt-far:#8f5cc7; --shorts:#1f2a44; --shorts-far:#45506b; --shoe:#f2f2f2; --shoe-far:#d0d0d0; --sole:#1c1c1c; --hair:#2a1a10; --ground:#d9c8f0; --prop:#0e7490; --field:#eef7ee; --fieldline:#9cc59c;
   --phy:#5c1090; --men:#0e7490; --emo:#c2410c; --soc:#a16207;
   --font-display: Raleway, "Segoe UI", system-ui, sans-serif;
   --font-num: "Roboto Mono", ui-monospace, monospace;
@@ -16,13 +16,13 @@
   --bg:#140a22; --surface:#1f1233; --fg:#f3eeff; --muted:#bba9d9; --line:#3a2558; --tint:#2a1745;
   --brand:#c69bf5; --brand-ink:#e5d8f5; --on-brand:#1a0b2e;
   --gold-soft:#3d3410; --teal:#5fd3e6; --teal-soft:#0f3540; --orange:#fb923c; --orange-soft:#45210c;
-  --fig:#e5d8f5; --fig-far:#6b4f94; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
+  --fig:#e5d8f5; --fig-far:#6b4f94; --skin:#e3a87c; --skin-far:#b07a52; --shirt:#9b5de5; --shirt-far:#6c45a3; --shorts:#0f172a; --shorts-far:#2b3550; --shoe:#f2f2f2; --shoe-far:#a8a8a8; --sole:#000; --hair:#1a0f08; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
   --phy:#c69bf5; --men:#5fd3e6; --emo:#fb923c; --soc:#facc15; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#140a22; --surface:#1f1233; --fg:#f3eeff; --muted:#bba9d9; --line:#3a2558; --tint:#2a1745;
   --brand:#c69bf5; --brand-ink:#e5d8f5; --on-brand:#1a0b2e;
   --gold-soft:#3d3410; --teal:#5fd3e6; --teal-soft:#0f3540; --orange:#fb923c; --orange-soft:#45210c;
-  --fig:#e5d8f5; --fig-far:#6b4f94; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
+  --fig:#e5d8f5; --fig-far:#6b4f94; --skin:#e3a87c; --skin-far:#b07a52; --shirt:#9b5de5; --shirt-far:#6c45a3; --shorts:#0f172a; --shorts-far:#2b3550; --shoe:#f2f2f2; --shoe-far:#a8a8a8; --sole:#000; --hair:#1a0f08; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
   --phy:#c69bf5; --men:#5fd3e6; --emo:#fb923c; --soc:#facc15; color-scheme:dark }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -604,14 +604,22 @@ function makeFig(ex,opts){
   if(has('band'))g.band=ln('var(--prop)',1.5);
   if(has('bandFoot'))g.bandFoot=ln('var(--prop)',1.5);
   if(has('strap'))g.strap=ln('var(--prop)',1.5);
-  g.uaB=ln('var(--fig-far)',sw);g.faB=ln('var(--fig-far)',sw);g.thB=ln('var(--fig-far)',sw);g.shB=ln('var(--fig-far)',sw);
-  g.torso=ln('var(--fig)',sw+1.5);
-  g.thA=ln('var(--fig)',sw);g.shA=ln('var(--fig)',sw);g.uaA=ln('var(--fig)',sw);g.faA=ln('var(--fig)',sw);
+  var k=opts.big?0.9:1;
+  function limbSet(sfx){var far=sfx==='B',c=function(n){return 'var(--'+n+(far?'-far':'')+')'};return {
+    sh:ln(c('skin'),4.6*k),shoe:ln(c('shoe'),3.8*k),sole:ln('var(--sole)',1.4*k),th:ln(c('skin'),6.4*k),shorts:ln(c('shorts'),7.6*k),
+    ua:ln(c('skin'),4.4*k),fa:ln(c('skin'),3.8*k),sleeve:ln(c('shirt'),6.2*k),hand:(function(){var h0=el('circle',{r:2.3*k,fill:c('skin')});svg.appendChild(h0);return h0})()}}
+  g.B=limbSet('B');
+  g.torsoP=el('path',{fill:'var(--shirt)',stroke:'var(--shirt)','stroke-width':1.6*k,'stroke-linejoin':'round'});svg.appendChild(g.torsoP);
+  g.waist=el('path',{fill:'var(--shorts)',stroke:'var(--shorts)','stroke-width':1.6*k,'stroke-linejoin':'round'});svg.appendChild(g.waist);
+  g.neck=ln('var(--skin)',3.6*k);
+  g.A=limbSet('A');
   if(has('stick'))g.stick=ln('var(--prop)',2);
   if(has('handBar'))g.handBar=ln('var(--prop)',3);
   if(has('racket')||has('racketUp')){g.racket=ln('var(--prop)',2);g.rhead=el('ellipse',{rx:4.5,ry:6,fill:'none',stroke:'var(--prop)','stroke-width':2});svg.appendChild(g.rhead)}
   if(has('paddle')){g.paddle=el('circle',{r:4,fill:'#c2410c'});svg.appendChild(g.paddle)}
-  g.head=el('circle',{r:6.5,fill:'var(--fig)'});svg.appendChild(g.head);
+  g.hair=el('circle',{r:6.4*k,fill:'var(--hair)'});svg.appendChild(g.hair);
+  g.head=el('circle',{r:5.7*k,fill:'var(--skin)'});svg.appendChild(g.head);
+  g.eye=el('circle',{r:0.8*k,fill:'#1c1c1c'});svg.appendChild(g.eye);
   var ballC={ball:['#f97316',5],tball:['#d9f99d',2.6],bb:['#ea580c',4.5],bbHands:['#ea580c',4.5],bbShot:['#ea580c',4.5],bbTop:['#ea580c',4.5],dribble:['#ea580c',4.5],vbArm:['#ffffff',4.5],vbTop:['#ffffff',4.5],vbB:['#ffffff',4.5],fbFixed:['#ffffff',4.2],fbHead:['#ffffff',4.2],juggle:['#ffffff',4.2],racketUp:['#d9f99d',2.4],ttToss:['#ffffff',1.8],kb:null};
   pr.forEach(function(k){if(ballC[k]){g.ballKind=k;g.ball=el('circle',{r:ballC[k][1],fill:ballC[k][0],stroke:'var(--fig)','stroke-width':k.slice(0,2)==='vb'||k.slice(0,2)==='fb'||k==='juggle'||k==='ttToss'?1:0});svg.appendChild(g.ball)}});
   if(has('kb')){g.kb=el('rect',{width:7,height:8,rx:2,fill:'#f97316'});svg.appendChild(g.kb)}
@@ -625,8 +633,23 @@ function L(l,p,q){l.setAttribute('x1',p[0]);l.setAttribute('y1',p[1]);l.setAttri
 function C(c,p){c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1])}
 function setPose(f,p,k){
   var g=f.g,head=p[0],sh=p[1],eA=p[2],hA=p[3],eB=p[4],hB=p[5],hip=p[6],kA=p[7],fA=p[8],kB=p[9],fB=p[10],P0=f.P0;
-  L(g.uaB,sh,eB);L(g.faB,eB,hB);L(g.thB,hip,kB);L(g.shB,kB,fB);L(g.torso,sh,hip);
-  L(g.thA,hip,kA);L(g.shA,kA,fA);L(g.uaA,sh,eA);L(g.faA,eA,hA);C(g.head,head);
+  var sx=sh[0]-hip[0],sy=sh[1]-hip[1],sl=Math.sqrt(sx*sx+sy*sy)||1;sx/=sl;sy/=sl;var nx=-sy,ny=sx;
+  function at(a,b,u){return [a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]}
+  function limbs(S,hp,kn,an,el2,hd){
+    L(S.th,hp,kn);L(S.shorts,hp,at(hp,kn,0.5));L(S.sh,kn,an);
+    var dx=an[0]-kn[0],dy=an[1]-kn[1],dl=Math.sqrt(dx*dx+dy*dy)||1;dx/=dl;dy/=dl;var tx=dy,ty=-dx;
+    var heel=[an[0]-tx*1.5+dx*1.2,an[1]-ty*1.5+dy*1.2],toe=[an[0]+tx*6.2+dx*1.2,an[1]+ty*6.2+dy*1.2];
+    L(S.shoe,heel,toe);L(S.sole,[heel[0]+dx*1.9,heel[1]+dy*1.9],[toe[0]+dx*1.9,toe[1]+dy*1.9]);
+    L(S.ua,sh,el2);L(S.sleeve,sh,at(sh,el2,0.48));L(S.fa,el2,hd);C(S.hand,hd)}
+  limbs(g.B,hip,kB,fB,eB,hB);
+  var W1=5.4,W2=4.3,top=at(hip,sh,1.04),mid=at(hip,sh,0.62);
+  g.torsoP.setAttribute('d','M'+(top[0]+nx*W1)+' '+(top[1]+ny*W1)+' Q'+(mid[0]+nx*(W1+0.9))+' '+(mid[1]+ny*(W1+0.9))+' '+(hip[0]+nx*W2)+' '+(hip[1]+ny*W2)+' L'+(hip[0]-nx*W2)+' '+(hip[1]-ny*W2)+' Q'+(mid[0]-nx*W1)+' '+(mid[1]-ny*W1)+' '+(top[0]-nx*W1)+' '+(top[1]-ny*W1)+' Z');
+  var wt=at(hip,sh,0.2),hb=at(hip,sh,-0.08);
+  g.waist.setAttribute('d','M'+(wt[0]+nx*4.6)+' '+(wt[1]+ny*4.6)+' L'+(hb[0]+nx*4.6)+' '+(hb[1]+ny*4.6)+' L'+(hb[0]-nx*4.6)+' '+(hb[1]-ny*4.6)+' L'+(wt[0]-nx*4.6)+' '+(wt[1]-ny*4.6)+' Z');
+  L(g.neck,sh,at(sh,head,0.55));
+  var fw=[nx,ny];
+  C(g.hair,[head[0]-fw[0]*1.3+sx*0.9,head[1]-fw[1]*1.3+sy*0.9]);C(g.head,[head[0]+fw[0]*0.5,head[1]+fw[1]*0.5]);C(g.eye,[head[0]+fw[0]*3.6+sx*0.6,head[1]+fw[1]*3.6+sy*0.6]);
+  limbs(g.A,hip,kA,fA,eA,hA);
   if(g.band)L(g.band,hA,[116,P0[3][1]]);
   if(g.bandFoot)L(g.bandFoot,fA,hA);
   if(g.strap)L(g.strap,hA,[P0[3][0]+30,-16]);
