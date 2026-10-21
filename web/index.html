@@ -33,7 +33,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-display);font-size:15px;line-height:1.55}
-body:not(.authed) nav.tabs a:not([data-pub]){display:none}
+body:not(.authed) nav.tabs a:not([data-pub]),body:not(.authed) nav.tabs .mg:not([data-pub]){display:none}
 a.step.link{color:inherit;text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s}
 a.step.link:hover{border-color:var(--brand);transform:translateY(-2px)}
 a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14px}
@@ -108,9 +108,22 @@ header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;backgroun
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo b{display:block;font-weight:900;font-size:18px;color:var(--brand);letter-spacing:-.01em;line-height:1}
 .logo small{display:block;font-weight:700;font-size:9px;color:var(--brand);letter-spacing:.16em;line-height:1.3}
-nav.tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 360px}
-nav.tabs a{padding:9px 12px;border-radius:10px;font-weight:600;font-size:14px;color:var(--muted);text-decoration:none}
-nav.tabs a[aria-current="page"]{background:var(--tint);color:var(--brand);font-weight:800}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 360px;justify-content:center}
+.mg{position:relative}
+.mt{font:inherit;font-size:15px;font-weight:600;color:var(--muted);background:none;border:0;padding:10px 12px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.mt::after{content:'';width:6px;height:6px;border:solid currentColor;border-width:0 1.8px 1.8px 0;transform:translateY(-2px) rotate(45deg);transition:transform .15s}
+.mt:hover,.mg.open .mt{background:var(--tint);color:var(--fg)}
+.mg.on .mt{color:var(--fg);font-weight:800;box-shadow:inset 0 -3px 0 var(--brand);border-radius:10px 10px 0 0}
+.mg.open .mt::after{transform:translateY(1px) rotate(225deg)}
+.dd{position:absolute;top:calc(100% + 6px);left:0;min-width:270px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(40,10,70,.14);padding:8px;display:none;flex-direction:column;gap:2px;z-index:60}
+.mg.open .dd{display:flex}
+@media (hover:hover){.mg:hover .dd{display:flex}.mg:hover .mt{background:var(--tint);color:var(--fg)}.mg::after{content:'';position:absolute;left:0;right:0;top:100%;height:8px}}
+.dd a{display:flex;flex-direction:column;gap:1px;padding:10px 12px;border-radius:10px;color:var(--fg);text-decoration:none}
+.dd a[hidden]{display:none}
+.dd a b{font-size:14.5px;font-weight:700}.dd a small{font-size:12.5px;color:var(--muted)}
+.dd a:hover,.dd a:focus-visible{background:var(--tint)}
+.dd a[aria-current="page"]{background:var(--tint)}.dd a[aria-current="page"] b{color:var(--brand)}
+@media (max-width:640px){.dd{position:fixed;left:12px;right:12px;top:auto;min-width:0}nav.tabs{justify-content:flex-start}}
 a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 main{padding-block:28px 64px}
 .view{display:flex;flex-direction:column;gap:22px}
@@ -310,21 +323,29 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
       <svg aria-hidden="true" width="36" height="36" viewBox="0 0 30 30"><polygon points="1.4,0 24.6,0 11.8,9.6" fill="#00bcd4"/><polygon points="0,3.4 17.2,19.9 0,29.2" fill="#5c1090"/><polygon points="29,0 30,0 30,30 11.9,11.5" fill="#f2cd30"/><polygon points="3.6,30 26.4,30 17.9,21.4" fill="#f97316"/></svg>
       <span><b>TOMUJIN</b><small>PHYSICAL EDUCATION</small></span>
     </a>
-    <nav class="tabs" aria-label="Хэсгүүд">
-      <a href="#home" data-go="home" data-pub>Нүүр</a>
-      <a href="#how" data-go="how" data-pub>Хэрхэн явагддаг</a>
-      <a href="#clubs" data-go="clubs" data-pub>Дугуйлан</a>
-      <a href="#priming" data-go="priming" data-pub>Өглөөний 20 минут</a>
-      <a href="#stories" data-go="stories" data-pub>Баг ба амжилт</a>
-      <a href="#wellbeing" data-go="wellbeing">Сайн сайхан байдал</a>
-      <a href="#library" data-go="library">Дасгалын сан</a>
-      <a href="#learn" data-go="learn">Мэдлэгийн сан</a>
-      <a href="#plan" data-go="plan">Миний бэлтгэл</a>
-      <a href="#calc" data-go="calc">Хоол тооцоолуур</a>
-      <a href="#lessons" data-go="lessons">Хичээлүүд</a>
-      <a href="#classes" data-go="classes">Ангиуд</a>
-      <a href="#log" data-go="log">Бэлтгэлийн тэмдэглэл</a>
-      <a href="#coach" data-go="coach" hidden>Багшийн самбар</a>
+    <nav class="tabs menu" aria-label="Хэсгүүд">
+      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Нүүр</button><div class="dd">
+        <a href="#home" data-go="home" data-pub><b>Нүүр хуудас</b><small>Шилдэг тамирчид, өдрийн дадал</small></a>
+        <a href="#how" data-go="how" data-pub><b>Хэрхэн явагддаг</b><small>Tomujin PE-ийн 6 алхам</small></a>
+        <a href="#priming" data-go="priming" data-pub><b>Өглөөний 20 минут</b><small>Бие, оюунаа сэрээх дасгал</small></a>
+      </div></div>
+      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Спорт ба амжилт</button><div class="dd">
+        <a href="#clubs" data-go="clubs" data-pub><b>Дугуйлан</b><small>13 дугуйлан</small></a>
+        <a href="#stories" data-go="stories" data-pub><b>Шигшээ баг ба амжилт</b><small>Сагс, волейбол, хөл бөмбөг, UBAC</small></a>
+      </div></div>
+      <div class="mg"><button type="button" class="mt" aria-haspopup="true">Суралцах</button><div class="dd">
+        <a href="#wellbeing" data-go="wellbeing"><b>Сайн сайхан байдал</b><small>4 хэмжээс, 14 чиглэл, өөрийгөө үнэлэх</small></a>
+        <a href="#library" data-go="library"><b>Дасгалын сан</b><small>253 дасгал, хөдөлгөөнт зурагтай</small></a>
+        <a href="#learn" data-go="learn"><b>Мэдлэгийн сан</b><small>Нойр, хоол, хөдөлгөөн, дэлгэц</small></a>
+        <a href="#calc" data-go="calc"><b>Хоол тооцоолуур</b><small>Өдөрт хэдэн ккал хэрэгтэй вэ</small></a>
+      </div></div>
+      <div class="mg"><button type="button" class="mt" aria-haspopup="true">Миний хэсэг</button><div class="dd">
+        <a href="#classes" data-go="classes"><b>Ангиуд</b><small>Мэдэгдэл, оноосон дасгал, файл</small></a>
+        <a href="#lessons" data-go="lessons"><b>Хичээлүүд</b><small>Хичээлийн төлөвлөгөө</small></a>
+        <a href="#plan" data-go="plan"><b>Миний бэлтгэл</b><small>Бэлтгэлээ төлөвлөх, хадгалсан дасгал</small></a>
+        <a href="#log" data-go="log"><b>Бэлтгэлийн тэмдэглэл</b><small>Хичээлийн дараа 1 минутад бөглөнө</small></a>
+        <a href="#coach" data-go="coach" hidden><b>Багшийн самбар</b><small>Сурагчдын тэмдэглэл, ахиц</small></a>
+      </div></div>
     </nav>
     <div class="chips" id="editBar"></div>
     <div class="chips" id="acctBar"></div>
@@ -338,7 +359,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <div style="display:flex;flex-direction:column;gap:14px">
       <span class="eyebrow">Сурагч · Эцэг эх · Багш</span>
       <h1>Хөдлөөд, эрүүл, аз жаргалтай байцгаая</h1>
-      <p class="lede">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Томүжингийн Сайн сайхан байдлын хүрээ, 1–12-р ангийн хөтөлбөр, дасгалын сан, мэдлэгийн сан нэг дор, бүгд хоорондоо уялдсан.</p>
+      <p class="lede">Бие, оюун ухаан, сэтгэл, найз нөхөд гэсэн 4 талын сайн сайхан байдал хөдөлгөөнөөс эхэлдэг. Дээрх цэснээс хэрэгтэй хэсгээ сонгоорой.</p>
       <div class="chips members"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Сайн сайхан байдлын хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
       <div class="chips guest"><a class="btn gold" href="#how" data-go="how">Tomujin PE хэрхэн явагддаг</a><a class="btn line" href="#clubs" data-go="clubs">Дугуйлангууд</a></div>
     </div>
@@ -353,14 +374,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
   </section>
   <div class="dims members" id="homeDims"></div>
   <div class="tip members" id="tip"></div>
-  <div class="tiles members" id="tiles"></div>
 
-  <div class="steps guest">
-    <a class="step link" href="#how" data-go="how"><span class="when">Бидний арга барил</span><h3>Tomujin PE хэрхэн явагддаг</h3><p class="muted" style="margin:0;font-size:14px">Эхлэлийн үнэлгээнээс тусгал хүртэлх 6 алхам.</p><span class="go">Үзэх →</span></a>
-    <a class="step link" href="#clubs" data-go="clubs"><span class="when">Хичээлээс гадуур</span><h3>Дугуйлангууд</h3><p class="muted" style="margin:0;font-size:14px">Спорт, оюун ухаан, тулааны урлаг, бүжиг, фитнесс.</p><span class="go">Үзэх →</span></a>
-    <a class="step link" href="#priming" data-go="priming"><span class="when">Бие, оюунаа сэрээх</span><h3>Өглөөний 20 минут</h3><p class="muted" style="margin:0;font-size:14px">Хичээлийн өмнө биеэ сэрээж, оюунаа төвлөрүүлэх дасгал.</p><span class="go">Үзэх →</span></a>
-    <a class="step link" href="#stories" data-go="stories" id="storiesCard"><span class="when">UBAC · Шигшээ баг</span><h3>Шигшээ баг ба амжилт</h3><p class="muted" style="margin:0;font-size:14px">Сагсан бөмбөг, волейбол, хөл бөмбөгийн баг, амжилтын түүх.</p><span class="go">Үзэх →</span></a>
-  </div>
 
   <div class="gate guest" id="gate">
     <span class="eyebrow">Зөвхөн Томүжингийн сурагч, багш нарт</span>
@@ -1237,7 +1251,7 @@ function renderHome(){
   var hd=$('homeDims');hd.innerHTML='';WBDIM.forEach(function(d){hd.appendChild(dimCard(d,true))});
   var dd=new Date(),tp=TIPS.length?TIPS[(dd.getDate()+dd.getMonth())%TIPS.length]:null;
   $('tip').innerHTML='';if(tp){$('tip').appendChild(h('span',{cls:'tag g',text:'Өнөөдрийн дадал · '+tp[0]}));$('tip').appendChild(h('strong',{text:tp[1]}))}if(editMode)$('tip').appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Өдрийн дадлууд засах',onclick:function(){editList('tips')}}));
-  var T=$('tiles');T.innerHTML='';
+  var T=$('tiles');if(!T)return;T.innerHTML='';
   [[EX.length,'Дасгалын сан',CATS.length+' ангилал: суурь хөдөлгөөн, хүч, спорт, үе мөч','library'],[ART.length,'Мэдлэгийн сан','Нойр, хоол, хөдөлгөөн, дэлгэц','learn'],['ккал','Хоол тооцоолуур','Нас, жин, InBody-оор өдрийн хэрэгцээ','calc'],['+','Миний бэлтгэл','Өөрийн бэлтгэлийн планаа бүрдүүл','plan'],[LESSONS.length,'Хичээлүүд','U1 заалны диаграмтай','lessons']].forEach(function(r){
     T.appendChild(h('a',{cls:'tile',href:'#'+r[3],'data-go':r[3]},[h('span',{cls:'n',text:String(r[0])}),h('h3',{text:r[1]}),h('p',{cls:'muted',text:r[2]})]))});
   bindGo(T);
@@ -1713,7 +1727,7 @@ function textToBlocks(s){return lines(s).map(function(l){var p=l.split('|').map(
 function renderClasses(){
   var W=$('classGrid');if(!W)return;W.innerHTML='';
   var add=$('classAdd');add.innerHTML='';var b=addBtn('Анги нэмэх',function(){openEditor('classes',null)});if(b)add.appendChild(b);
-  var na=document.querySelector('nav.tabs a[data-go=classes]');if(na)na.textContent=(ME&&!isStaff())?'Миний анги':'Ангиуд';
+  var na=document.querySelector('nav.tabs a[data-go=classes] b');if(na)na.textContent=(ME&&!isStaff())?'Миний анги':'Ангиуд';
   var CL=CLASSES;if(ME&&!isStaff()){if(!myClass()){W.appendChild(classPicker());return}CL=CLASSES.filter(function(c){return c.id===myClass()})}
   CL.forEach(function(c){
     var nL=LESSONS.filter(function(l){return (l.cls||[]).indexOf(c.id)>=0}).length,nE=classExercises(c).length,nA=(c.att||[]).length;
@@ -2452,10 +2466,14 @@ function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  [].forEach.call(document.querySelectorAll('nav.tabs .mg'),function(g){g.classList.toggle('on',!!g.querySelector('[aria-current]'));g.classList.remove('open')});if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('nav.tabs'))document.activeElement.blur();
   try{if(show.ready&&location.hash!=='#'+v)history.pushState(null,'','#'+v);else history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo(0,0)}
 window.addEventListener('popstate',function(){show((location.hash||'').slice(1))});
 function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
-bindGo(document.querySelector('header'));bindGo(document.querySelector('main'));
+bindGo(document.querySelector('header'));
+[].forEach.call(document.querySelectorAll('nav.tabs .mt'),function(b){b.addEventListener('click',function(ev){ev.stopPropagation();var g=b.parentNode,o=!g.classList.contains('open');[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')});if(o)g.classList.add('open');b.setAttribute('aria-expanded',String(o))})});
+document.addEventListener('click',function(){[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
 var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
