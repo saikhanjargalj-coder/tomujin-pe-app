@@ -1,5 +1,8 @@
 # Tomujin PE
 
+> **Шинэ: Firebase хувилбар** — нээлттэй Wellbeing платформ, 120+ дасгалын сан, хоол тэжээлийн тооцоолуур, Loading Form, багшийн самбар.
+> Суулгах заавар: [FIREBASE.md](FIREBASE.md). Доорх нь өмнөх Supabase хувилбарын заавар.
+
 Tomujin Alternative School-ийн биеийн тамирын веб апп: ангиуд, сурагчид, фитнес тест (baseline / mid / final), үнэлгээ (20/30/15/15/10/10), хичээлийн сан, сурагчийн дасгалын бүртгэл (Loading Form, RPE), тайлан ба CSV.
 
 **#JustShowUp**
