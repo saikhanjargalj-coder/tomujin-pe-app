@@ -236,6 +236,14 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 .chk{flex-direction:row!important;align-items:center;font-weight:600!important;font-size:14px!important;color:var(--fg)!important}
 .inb summary{cursor:pointer;font-weight:800;color:var(--teal);font-size:14px;margin-bottom:10px}
 .big3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kres{background:var(--brand);color:var(--on-brand);border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:4px}
+.kres .l{font-size:14px;font-weight:700;opacity:.9}.kres .v{font-family:var(--font-num);font-size:44px;font-weight:700;line-height:1.1}.kres .v small{font-size:18px}
+.kres p{margin:0;font-size:14px}.kres .how{opacity:.8;font-size:12.5px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kcard{background:var(--surface);border:1px solid var(--line);border-top:5px solid var(--kc);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.kcard .t{font-weight:800;color:var(--kc)}.kcard .v{font-family:var(--font-num);font-size:28px;font-weight:700}.kcard .v small{font-size:14px}.kcard p{margin:0;font-size:12.5px;color:var(--muted)}
+.kmini{background:var(--tint);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}.kmini b{font-size:18px}.kmini span{font-size:13px;color:var(--muted)}
+.msum{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.msum>div{background:var(--tint);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;min-width:120px}.msum .l{font-size:12.5px;color:var(--muted)}.msum b{font-size:20px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
 .kpi.main{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
 .kpi .v{font-family:var(--font-num);font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
@@ -1041,7 +1049,7 @@ function calcAll(i){
   r.bmrSrc=r.inb?'InBody-ийн BMR':r.kat?'Katch-McArdle (өөх тосгүй жин)':r.mif?'Mifflin-St Jeor':'Schofield (ДЭМБ/FAO)';
   r.tdee=r.bmr*i.pal;
   var adj=(i.age>=18&&i.goal)?i.goal:0;r.adj=adj;r.target=r.tdee*(1+adj);
-  var pk=i.ath?(i.age<18?[1.2,1.6]:[1.4,2.0]):[m.prot,m.prot];r.pk=pk;
+  var pk=(i.ath||i.pal>=1.8)?(i.age<18?[1.2,1.6]:[1.4,2.0]):[m.prot,m.prot];r.pk=pk;
   var pg=i.w*(pk[0]+pk[1])/2;r.pg=pg;
   var fatPct=(m.fat[0]+m.fat[1])/2;r.fg=r.target*fatPct/100/9;
   r.cg=Math.max(0,(r.target-pg*4-r.fg*9)/4);
@@ -1404,7 +1412,7 @@ function initCalc(){
   fillPals();fillFoods();var fs=$('fSel');
   function setDef(){var f=FOODS[+fs.value];if(f)$('fG').value=f[5]}fs.addEventListener('change',setDef);setDef();
   var saved=lsGet('tpe-calc');if(saved){['cAge','cW','cH','cPbf','cFfm','cSmm','cBmr'].forEach(function(k){if(saved[k]!=null)$(k).value=saved[k]});if(saved.sex)document.querySelector('input[name=cSex][value='+saved.sex+']').checked=true;if(saved.pal)[].forEach.call(document.querySelectorAll('input[name=cPal]'),function(r){r.checked=r.value===String(saved.pal)});$('cAth').checked=!!saved.ath}
-  MEAL=lsGet('tpe-meal')||[[4,100],[8,150],[2,120],[16,150]];
+  MEAL=lsGet('tpe-meal')||[];
   $('calcForm').addEventListener('input',renderCalc);$('calcForm').addEventListener('change',renderCalc);
   $('calcForm').addEventListener('submit',function(e){e.preventDefault()});
   $('fAdd').addEventListener('click',function(){var g=+$('fG').value;if(g>0){MEAL.push([+$('fSel').value,g]);lsSet('tpe-meal',MEAL);renderCalc()}});
@@ -1423,28 +1431,28 @@ function renderCalc(){
   var i=readCalc(),r=calcAll(i);CR=r;
   $('goalRow').hidden=i.age<18;
   var O=$('calcOut');O.innerHTML='';
-  O.appendChild(h('div',{cls:'big3'},[kpi(fmt(r.target),'Өдрийн илчлэг, ккал',r.adj?('Хадгалах түвшин '+fmt(r.tdee)+' ккал'):'Энэ хэмжээгээр жин тогтвортой байна',true),kpi(fmt(r.bmr),'Суурь бодисын солилцоо (BMR)',r.bmrSrc),kpi(i.pal.toFixed(1),'Идэвхийн коэффициент (PAL)','BMR × PAL = нийт зарцуулалт')]));
-  var P=r.pg*4/r.target*100,F=r.fg*9/r.target*100,Cc=100-P-F;
-  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'Макро шим тэжээл'}),
-    h('div',{cls:'macro',role:'img','aria-label':'Уураг '+rd(P)+'%, нүүрс ус '+rd(Cc)+'%, өөх тос '+rd(F)+'%'},[h('i',{style:'width:'+P+'%;background:#5c1090'}),h('i',{style:'width:'+Cc+'%;background:#f2cd30'}),h('i',{style:'width:'+F+'%;background:#0e7490'})]),
-    h('table',{cls:'dose'},[h('thead',{},[h('tr',{},[h('th',{text:''}),h('th',{text:'Грамм/өдөр'}),h('th',{text:'Хувь'}),h('th',{text:'Үндэслэл'})])]),h('tbody',{},[
-      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#5c1090;margin-right:6px'}),'Уураг']),h('td',{cls:'num',text:fmt(r.pg)+' г'}),h('td',{cls:'num',text:rd(P)+'%'}),h('td',{cls:'muted',text:(r.pk[0]===r.pk[1]?r.pk[0]+' г/кг (насны RDA)':r.pk[0]+'–'+r.pk[1]+' г/кг (бэлтгэлтэй)')})]),
-      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#f2cd30;margin-right:6px'}),'Нүүрс ус']),h('td',{cls:'num',text:fmt(r.cg)+' г'}),h('td',{cls:'num',text:rd(Cc)+'%'}),h('td',{cls:'muted',text:rd(r.ck,1)+' г/кг · зөвлөмж 45–65%'})]),
-      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#0e7490;margin-right:6px'}),'Өөх тос']),h('td',{cls:'num',text:fmt(r.fg)+' г'}),h('td',{cls:'num',text:rd(F)+'%'}),h('td',{cls:'muted',text:'зөвлөмж '+r.m.fat[0]+'–'+r.m.fat[1]+'%'})]),
-      h('tr',{},[h('td',{text:'Эслэг'}),h('td',{cls:'num',text:fmt(r.fiber)+' г'}),h('td',{text:''}),h('td',{cls:'muted',text:'1000 ккал тутамд 14 г'})]),
-      h('tr',{},[h('td',{text:'Нэмэлт сахар'}),h('td',{cls:'num',text:'< '+fmt(r.sugar)+' г'}),h('td',{text:''}),h('td',{cls:'muted',text:'ДЭМБ: < 10%, хамгийн сайн нь < '+fmt(r.sugar5)+' г'})])])]),
-    h('p',{cls:'muted',style:'font-size:13px',text:'Хооллолтод хуваавал: 3 үндсэн хоол (тус бүр ≈ '+fmt(r.target*0.27)+' ккал) + 2 зууш (≈ '+fmt(r.target*0.095)+' ккал).'})]));
-  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'Ус ба гол эрдэс, витамин'}),h('table',{cls:'dose'},[h('tbody',{},[
-    ['Ус (хоол + ундаа)',r.m.wat+' л','EFSA; бэлтгэлийн цаг тутам +0.4–0.8 л'],['Кальци',r.m.ca+' мг','Яс өсөх үе; сүү, тараг, бяслаг'],['Төмөр',r.m.fe+' мг','Мах, буурцаг, ногоон навч'],['Цайр',r.m.zn+' мг','Мах, самар, үр тариа'],['Д витамин',r.m.vd+' IU','Нар, загас, өндөг; өвөл дутагддаг']
-  ].map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]}),h('td',{cls:'muted',text:x[2]})])}))])]));
-  var comp=[['Schofield (ДЭМБ/FAO)',r.sch,'жин, нас, хүйс'],['Mifflin-St Jeor',r.mif,i.age<18?'18+ насанд':'жин, өндөр, нас']].concat([['Katch-McArdle',r.kat,r.ffm?'FFM '+rd(r.ffm,1)+' кг':'InBody FFM эсвэл PBF оруул'],['InBody төхөөрөмж',r.inb,r.inb?'':'InBody BMR оруул']]);
-  var body=[];if(r.bmi)body.push(['BMI',rd(r.bmi,1)+' кг/м²',i.age<18?'18-аас доош насанд насны персентилээр (WHO BMI-for-age) үнэлнэ':'18.5–24.9 хэвийн (булчинлаг хүнд хэтэрхий өндөр гарч болно)']);
-  if(r.ffmi)body.push(['FFMI',rd(r.ffmi,1)+' кг/м²','Өөх тосгүй жин / өндөр². BMI-ээс илүү булчинг харуулна']);
-  if(i.smm)body.push(['SMM / жин',rd(i.smm/i.w*100,1)+'%','Араг ясны булчингийн эзлэх хувь']);
-  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'BMR-ийн тэгшитгэлүүдийг харьцуулах'}),h('table',{cls:'dose'},[h('tbody',{},comp.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]?fmt(x[1])+' ккал':'—'}),h('td',{cls:'muted',text:x[2]})])}))]),
-    h('p',{cls:'muted',style:'font-size:13px',text:'Сонголтын дараалал: InBody BMR → Katch-McArdle → Mifflin (18+) → Schofield. Булчингийн хэмжээг тусгадаг тул InBody өгөгдөл илүү нарийн.'})].concat(body.length?[h('h3',{text:'Биеийн бүтэц'}),h('table',{cls:'dose'},[h('tbody',{},body.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]}),h('td',{cls:'muted',text:x[2]})])}))])]:[])));
+  var palName=(PALS.filter(function(p){return p[0]===i.pal})[0]||[0,''])[1];
+  O.appendChild(h('div',{cls:'kres'},[
+    h('span',{cls:'l',text:'Таны өдрийн хэрэгцээ'}),
+    h('span',{cls:'v'},[fmt(r.target),h('small',{text:' ккал'})]),
+    h('p',{text:r.adj?('Зорилгодоо хүрэхийн тулд. Жин тогтвортой байлгах бол '+fmt(r.tdee)+' ккал.'):(i.age<18?'Өсөлт, хичээл, бэлтгэлд хангалттай энерги. Үүнээс бага идэхгүй байх нь чухал.':'Энэ хэмжээгээр идвэл жин тогтвортой байна.')}),
+    h('p',{cls:'how',text:'Тооцоо: тайван үед зарцуулах '+fmt(r.bmr)+' ккал × идэвх '+i.pal.toFixed(1)+' ('+palName.toLowerCase()+') = '+fmt(r.tdee)+' ккал'})]));
+  function card(c,t,v,u,note){return h('div',{cls:'kcard',style:'--kc:'+c},[h('span',{cls:'t',text:t}),h('span',{cls:'v'},[v,h('small',{text:' '+u})]),h('p',{text:note})])}
+  O.appendChild(h('div',{cls:'kgrid'},[
+    card('#5c1090','Уураг',fmt(r.pg),'г','Булчин, өсөлт, сэргэлт. Мах, өндөг, сүү, тараг, буурцаг.'),
+    card('#c9a400','Нүүрс ус',fmt(r.cg),'г','Тархи, бэлтгэлийн гол түлш. Будаа, гурил, төмс, жимс.'),
+    card('#0e7490','Өөх тос',fmt(r.fg),'г','Даавар, витамин шингээх. Самар, тос, загас.'),
+    card('#2563eb','Ус',String(r.m.wat),'л','Өдөрт. Бэлтгэлийн цаг тутам +0.5 л нэм.')]));
+  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'Өдөрт хэрхэн хуваах вэ'}),h('div',{cls:'kgrid'},[['Өглөөний хоол',0.25],['Өдрийн хоол',0.3],['Оройн хоол',0.3],['Зууш (1–2 удаа)',0.15]].map(function(x){return h('div',{cls:'kmini'},[h('b',{text:fmt(r.target*x[1])+' ккал'}),h('span',{text:x[0]})])}))]));
   var ref=DGA[i.sex].filter(function(x){return i.age>=x[0]&&i.age<=x[1]})[0];
-  if(ref)O.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Харьцуулах лавлагаа: '+(i.sex==='m'?'эрэгтэй':'эмэгтэй')+' '+ref[0]+'–'+(ref[1]>100?'+':ref[1])+' насны дунд идэвхтэй хүн ≈ '+ref[2]+' ккал/өдөр (Dietary Guidelines for Americans 2020–2025).'}));
+  var comp=[['Schofield (ДЭМБ/FAO)',r.sch,'жин, нас, хүйс'],['Mifflin-St Jeor',r.mif,i.age<18?'18+ насанд':'жин, өндөр, нас'],['Katch-McArdle',r.kat,r.ffm?'FFM '+rd(r.ffm,1)+' кг':'InBody FFM эсвэл PBF оруул'],['InBody төхөөрөмж',r.inb,r.inb?'':'InBody BMR оруул']];
+  var rows=[['Тайван үеийн зарцуулалт (BMR)',fmt(r.bmr)+' ккал',r.bmrSrc],['Идэвхийн коэффициент (PAL)',i.pal.toFixed(1),palName],['Эслэг',fmt(r.fiber)+' г','1000 ккал тутамд 14 г'],['Нэмэлт сахар','< '+fmt(r.sugar)+' г','ДЭМБ: илчлэгийн 10%-иас бага'],['Кальци',r.m.ca+' мг','сүү, тараг, бяслаг'],['Төмөр',r.m.fe+' мг','мах, буурцаг, ногоон навч'],['Цайр',r.m.zn+' мг','мах, самар, үр тариа'],['Д витамин',r.m.vd+' IU','нар, загас, өндөг']];
+  if(r.bmi)rows.push(['BMI',rd(r.bmi,1)+' кг/м²',i.age<18?'18-аас доош насанд насны персентилээр үнэлнэ':'18.5–24.9 хэвийн']);
+  if(r.ffmi)rows.push(['FFMI',rd(r.ffmi,1)+' кг/м²','өөх тосгүй жин / өндөр²']);
+  O.appendChild(h('details',{cls:'box'},[h('summary',{style:'font-weight:800;cursor:pointer',text:'Дэлгэрэнгүй тооцоо (эрдэс, тэгшитгэлүүд)'}),
+    h('table',{cls:'dose'},[h('tbody',{},rows.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]}),h('td',{cls:'muted',text:x[2]})])}))]),
+    h('h3',{text:'BMR-ийн тэгшитгэлүүд'}),h('table',{cls:'dose'},[h('tbody',{},comp.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]?fmt(x[1])+' ккал':'—'}),h('td',{cls:'muted',text:x[2]})])}))]),
+    ref?h('p',{cls:'muted',style:'font-size:13px',text:'Лавлагаа: '+(i.sex==='m'?'эрэгтэй':'эмэгтэй')+' '+ref[0]+'–'+(ref[1]>100?'+':ref[1])+' насны дунд идэвхтэй хүн ≈ '+ref[2]+' ккал/өдөр.'}):null]));
   renderMeal();
 }
 function renderMeal(){
@@ -1456,6 +1464,10 @@ function renderMeal(){
   tb.appendChild(h('tr',{style:'font-weight:800'},[h('td',{text:'Нийт'}),h('td',{text:''}),h('td',{cls:'num',text:fmt(tot[0])}),h('td',{cls:'num',text:rd(tot[1],1)+' г'}),h('td',{cls:'num',text:rd(tot[2],1)+' г'}),h('td',{cls:'num',text:rd(tot[3],1)+' г'}),h('td',{text:''})]));
   T.appendChild(tb);
   var B=$('mealBars');B.innerHTML='';if(!CR)return;
+  var left=CR.target-tot[0];
+  B.appendChild(h('div',{cls:'msum'},[h('div',{},[h('span',{cls:'l',text:'Өнөөдөр идсэн'}),h('b',{text:fmt(tot[0])+' ккал'})]),h('div',{},[h('span',{cls:'l',text:'Хэрэгцээ'}),h('b',{text:fmt(CR.target)+' ккал'})]),h('div',{},[h('span',{cls:'l',text:left>=0?'Үлдсэн':'Илүү идсэн'}),h('b',{style:left>=0?'':'color:#c2410c',text:fmt(Math.abs(left))+' ккал'})]),
+    MEAL.length?h('button',{type:'button',cls:'btn line small',text:'Бүгдийг арилгах',onclick:function(){MEAL=[];lsSet('tpe-meal',MEAL);renderMeal()}}):null]));
+  if(!MEAL.length){B.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Өнөөдөр идсэн хоолоо дээрээс сонгоод "+ Нэмэх" дарна уу.'}));T.innerHTML='';return}
   [['Илчлэг',tot[0],CR.target,'ккал','#5c1090'],['Уураг',tot[1],CR.pg,'г','#5c1090'],['Нүүрс ус',tot[2],CR.cg,'г','#c9a400'],['Өөх тос',tot[3],CR.fg,'г','#0e7490']].forEach(function(x){
     var pct=Math.min(100,x[1]/x[2]*100);
     B.appendChild(h('div',{cls:'bar'},[h('div',{style:'display:flex;justify-content:space-between;font-size:14px;font-weight:700'},[h('span',{text:x[0]}),h('span',{cls:'num',text:fmt(x[1])+' / '+fmt(x[2])+' '+x[3]+' ('+Math.round(x[1]/x[2]*100)+'%)'})]),h('div',{cls:'tr'},[h('i',{style:'width:'+pct+'%;background:'+x[4]})])]))});
@@ -2273,12 +2285,12 @@ var PRIMEVAR=[
 var PRIMERULE=['Хүнд биш, сэргээдэг: эрчим 10-аас 3–5. Хөлрөхгүй, амьсгал хурдсана, гэхдээ ярьж чадна.','Өдөр бүр, нэг цагт: тогтмол байдал эрчмээс чухал.','Багш нар хамт хийнэ: том хүн үлгэр жишээ үзүүлбэл хүүхдүүд дагана.','Өвдөж байвал зогсоно: өвдөлт биш, хөдөлгөөн бол зорилго.','Хөгжим нэм: хэмнэл нь хамтдаа хөдлөхийг амар болгодог.'];
 var primeT=null,primeLeft=0,primeIdx=0,primeRun=false;
 function primeTotal(){return PRIME.reduce(function(a,b){return a+b.t},0)}
-function fmt(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function fmtT(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
 function renderPrimeTeaser(){var E=$('primeEdit');if(E){E.innerHTML='';if(editMode){E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Дасгалын хэсгүүд',onclick:function(){editList('prime')}}));E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Нас, орчны тохируулга',onclick:function(){editList('primevar')}}));E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Дүрэм',onclick:function(){editList('primerule')}}))}}
-  var W=$('primeTeaser');if(!W)return;W.innerHTML='';var t0=0;PRIME.forEach(function(b){W.appendChild(h('div',{cls:'step',style:'border-left:5px solid '+b.c},[h('span',{cls:'when',text:fmt(t0)+' – '+fmt(t0+b.t)}),h('h3',{text:b.n}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:b.k})]));t0+=b.t})}
+  var W=$('primeTeaser');if(!W)return;W.innerHTML='';var t0=0;PRIME.forEach(function(b){W.appendChild(h('div',{cls:'step',style:'border-left:5px solid '+b.c},[h('span',{cls:'when',text:fmtT(t0)+' – '+fmtT(t0+b.t)}),h('h3',{text:b.n}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:b.k})]));t0+=b.t})}
 function renderPriming(){
   var W=$('primeOut');if(!W)return;W.innerHTML='';
-  var clock=h('span',{cls:'clock',id:'pClock',text:fmt(primeTotal())}),now=h('span',{cls:'now',id:'pNow',text:'Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}),bar=h('div',{cls:'pbar'},[h('i',{id:'pBar'})]);
+  var clock=h('span',{cls:'clock',id:'pClock',text:fmtT(primeTotal())}),now=h('span',{cls:'now',id:'pNow',text:'Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}),bar=h('div',{cls:'pbar'},[h('i',{id:'pBar'})]);
   var go=h('button',{type:'button',cls:'btn small',id:'pGo',text:'▶ Эхлэх',onclick:function(){primeRun?primePause():primeStart()}});
   var rs=h('button',{type:'button',cls:'btn line small',style:'background:transparent;color:var(--on-brand);border:1.5px solid var(--on-brand)',text:'↺ Дахин',onclick:primeReset});
   W.appendChild(h('div',{cls:'ptimer'},[clock,now,go,rs,bar]));
@@ -2287,7 +2299,7 @@ function renderPriming(){
     var mv=h('div',{cls:'pmoves'});
     b.m.forEach(function(m){var e=m[0]&&byId(m[0]);var mini=e?h('div',{cls:'mini'},[makeVis(e,{phase:.2}).svg]):h('div',{cls:'mini none',text:'•'});
       mv.appendChild(h(e?'button':'div',e?{type:'button',cls:'pmove',onclick:function(){openEx(e.id)}}:{cls:'pmove'},[mini,h('div',{},[h('b',{text:m[1]}),h('small',{text:m[2]}),h('small',{text:m[3]})])]))});
-    W.appendChild(h('div',{cls:'pblock',id:'pb-'+i,style:'--pc:'+b.c},[h('div',{cls:'ph'},[h('div',{},[h('span',{cls:'eyebrow',style:'color:'+b.c,text:(i+1)+' · '+b.k}),h('h2',{text:b.n})]),h('span',{cls:'time',text:fmt(t0)+' – '+fmt(t0+b.t)})]),h('p',{cls:'muted',style:'margin:0',text:b.w}),mv]));t0+=b.t;
+    W.appendChild(h('div',{cls:'pblock',id:'pb-'+i,style:'--pc:'+b.c},[h('div',{cls:'ph'},[h('div',{},[h('span',{cls:'eyebrow',style:'color:'+b.c,text:(i+1)+' · '+b.k}),h('h2',{text:b.n})]),h('span',{cls:'time',text:fmtT(t0)+' – '+fmtT(t0+b.t)})]),h('p',{cls:'muted',style:'margin:0',text:b.w}),mv]));t0+=b.t;
   });
   W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Нас, орчинд тохируулах'}),h('div',{cls:'two-col'},PRIMEVAR.map(function(v){return h('div',{cls:'step'},[h('h3',{text:v[0]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:v[1]})])}))]));
   W.appendChild(h('div',{cls:'two-col'},[
@@ -2301,10 +2313,10 @@ function renderPriming(){
 }
 function primeAt(elapsed){var t=0;for(var i=0;i<PRIME.length;i++){if(elapsed<t+PRIME[i].t)return [i,t+PRIME[i].t-elapsed];t+=PRIME[i].t}return [PRIME.length,0]}
 function primePaint(){var tot=primeTotal(),el=tot-primeLeft;var a=primeAt(el);var c=$('pClock');if(!c)return;
-  c.textContent=fmt(primeLeft);$('pBar').style.width=(100*el/tot)+'%';
+  c.textContent=fmtT(primeLeft);$('pBar').style.width=(100*el/tot)+'%';
   if(!primeRun&&primeLeft===tot){$('pNow').textContent='Бэлэн үү? 20 минутын priming-ийг эхлүүлье.'}
   else if(a[0]>=PRIME.length){$('pNow').textContent='Дууслаа! Сайхан өдөр болоорой.'}
-  else $('pNow').textContent=(a[0]+1)+'/'+PRIME.length+' · '+PRIME[a[0]].n+' · '+fmt(a[1])+' үлдсэн';
+  else $('pNow').textContent=(a[0]+1)+'/'+PRIME.length+' · '+PRIME[a[0]].n+' · '+fmtT(a[1])+' үлдсэн';
   PRIME.forEach(function(b,i){var e=$('pb-'+i);if(e)e.style.outline=(primeRun||el>0)&&i===a[0]?'3px solid '+b.c:'none'});
   $('pGo').textContent=primeRun?'❚❚ Түр зогсоох':(primeLeft<tot&&primeLeft>0?'▶ Үргэлжлүүлэх':'▶ Эхлэх');}
 function primeStart(){if(primeLeft<=0)primeLeft=primeTotal();primeRun=true;var last=primeAt(primeTotal()-primeLeft)[0];
