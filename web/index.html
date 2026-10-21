@@ -281,6 +281,7 @@ body.editing [data-cms]:hover{background:var(--gold-soft)}
 body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
 .lrow{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
 .lrow .ctl{display:flex;gap:6px;justify-content:flex-end}
+.pic .saved{position:absolute;right:8px;top:8px;background:var(--gold);color:#1c1c1c;border-radius:999px;font-size:12px;font-weight:900;padding:2px 7px}
 .imgprev{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.imgprev img{max-width:260px;max-height:180px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
 .ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
 .rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
@@ -384,6 +385,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <div class="row" id="patRow" hidden><span class="lab">Хэв</span><div class="chips" id="fPat"></div></div>
     <div class="row"><span class="lab">Шат</span><div class="chips" id="fLv"></div></div>
   </div>
+  <div class="chips" id="libSaved"></div>
   <div class="chips" id="libAdd"></div>
   <p class="count" id="exCount"></p>
   <div id="exList" style="display:flex;flex-direction:column;gap:28px"></div>
@@ -461,6 +463,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <form class="box" id="planForm" autocomplete="off"><h3>Тохиргоо</h3></form>
     <div id="planOut" style="display:flex;flex-direction:column;gap:14px;min-width:0"></div>
   </div>
+  <div class="box members"><h3>Миний хадгалсан дасгалууд</h3><div id="mySaved"></div></div>
   <div class="box"><h3>Хадгалсан ба багшийн нийтэлсэн планууд</h3><div id="myPlans" style="display:flex;flex-direction:column;gap:6px"></div><p class="muted" style="font-size:12.5px">Нэвтэрсэн бол планууд таны акаунтад хадгалагдаж, багш тань харах боломжтой. Нэвтрээгүй бол зөвхөн энэ төхөөрөмж дээр хадгалагдана.</p></div>
 </section>
 
@@ -1284,11 +1287,13 @@ function renderFilters(){
 function card(e,i){
   var ph=(!e.solved&&!e.dr)?firstPhoto(e):null;var pic=h('div',{cls:'pic'},[ph?h('img',{src:ph,alt:''}):makeVis(e,{phase:i*0.23}).svg,h('span',{cls:'lv',text:lvl(e)})]);
   if((e.att||[]).length)pic.appendChild(h('span',{cls:'vid',text:'▶ '+(e.att||[]).length}));
+  if(SAVED[e.id])pic.appendChild(h('span',{cls:'saved',text:'★'}));
   return h('button',{type:'button',cls:'ex'+(e.deleted?' hiddenitem':''),onclick:function(){openEx(e.id)}},[pic,h('div',{cls:'body'},[h('h3',{text:e.n}),h('small',{text:e.en}),h('div',{cls:'chips',style:'margin-top:4px'},[h('span',{cls:'tag',text:e.p?PAT[e.p]:CAT[e.c].split(' (')[0]}),e.dr?h('span',{cls:'tag g',text:'Диаграм'}):null])])]);
 }
 function renderLib(){
   var q=fQ.trim().toLowerCase();
-  var list=EX.filter(function(e){return (fCat==='all'||e.c===fCat)&&(fPat==='all'||e.p===fPat)&&(!fLv||e.lv===fLv)&&(!q||(e.n+' '+e.en+' '+CAT[e.c]+' '+(e.p?PAT[e.p]:'')).toLowerCase().indexOf(q)>=0)});
+  var SB=$('libSaved');if(SB){SB.innerHTML='';if(ME){var nS=Object.keys(SAVED).length;SB.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(fSaved),text:'★ Миний хадгалсан ('+nS+')',onclick:function(){fSaved=!fSaved;renderLib()}}))}}
+  var list=EX.filter(function(e){return (!fSaved||SAVED[e.id])&&(fCat==='all'||e.c===fCat)&&(fPat==='all'||e.p===fPat)&&(!fLv||e.lv===fLv)&&(!q||(e.n+' '+e.en+' '+CAT[e.c]+' '+(e.p?PAT[e.p]:'')).toLowerCase().indexOf(q)>=0)});
   $('libEyebrow').textContent=EX.length+' дасгал · '+CATS.length+' ангилал · Шат 1–6';
   $('exCount').innerHTML='';$('exCount').appendChild(h('b',{text:String(list.length)}));$('exCount').appendChild(document.createTextNode(' дасгал олдлоо'));
   var la=$('libAdd');la.innerHTML='';var ab=addBtn('Дасгал нэмэх',function(){openEditor('ex',null)});if(ab)la.appendChild(ab);
@@ -1321,6 +1326,7 @@ function openEx(id){
     $('sheetEyebrow').textContent=CAT[e.c]+(e.p?' · '+PAT[e.p]:'')+' · '+lvl(e);
     p.appendChild(h('div',{},[h('h2',{id:'sheetTitle',text:e.n,style:'font-size:28px'}),h('p',{cls:'muted',style:'font-size:13px;font-weight:700',text:e.en})]));
     var er=editRow('ex',e,openEx);if(er)p.appendChild(er);
+    if(ME&&db){var sv=h('button',{type:'button',cls:'btn '+(SAVED[e.id]?'gold':'line')+' small',text:SAVED[e.id]?'★ Хадгалсан':'☆ Хадгалах',onclick:function(){toggleSave(e.id).catch(function(){});sv.textContent=SAVED[e.id]?'★ Хадгалсан':'☆ Хадгалах';sv.className='btn '+(SAVED[e.id]?'gold':'line')+' small'}});p.appendChild(h('div',{cls:'editrow'},[sv]))}
     p.appendChild(h('p',{cls:'lede',text:e.w}));
     var vis=makeVis(e,{big:true}),ctl=[];
     if(!reduce){var pb=h('button',{type:'button',cls:'btn line small',text:paused?'▶ Тоглуулах':'❚❚ Зогсоох',onclick:function(){paused=!paused;pb.textContent=paused?'▶ Тоглуулах':'❚❚ Зогсоох'}});
@@ -1374,7 +1380,8 @@ function court(Ls){
 function renderLessons(){
   var la=$('lesAdd');la.innerHTML='';var ab=addBtn('Хичээл нэмэх',function(){openEditor('les',null)});if(ab)la.appendChild(ab);
   var W=$('lessonList');W.innerHTML='';
-  LESSONS.forEach(function(Ls){
+  var LS=LESSONS;if(ME&&!isStaff()){if(!myClass()){W.appendChild(classPicker());return}LS=LESSONS.filter(function(l){return (l.cls||[]).indexOf(myClass())>=0});if(!LS.length)W.appendChild(h('p',{cls:'muted',text:className(myClass())+' ангид одоогоор хичээл оноогоогүй байна. Багш хичээл оноохоор энд гарч ирнэ.'}))}
+  LS.forEach(function(Ls){
     var blocks=h('div',{cls:'blocks'},(Ls.blocks||[]).map(function(b){var line=[];b[2].forEach(function(id,i){var x=byId(id);if(!x)return;if(line.length)line.push(document.createTextNode(' · '));line.push(h('button',{type:'button',cls:'exlink',text:x.n,onclick:function(){openEx(id)}}))});
       return h('div',{cls:'blk'},[h('span',{cls:'t',text:b[0]}),h('div',{style:'display:flex;flex-direction:column;gap:4px;min-width:0'},[h('strong',{text:b[1]}),line.length?h('div',{},line):null,h('p',{cls:'muted',text:b[3]})])])}));
     var hasCourt=Ls.stations&&Ls.stations.length;W.appendChild(h('article',{cls:'lesson'+(Ls.deleted?' hiddenitem':''),id:'les-'+Ls.id},[h('div',{cls:'chips'},[Ls.grade?h('span',{cls:'tag g',text:Ls.grade}):null,h('span',{cls:'tag t',text:'80 мин'})].concat((Ls.cls||[]).map(function(c){var k=CLASSES.filter(function(x){return x.id===c})[0];return k?h('span',{cls:'tag',text:k.name}):null}))),h('h2',{text:Ls.title}),Ls.goal?h('p',{cls:'lede',text:'Зорилго: '+Ls.goal}):null,editRow('les',Ls,function(){}),h('div',{cls:'chips'},[h('span',{cls:'muted',style:'font-size:13px;font-weight:700',text:'Wellbeing:'})].concat((Ls.ws||[]).map(wbTag))),hasCourt?h('div',{cls:'court'},[court(Ls)]):null,hasCourt?h('div',{cls:'legend'},[h('span',{},[h('i',{style:'background:#00bcd4'}),'сурагч']),h('span',{},[h('i',{style:'background:var(--fig)'}),'багана']),h('span',{},[h('i',{style:'background:#5c1090'}),'станц'])]):null,blocks,attView(Ls.att)]));
@@ -1694,7 +1701,9 @@ function textToBlocks(s){return lines(s).map(function(l){var p=l.split('|').map(
 function renderClasses(){
   var W=$('classGrid');if(!W)return;W.innerHTML='';
   var add=$('classAdd');add.innerHTML='';var b=addBtn('Анги нэмэх',function(){openEditor('classes',null)});if(b)add.appendChild(b);
-  CLASSES.forEach(function(c){
+  var na=document.querySelector('nav.tabs a[data-go=classes]');if(na)na.textContent=(ME&&!isStaff())?'Миний анги':'Ангиуд';
+  var CL=CLASSES;if(ME&&!isStaff()){if(!myClass()){W.appendChild(classPicker());return}CL=CLASSES.filter(function(c){return c.id===myClass()})}
+  CL.forEach(function(c){
     var nL=LESSONS.filter(function(l){return (l.cls||[]).indexOf(c.id)>=0}).length,nE=classExercises(c).length,nA=(c.att||[]).length;
     W.appendChild(h('button',{type:'button',cls:'art'+(c.deleted?' hiddenitem':''),onclick:function(){openClass(c.id)}},[h('span',{cls:'big',text:c.name}),h('span',{cls:'muted',text:c.grade?c.grade+'-р анги':''}),
       h('div',{cls:'chips'},[h('span',{cls:'tag',text:nL+' хичээл'}),h('span',{cls:'tag t',text:nE+' дасгал'}),h('span',{cls:'tag g',text:nA+' файл'})]),c.note?h('p',{cls:'muted',style:'font-size:14px',text:c.note.split('\n')[0].slice(0,90)}):null]));
@@ -1802,7 +1811,7 @@ function publishPlan(st){
 }
 function renderMyPlans(){
   var W=$('myPlans');if(!W)return;W.innerHTML='';
-  var pub=Object.keys(PUBPLANS).map(function(k){return PUBPLANS[k]});
+  var pub=Object.keys(PUBPLANS).map(function(k){return PUBPLANS[k]});if(ME&&!isStaff())pub=pub.filter(function(p){return !(p.cls&&p.cls.length)||p.cls.indexOf(myClass())>=0});
   function row(pl,own){return h('div',{cls:'attrow'},[h('span',{cls:'tag '+(own?'':'g'),text:own?'Миний':'Багшийн'}),h('strong',{text:pl.name,style:'flex:1 1 160px'}),h('span',{cls:'muted',style:'font-size:12px',text:GOALS[pl.goal].n+' · '+pl.min+' мин'+(pl.cls&&pl.cls.length?' · '+pl.cls.map(function(c){var x=CLASSES.filter(function(k){return k.id===c})[0];return x?x.name:c}).join(', '):'')}),
     h('button',{type:'button',cls:'btn line small',text:own?'Нээх':'Хуулж авах',onclick:function(){PLAN=JSON.parse(JSON.stringify(pl));if(!own){PLAN.id='p'+Date.now().toString(36);PLAN.name=pl.name+' (хуулбар)';delete PLAN.cls}saveDraft();syncPlanForm();renderPlan();$('pName').scrollIntoView({block:'center'})}}),
     own?h('button',{type:'button',cls:'rm','aria-label':'Устгах',text:'×',onclick:function(){MYPLANS=MYPLANS.filter(function(x){return x.id!==pl.id});lsSet('tpe-plans',MYPLANS);cloudDelPlan(pl.id);renderMyPlans()}}):(canEdit&&db?h('button',{type:'button',cls:'rm','aria-label':'Нийтлэлээс хасах',text:'×',onclick:function(){db.doc('plans/'+pl.id).delete().catch(function(){})}}):null)])}
@@ -1822,7 +1831,18 @@ function initPlan(){
 function readPlanForm(){PLAN.name=$('pName').value||PLAN.name;PLAN.goal=$('pGoal').value;PLAN.min=+$('pMin').value;PLAN.lv=+$('pLv').value;PLAN.eq=checked('pEq')}
 
 /* ---------- accounts, Loading Form, teacher dashboard (Firebase) ---------- */
-var ME=null,MYROLE=null,MYPROFILE=null,USERS={},LOADS=[],WBALL=[],MYLOADS=[],MYWB={};
+var ME=null,MYROLE=null,MYPROFILE=null,USERS={},LOADS=[],WBALL=[],MYLOADS=[],MYWB={},SAVED={},fSaved=false;
+function toggleSave(id){if(!ME||!db)return Promise.reject();var ref=db.doc('users/'+ME.uid+'/saved/'+id);if(SAVED[id]){delete SAVED[id];renderLib();renderSaved();return ref.delete()}SAVED[id]=Date.now();renderLib();renderSaved();return ref.set({at:SAVED[id]})}
+function renderSaved(){var W=$('mySaved');if(!W)return;W.innerHTML='';var ids=Object.keys(SAVED).sort(function(a,b){return SAVED[b]-SAVED[a]});var list=ids.map(byId).filter(Boolean);
+  if(!list.length){W.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Одоогоор хадгалсан дасгал алга. Дасгалын сангаас дасгал нээгээд "☆ Хадгалах" дарна уу.'}));return}
+  W.appendChild(h('div',{cls:'chips'},list.map(function(e){return h('button',{type:'button',cls:'tag t',text:'★ '+e.n,onclick:function(){openEx(e.id)}})})))}
+function classPicker(){var st=h('p',{cls:'status',role:'status'});var sel=fSelect('mc-class','Анги',[['','— Ангиа сонгоно уу —']].concat(CLASSES.filter(function(c){return !c.deleted}).map(function(c){return [c.id,c.name]})),'');
+  return h('div',{cls:'gate'},[h('h2',{text:'Ангиа сонгоно уу'}),h('p',{cls:'lede',text:'Танай ангид оноосон хичээл, дасгал, мэдэгдлийг харахын тулд ангиа нэг удаа сонгоно. Дараа нь зөвхөн багш сольж чадна.'}),sel,
+    h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var v=val('mc-class');if(!v){st.className='status err';st.textContent='Ангиа сонгоно уу.';return}
+      db.doc('users/'+ME.uid).update({classId:v}).then(function(){MYPROFILE=Object.assign({},MYPROFILE||{},{classId:v});rerenderAll();renderMyPlans()},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st])])}
+function isStaff(){return MYROLE==='admin'||MYROLE==='teacher'}
+function myClass(){return (MYPROFILE&&MYPROFILE.classId)||''}
+function className(id){var c=CLASSES.filter(function(x){return x.id===id})[0];return c?c.name:''}
 var RPEL=['','1 · Маш хөнгөн','2 · Хөнгөн','3 · Дунд зэрэг','4 · Бага зэрэг хүнд','5 · Хүнд','6 · Хүнд+','7 · Маш хүнд','8 · Маш хүнд+','9 · Бараг хамгийн хүнд','10 · Хамгийн хүнд'];
 var FEELL=['','1 · Муу','2 · Ядарсан','3 · Хэвийн','4 · Сайн','5 · Маш сайн'];
 var SOREL=['','1 · Өвдөлтгүй','2 · Бага зэрэг','3 · Дунд','4 · Их','5 · Маш их'];
@@ -1844,11 +1864,11 @@ function openLogin(mode){
     var f=h('form',{cls:'edform'});
     f.appendChild(fText('li-email','Сургуулийн имэйл','',{type:'email',ph:'нэр@'+TPE.domain}));
     f.appendChild(fText('li-pw','Нууц үг','',{type:'password',ph:mode==='up'?'дор хаяж 6 тэмдэгт':''}));
-    if(mode==='up'){f.appendChild(fText('li-name','Овог нэр','',{ph:'жишээ: Бат-Эрдэнэ Тэмүүлэн'}));f.appendChild(fSelect('li-class','Анги',CLASSES.filter(function(c){return !c.deleted}).map(function(c){return [c.id,c.name]}),''))}
+    if(mode==='up'){f.appendChild(fText('li-name','Овог нэр','',{ph:'жишээ: Бат-Эрдэнэ Тэмүүлэн'}));f.appendChild(fSelect('li-class','Анги',[['','— Ангиа сонгоно уу —']].concat(CLASSES.filter(function(c){return !c.deleted}).map(function(c){return [c.id,c.name]})),''))}
     f.addEventListener('submit',function(ev){ev.preventDefault();go()});
     function go(){
       var em=val('li-email'),pw=$('li-pw').value;st.className='status';st.textContent='Түр хүлээнэ үү…';
-      if(mode==='up'){var nm=val('li-name');if(!nm){st.className='status err';st.textContent='Нэрээ оруулна уу.';return}
+      if(mode==='up'){var nm=val('li-name');if(!nm){st.className='status err';st.textContent='Нэрээ оруулна уу.';return}if(!val('li-class')){st.className='status err';st.textContent='Ангиа сонгоно уу.';return}
         try{localStorage.setItem('tpe-pending',JSON.stringify({name:nm,classId:val('li-class')}))}catch(e){}
         TPE.signUp(em,pw,nm).then(function(){st.textContent='Баталгаажуулах холбоос '+em+' хаяг руу илгээгдлээ. Имэйлээ нээж холбоос дээр дараад энд буцаж ирнэ үү.';openVerify()},function(e){st.className='status err';st.textContent=authErr(e)})}
       else TPE.signIn(em,pw).then(function(){closeSheet()},function(e){st.className='status err';st.textContent=authErr(e)});
@@ -1898,6 +1918,7 @@ function stopSubs(){unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
 function startSubs(){
   stopSubs();if(!ME||!db)return;
   unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
+  unsubs.push(db.collection('users/'+ME.uid+'/saved').onSnapshot(function(s){SAVED={};s.docs.forEach(function(d){SAVED[d.id]=d.data().at||1});renderLib();renderSaved()}));
   unsubs.push(db.collection('users/'+ME.uid+'/wellbeing').onSnapshot(function(s){MYWB={};s.docs.forEach(function(d){MYWB[d.id]=d.data()})}));
   unsubs.push(db.collection('users/'+ME.uid+'/plans').onSnapshot(function(s){var cloud=s.docs.map(function(d){return d.data().plan}).filter(Boolean);var ids={};cloud.forEach(function(p){ids[p.id]=1});MYPLANS=cloud.concat(MYPLANS.filter(function(p){return !ids[p.id]}));renderMyPlans()}));
   if(MYROLE==='teacher'||MYROLE==='admin'){
@@ -1991,7 +2012,7 @@ async function fbInit(){
   db.collection('site').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});SITE=m;applySite();rerenderAll()},function(){});
   PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
-    ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='admin';if(!canEdit)editMode=false;
+    ME=u;MYROLE=role;MYPROFILE=null;SAVED={};fSaved=false;canEdit=role==='admin';if(!canEdit)editMode=false;
     setAuthed(!!(u&&u.emailVerified&&role));
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
     await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
