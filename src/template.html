@@ -27,6 +27,11 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-display);font-size:15px;line-height:1.55}
+body:not(.authed) nav.tabs a:not([data-go=home]){display:none}
+body:not(.authed) .members{display:none!important}
+body.authed .guest{display:none!important}
+.gate{background:var(--tint);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.gate h2{margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
 .wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
@@ -232,13 +237,33 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
       <span class="eyebrow">Сурагч · Эцэг эх · Багш</span>
       <h1>Хөдөлгөөнөөр эхэлдэг 4 талт wellbeing</h1>
       <p class="lede">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Томүжингийн Wellbeing хүрээ, 1–12-р ангийн хөтөлбөр, дасгалын сан, мэдлэгийн сан нэг дор, бүгд хоорондоо уялдсан.</p>
-      <div class="chips"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Wellbeing хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
+      <div class="chips members"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Wellbeing хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
+      <div class="chips guest"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
     </div>
     <div class="stage" id="heroStage" aria-label="Дасгалын хөдөлгөөнт жишээ"></div>
   </div>
-  <div class="dims" id="homeDims"></div>
-  <div class="tip" id="tip"></div>
-  <div class="tiles" id="tiles"></div>
+  <div class="guest" style="display:flex;flex-direction:column;gap:14px">
+    <span class="eyebrow">Бид юу хийдэг вэ</span>
+    <h2 style="margin:0">Хөдөлгөөн бол эрүүл амьдралын эхлэл</h2>
+    <p class="lede">Томүжин Альтернатив Сургуулийн биеийн тамирын хөтөлбөр нь сурагч бүрийг бусадтай харьцуулахгүйгээр өөрийн ахицад нь төвлөрч, насан туршийн хөдөлгөөний дадал, эрүүл амьдралын хэв маягийг төлөвшүүлэхийг зорьдог.</p>
+    <div class="tiles">
+      <div class="tile"><span class="n">1–12</span><h3>Биеийн тамирын хичээл</h3><p class="muted">Суурь хөдөлгөөн, хүч, тэсвэр, уян хатан чанар, спортын тоглоомууд. Анги бүрийн хөгжлийн онцлогт тохирсон хөтөлбөр.</p></div>
+      <div class="tile"><span class="n">4</span><h3>Wellbeing</h3><p class="muted">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Хөдөлгөөнөөр дамжуулан бүгдийг хөгжүүлнэ.</p></div>
+      <div class="tile"><span class="n">RPE</span><h3>Бэлтгэлээ мэдрэх</h3><p class="muted">Сурагчид бэлтгэлийн ачаалал, биеийн мэдрэмжээ тэмдэглэж, өөрийн биеийг ойлгож сурна.</p></div>
+      <div class="tile"><span class="n">PBL</span><h3>Төсөлд суурилсан суралцахуй</h3><p class="muted">Фитнесс үнэлгээ, InBody үр дүнгээ ашиглан өөрийн бэлтгэлийн төлөвлөгөөг өөрөө бүтээнэ.</p></div>
+      <div class="tile"><span class="n">UBAC</span><h3>Спорт ба тэмцээн</h3><p class="muted">Сургуулийн волейбол болон бусад багууд, спортын наадам, тэмцээнд оролцоно.</p></div>
+      <div class="tile"><span class="n">∞</span><h3>"Just Show Up"</h3><p class="muted">Хамгийн чухал нь тогтмол ирж, оролцох. Сахилга бат бол ажиглагдах үйлдэл.</p></div>
+    </div>
+  </div>
+  <div class="gate guest" id="gate">
+    <span class="eyebrow">Зөвхөн Томүжингийн сурагч, багш нарт</span>
+    <h2>Сургуулийн имэйлээрээ нэвтэрч бүх хэсгийг үзнэ</h2>
+    <p class="lede">Wellbeing хүрээ, дасгалын сан, мэдлэгийн сан, хоол тооцоолуур, бэлтгэлийн план, хичээлүүд, Loading Form нь зөвхөн @tomujin.edu.mn хаягаар нэвтэрч, имэйлээ баталгаажуулсан хэрэглэгчдэд нээгдэнэ.</p>
+    <div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
+  </div>
+  <div class="dims members" id="homeDims"></div>
+  <div class="tip members" id="tip"></div>
+  <div class="tiles members" id="tiles"></div>
 </section>
 
 <section class="view" id="v-wellbeing" hidden>
@@ -1251,19 +1276,36 @@ async function fbInit(){
   await new Promise(function(r){if(window.TPE)r();else window.addEventListener('tpe-ready',r,{once:true})});
   if(!TPE.configured){renderAccount();renderLog();return}
   db=TPE.db;
-  Object.keys(COLL).forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
-  db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){var x=d.data();if(GOALS[x.goal])m[d.id]=x});PUBPLANS=m;renderMyPlans()},function(){});
+  db.collection('classes').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV.classes=m;rerenderAll()},function(){});
   TPE.onAuth(async function(u,role){
     ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='teacher'||role==='admin';if(!canEdit)editMode=false;
+    setAuthed(!!(u&&u.emailVerified&&role));
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
     await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
     [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!canEdit});
   });
 }
 
+/* ---------- members-only gate ---------- */
+var AUTHED=false,PENDING=null,contentSubs=[];
+function startContentSubs(){
+  stopContentSubs();if(!db)return;
+  Object.keys(COLL).filter(function(k){return k!=='classes'}).forEach(function(kind){contentSubs.push(db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){}))});
+  contentSubs.push(db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){var x=d.data();if(GOALS[x.goal])m[d.id]=x});PUBPLANS=m;renderMyPlans()},function(){}));
+}
+function stopContentSubs(){contentSubs.forEach(function(f){try{f()}catch(e){}});contentSubs=[]}
+function setAuthed(on){
+  var was=AUTHED;AUTHED=on;document.body.classList.toggle('authed',on);
+  if(on&&!was){startContentSubs();if(PENDING){var v=PENDING;PENDING=null;show(v)}}
+  if(!on){stopContentSubs();PENDING=null;var cur=(location.hash||'').slice(1);if(cur&&cur!=='home')show('home')}
+}
+[].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
+
 /* ---------- routing ---------- */
 var VIEWS=['home','wellbeing','library','learn','plan','calc','lessons','classes','log','coach'];
-function show(v){if(VIEWS.indexOf(v)<0)v='home';VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
+function show(v){if(VIEWS.indexOf(v)<0)v='home';
+  if(!AUTHED&&v!=='home'){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
+VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   try{history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo(0,0)}
 function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
@@ -1272,7 +1314,7 @@ $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
 var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
-show((location.hash||'').slice(1));
+show((location.hash||'').slice(1));show.ready=true;
 
 })();
 </script>
