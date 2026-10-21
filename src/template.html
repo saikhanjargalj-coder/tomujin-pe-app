@@ -1,0 +1,1278 @@
+<title>Tomujin PE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: sticky brand header with section tabs; views swap in place; any record opens in a right-hand sheet */
+:root{
+  --bg:#faf7ff; --surface:#ffffff; --fg:#1c1c1c; --muted:#62537d; --line:#e5d8f5; --tint:#f3eeff;
+  --brand:#5c1090; --brand-ink:#3d1b6e; --on-brand:#ffffff;
+  --gold:#f2cd30; --gold-soft:#fdf3c4; --teal:#0e7490; --teal-soft:#e0f7fa; --orange:#c2410c; --orange-soft:#ffedd5;
+  --fig:#3d1b6e; --fig-far:#c4a8e8; --ground:#d9c8f0; --prop:#0e7490; --field:#eef7ee; --fieldline:#9cc59c;
+  --phy:#5c1090; --men:#0e7490; --emo:#c2410c; --soc:#a16207;
+  --font-display: Raleway, "Segoe UI", system-ui, sans-serif;
+  --font-num: "Roboto Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#140a22; --surface:#1f1233; --fg:#f3eeff; --muted:#bba9d9; --line:#3a2558; --tint:#2a1745;
+  --brand:#c69bf5; --brand-ink:#e5d8f5; --on-brand:#1a0b2e;
+  --gold-soft:#3d3410; --teal:#5fd3e6; --teal-soft:#0f3540; --orange:#fb923c; --orange-soft:#45210c;
+  --fig:#e5d8f5; --fig-far:#6b4f94; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
+  --phy:#c69bf5; --men:#5fd3e6; --emo:#fb923c; --soc:#facc15; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#140a22; --surface:#1f1233; --fg:#f3eeff; --muted:#bba9d9; --line:#3a2558; --tint:#2a1745;
+  --brand:#c69bf5; --brand-ink:#e5d8f5; --on-brand:#1a0b2e;
+  --gold-soft:#3d3410; --teal:#5fd3e6; --teal-soft:#0f3540; --orange:#fb923c; --orange-soft:#45210c;
+  --fig:#e5d8f5; --fig-far:#6b4f94; --ground:#3a2558; --prop:#5fd3e6; --field:#16261a; --fieldline:#3f6b47;
+  --phy:#c69bf5; --men:#5fd3e6; --emo:#fb923c; --soc:#facc15; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-display);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding-block:10px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo b{display:block;font-weight:900;font-size:18px;color:var(--brand);letter-spacing:-.01em;line-height:1}
+.logo small{display:block;font-weight:700;font-size:9px;color:var(--brand);letter-spacing:.16em;line-height:1.3}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 360px}
+nav.tabs a{padding:9px 12px;border-radius:10px;font-weight:600;font-size:14px;color:var(--muted);text-decoration:none}
+nav.tabs a[aria-current="page"]{background:var(--tint);color:var(--brand);font-weight:800}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+main{padding-block:28px 64px}
+.view{display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+h1{margin:0;font-weight:900;font-size:clamp(28px,5vw,46px);letter-spacing:-.02em;color:var(--brand);text-wrap:balance;line-height:1.08}
+h2{margin:0;font-weight:800;font-size:22px;color:var(--brand);text-wrap:balance}
+h3{margin:0;font-weight:800;font-size:17px;text-wrap:balance}
+p{margin:0}
+.lede{max-width:66ch;color:var(--muted);font-size:16px}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;font:inherit;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;border:0}
+.btn.gold{background:var(--gold);color:#1c1c1c;box-shadow:4px 4px 0 var(--brand)}
+.btn.line{background:var(--surface);color:var(--brand);border:1.5px solid var(--brand)}
+.btn.small{padding:8px 12px;font-size:13px;box-shadow:none}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center}
+.hero .stage{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hero .stage svg{width:100%;height:auto}
+.dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.dim{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--dc);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.dim h3{color:var(--dc)}
+.dim .en{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.strandbtn{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;background:var(--tint);border:0;border-radius:10px;padding:10px 12px;font:inherit;font-weight:700;font-size:14px;color:var(--fg);cursor:pointer}
+.strandbtn:hover{outline:2px solid var(--dc)}
+.strandbtn span.n{font-family:var(--font-num);font-size:12px;color:var(--muted);flex:none}
+.lvscale{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.lvscale div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px}
+.lvscale b{font-family:var(--font-num);color:var(--brand);font-size:13px}
+.lvscale strong{font-size:14px}
+.lvscale span{font-size:12.5px;color:var(--muted);line-height:1.4}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--fg)}
+.tile:hover{border-color:var(--brand)}
+.tile .n{font-family:var(--font-num);font-size:30px;font-weight:700;color:var(--brand)}
+.tip{background:var(--brand);color:var(--on-brand);border-radius:16px;padding:18px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.tip strong{font-size:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{padding:6px 12px;border-radius:9999px;font:inherit;font-size:13px;font-weight:700;background:var(--surface);color:var(--brand-ink);border:1px solid var(--line);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.tag{display:inline-block;padding:3px 9px;border-radius:9999px;font-size:12px;font-weight:700;background:var(--tint);color:var(--brand-ink);border:0;font-family:inherit;text-decoration:none}
+button.tag,a.tag{cursor:pointer}
+.tag.t{background:var(--teal-soft);color:var(--teal)} .tag.g{background:var(--gold-soft);color:var(--fg)} .tag.o{background:var(--orange-soft);color:var(--orange)}
+.tag.wb{background:transparent;border:1.5px solid var(--dc);color:var(--fg)}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.filters .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filters .lab{width:86px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--brand-ink)}
+input[type=search],input[type=url]{font:inherit;font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;max-width:360px}
+.catsec{display:flex;flex-direction:column;gap:12px}
+.cathead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:0}
+.ex:hover{border-color:var(--brand)}
+.ex .pic{background:var(--tint);padding:6px 6px 0;position:relative;aspect-ratio:124/112;max-width:100%}
+.ex .pic svg{width:100%;height:100%;display:block}
+.ex .lv{position:absolute;top:8px;left:8px;font-family:var(--font-num);font-weight:700;font-size:11px;background:var(--brand);color:var(--on-brand);padding:3px 7px;border-radius:8px}
+.ex .vid{position:absolute;top:8px;right:8px;font-size:11px;font-weight:800;background:var(--gold);color:#1c1c1c;padding:3px 7px;border-radius:8px}
+.ex .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px}
+.ex .body h3{font-size:15px}
+.ex .body small{font-size:12px;color:var(--muted)}
+.count{font-size:14px;color:var(--muted)}
+.count b{color:var(--fg)}
+.sheet{position:fixed;inset:0;z-index:40;background:rgba(20,10,34,.55);display:flex;justify-content:flex-end}
+.sheet .panel{background:var(--bg);width:min(780px,100%);height:100%;overflow-y:auto;padding-block:calc(env(safe-area-inset-top,0px) + 18px) calc(env(safe-area-inset-bottom,0px) + 40px);padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+.sheet .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.closeb{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;font:inherit;font-size:20px;font-weight:700;flex:none}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.demo svg{width:100%;max-width:440px;height:auto;margin:0 auto;display:block}
+.demo .ctl{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+ul.cues,ul.bad,ul.en{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+ul.bad li::marker{color:var(--orange)}
+ul.en{font-size:13.5px;color:var(--muted)}
+.dose{width:100%;border-collapse:collapse;font-size:14px}
+.dose td,.dose th{padding:8px 6px;border-top:1px solid var(--line);text-align:left}
+.dose th{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;border-top:0}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.ladder{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.ladder button{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px;font:inherit;color:inherit;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.ladder button[aria-current="true"]{border:2px solid var(--brand);background:var(--tint)}
+.ladder svg{width:100%;height:auto}
+.ladder small{font-family:var(--font-num);font-weight:700;color:var(--brand);font-size:12px}
+.ladder span{font-size:13px;font-weight:700;line-height:1.3}
+.videobox{background:var(--tint);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.videobox video,.videobox img{width:100%;border-radius:10px}
+.status{font-size:13px;font-weight:700;color:var(--teal)}
+.status.err{color:var(--orange)}
+.levels{display:flex;flex-direction:column;gap:10px}
+.lvrow{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--dc);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.lvrow[data-me="true"]{background:var(--tint);border-color:var(--dc)}
+.lvrow .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.lvrow .hd b{font-family:var(--font-num);color:var(--dc)}
+.lvrow details summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--muted)}
+.selfcheck{background:var(--gold-soft);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.artgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.art{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.art:hover{border-color:var(--brand)}
+.art .big{font-family:var(--font-num);font-size:28px;font-weight:700;color:var(--brand);line-height:1}
+.reading{max-width:66ch;display:flex;flex-direction:column;gap:14px;font-size:16px;line-height:1.65}
+.reading h3{color:var(--brand);margin-top:6px}
+.reading ol,.reading ul{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.src{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:16px}
+.blocks{display:flex;flex-direction:column;gap:10px}
+.blk{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:start;border-top:1px solid var(--line);padding-top:10px}
+.blk .t{font-family:var(--font-num);font-weight:700;color:var(--brand);font-size:14px}
+.exlink{background:none;border:0;padding:0;font:inherit;font-weight:800;color:var(--brand);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.court{overflow-x:auto}
+.court svg{min-width:560px;width:100%;height:auto;display:block}
+.court text,.drill text{font-family:var(--font-display);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+footer{border-top:1px solid var(--line);padding-block:20px;font-size:13px;color:var(--muted)}
+.calcgrid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:18px;align-items:start}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.fgrid label,#calcForm>label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--brand-ink)}
+.fgrid input,.fgrid select{font:inherit;font-size:16px;font-weight:600;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bottom:6px}
+.seg{flex-direction:row;flex-wrap:wrap;gap:6px}
+.seg label,.pals label{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:14px;font-weight:600;cursor:pointer}
+.pals label{align-items:flex-start}
+.pals label small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.chk{flex-direction:row!important;align-items:center;font-weight:600!important;font-size:14px!important;color:var(--fg)!important}
+.inb summary{cursor:pointer;font-weight:800;color:var(--teal);font-size:14px;margin-bottom:10px}
+.big3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.kpi.main{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.kpi .v{font-family:var(--font-num);font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:13px;font-weight:700;opacity:.85}
+.kpi small{font-size:12px;opacity:.8}
+.macro{display:flex;height:16px;border-radius:9999px;overflow:hidden;gap:2px}
+.macro i{display:block;height:100%}
+.bar{display:flex;flex-direction:column;gap:4px}
+.bar .tr{height:10px;border-radius:9999px;background:var(--tint);overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:9999px}
+.scroll{overflow-x:auto}
+.wbars{display:flex;align-items:flex-end;gap:8px;height:180px;padding-top:8px}
+.wbars .wb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.wbars .wb i{display:block;width:100%;max-width:48px;border-radius:6px 6px 0 0}
+.wbars small{font-size:11px;color:var(--muted)}
+.editrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn.danger{color:var(--orange);border-color:var(--orange)}
+.btn.danger-fill{background:var(--orange);color:#fff}
+.attrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--tint);border-radius:10px;padding:8px 10px}
+.attrow input{flex:1 1 160px;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.ff{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--brand-ink)}
+.ff small{font-weight:500;color:var(--muted)}
+.ff input,.ff select,.ff textarea{font:inherit;font-size:15px;font-weight:500;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%}
+.ff textarea{resize:vertical;line-height:1.5}
+.edform{display:flex;flex-direction:column;gap:14px}
+.checks .ck{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:9999px;font-size:13px;font-weight:600;background:var(--surface);cursor:pointer}
+.planrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px}
+.pthumb{width:84px;flex:none;background:var(--tint);border:0;border-radius:10px;padding:2px;cursor:pointer}
+.pthumb svg{width:100%;height:auto;display:block}
+.fgrid.tight{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fgrid.tight input{font-size:14px;padding:7px 9px}
+.hiddenitem{opacity:.5;border-style:dashed}
+.ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
+.rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
+@media (max-width:860px){ .calcgrid{grid-template-columns:1fr} }
+@media (max-width:760px){ .hero{grid-template-columns:1fr} .filters .lab{width:100%} .lvscale{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;scroll-behavior:auto!important} }
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#home" data-go="home" aria-label="Tomujin PE нүүр">
+      <svg aria-hidden="true" width="36" height="36" viewBox="0 0 30 30"><polygon points="1.4,0 24.6,0 11.8,9.6" fill="#00bcd4"/><polygon points="0,3.4 17.2,19.9 0,29.2" fill="#5c1090"/><polygon points="29,0 30,0 30,30 11.9,11.5" fill="#f2cd30"/><polygon points="3.6,30 26.4,30 17.9,21.4" fill="#f97316"/></svg>
+      <span><b>TOMUJIN</b><small>PHYSICAL EDUCATION</small></span>
+    </a>
+    <nav class="tabs" aria-label="Хэсгүүд">
+      <a href="#home" data-go="home">Нүүр</a>
+      <a href="#wellbeing" data-go="wellbeing">Wellbeing</a>
+      <a href="#library" data-go="library">Дасгалын сан</a>
+      <a href="#learn" data-go="learn">Мэдлэгийн сан</a>
+      <a href="#plan" data-go="plan">Миний бэлтгэл</a>
+      <a href="#calc" data-go="calc">Хоол тооцоолуур</a>
+      <a href="#lessons" data-go="lessons">Хичээлүүд</a>
+      <a href="#classes" data-go="classes">Ангиуд</a>
+      <a href="#log" data-go="log">Loading Form</a>
+      <a href="#coach" data-go="coach" hidden>Багшийн самбар</a>
+    </nav>
+    <div class="chips" id="editBar"></div>
+    <div class="chips" id="acctBar"></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="view" id="v-home">
+  <div class="hero">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span class="eyebrow">Сурагч · Эцэг эх · Багш</span>
+      <h1>Хөдөлгөөнөөр эхэлдэг 4 талт wellbeing</h1>
+      <p class="lede">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Томүжингийн Wellbeing хүрээ, 1–12-р ангийн хөтөлбөр, дасгалын сан, мэдлэгийн сан нэг дор, бүгд хоорондоо уялдсан.</p>
+      <div class="chips"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Wellbeing хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
+    </div>
+    <div class="stage" id="heroStage" aria-label="Дасгалын хөдөлгөөнт жишээ"></div>
+  </div>
+  <div class="dims" id="homeDims"></div>
+  <div class="tip" id="tip"></div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section class="view" id="v-wellbeing" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">4 хэмжээс · 14 чиглэл · 6 түвшин</span>
+    <h1>Wellbeing хүрээ</h1>
+    <p class="lede">Сургуулийн Mastery Tracker-ийн "Timeless Competencies". Түвшин нь чадварыг биш, хэр бие даан эзэмшсэнийг хэмждэг: багш хөтөлсөн үеэс эхлээд бусдад түгээдэг болох хүртэл. Чиглэл дээр дарж түвшин бүрийн тайлбар, PE-д хэрхэн харагдах, холбогдох дасгал, нийтлэлийг үзнэ.</p>
+  </div>
+  <div class="lvscale" id="lvScale" aria-label="6 түвшин"></div>
+  <div class="dims" id="wbDims"></div>
+</section>
+
+<section class="view" id="v-library" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow" id="libEyebrow"></span>
+    <h1>Дасгалын сан</h1>
+    <p class="lede">Суурь хөдөлгөөнөөс спорт хүртэл. Карт дээр дарж хөдөлгөөнт үзүүлбэр, кью, алдаа, ахицын шат, Wellbeing холбоо, багшийн бичлэгийг үзнэ. Шат 1–6 нь дасгалын хүндрэл бөгөөд насанд биш чадварт тулгуурлана.</p>
+  </div>
+  <div class="filters">
+    <div class="row"><label class="lab" for="q">Хайх</label><input type="search" id="q" placeholder="Жишээ нь: суулт, сервис, dribble"></div>
+    <div class="row"><span class="lab">Ангилал</span><div class="chips" id="fCat"></div></div>
+    <div class="row" id="patRow" hidden><span class="lab">Хэв</span><div class="chips" id="fPat"></div></div>
+    <div class="row"><span class="lab">Шат</span><div class="chips" id="fLv"></div></div>
+  </div>
+  <div class="chips" id="libAdd"></div>
+  <p class="count" id="exCount"></p>
+  <div id="exList" style="display:flex;flex-direction:column;gap:28px"></div>
+</section>
+
+<section class="view" id="v-learn" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Нойр · Хоол · Хөдөлгөөн · Дэлгэц</span>
+    <h1>Мэдлэгийн сан</h1>
+    <p class="lede">Эрүүл амьдралын дадлын тухай богино, ойлгомжтой нийтлэлүүд. Нийтлэл бүр өнөөдрөөс хэрэгжүүлэх 3 алхамтай, Wellbeing чиглэлтэйгээ холбоотой.</p>
+  </div>
+  <div class="chips" id="artAdd"></div>
+  <div class="chips" id="fAud"></div>
+  <div class="artgrid" id="artGrid"></div>
+</section>
+
+<section class="view" id="v-calc" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Нас · Хүйс · Жин · Өндөр · InBody</span>
+    <h1>Хоол тэжээлийн тооцоолуур</h1>
+    <p class="lede">Өдөрт хэдэн ккал, хэдэн грамм уураг, нүүрс ус, өөх тос, ус, эрдэс бодис хэрэгтэйг шинжлэх ухааны тэгшитгэлээр тооцно. InBody-ийн үр дүнгээ оруулбал илүү нарийн болно. Доор нь өдрийн хоолоо нэмж, нийт илчлэгээ зорилттой харьцуул.</p>
+  </div>
+  <div class="calcgrid">
+    <form class="box" id="calcForm" autocomplete="off">
+      <h3>Таны мэдээлэл</h3>
+      <div class="fgrid">
+        <label for="cAge">Нас<input type="number" id="cAge" min="4" max="90" step="1" value="15"></label>
+        <fieldset class="seg"><legend>Хүйс</legend><label><input type="radio" name="cSex" value="m" checked> Эрэгтэй</label><label><input type="radio" name="cSex" value="f"> Эмэгтэй</label></fieldset>
+        <label for="cW">Жин (кг)<input type="number" id="cW" min="12" max="200" step="0.1" value="58"></label>
+        <label for="cH">Өндөр (см)<input type="number" id="cH" min="90" max="220" step="0.5" value="168"></label>
+      </div>
+      <fieldset class="pals"><legend>Идэвхийн түвшин</legend><div id="palOpts"></div></fieldset>
+      <label class="chk"><input type="checkbox" id="cAth"> Тогтмол бэлтгэл хийдэг (тамирчин) — уурагийн хэрэгцээ нэмэгдэнэ</label>
+      <details class="inb"><summary>InBody-ийн үр дүн (заавал биш)</summary>
+        <div class="fgrid">
+          <label for="cPbf">Өөх тосны хувь, PBF (%)<input type="number" id="cPbf" min="3" max="60" step="0.1" placeholder="жишээ 18.5"></label>
+          <label for="cFfm">Өөх тосгүй жин, FFM (кг)<input type="number" id="cFfm" min="10" max="120" step="0.1" placeholder="жишээ 47.3"></label>
+          <label for="cSmm">Араг ясны булчин, SMM (кг)<input type="number" id="cSmm" min="5" max="70" step="0.1" placeholder="жишээ 26.1"></label>
+          <label for="cBmr">InBody BMR (ккал)<input type="number" id="cBmr" min="600" max="3500" step="1" placeholder="жишээ 1392"></label>
+        </div>
+      </details>
+      <fieldset class="seg" id="goalRow"><legend>Зорилго (18+ насанд)</legend><label><input type="radio" name="cGoal" value="0" checked> Хадгалах</label><label><input type="radio" name="cGoal" value="-0.15"> Өөх бууруулах</label><label><input type="radio" name="cGoal" value="0.1"> Булчин нэмэх</label></fieldset>
+    </form>
+    <div id="calcOut" style="display:flex;flex-direction:column;gap:14px;min-width:0"></div>
+  </div>
+  <div class="box" id="mealBox">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h3>Өдрийн хоолоо нэм</h3><span class="muted" style="font-size:13px">Илчлэг = 4 × уураг + 4 × нүүрс ус + 9 × өөх тос</span></div>
+    <div class="fgrid" style="align-items:end">
+      <label for="fSel">Хүнс<select id="fSel"></select></label>
+      <label for="fG">Хэмжээ (г / мл)<input type="number" id="fG" min="1" max="2000" step="1"></label>
+      <div><button type="button" class="btn gold small" id="fAdd">+ Нэмэх</button></div>
+    </div>
+    <div class="scroll"><table class="dose" id="mealTbl"></table></div>
+    <div id="mealBars" style="display:flex;flex-direction:column;gap:10px"></div>
+    <p class="muted" style="font-size:12.5px">100 г тутмын утга: USDA FoodData Central. "≈" тэмдэгтэй монгол хоол гэр бүр өөр тул ойролцоо. Шошготой бүтээгдэхүүний хувьд шошгоны утгыг ашиглаарай.</p>
+  </div>
+  <div class="box" style="background:var(--gold-soft);border-color:transparent">
+    <h3>Анхаар</h3>
+    <ul class="cues">
+      <li>Эдгээр нь шинжлэх ухааны дундаж тэгшитгэл. Хүн бүрт ±10–15% зөрөх нь хэвийн. Хэдэн долоо хоног жин, мэдрэмжээ ажиглаж тохируул.</li>
+      <li>18-аас доош насанд жин хасах зорилгоор илчлэг хасахгүй. Өсөлтөд хангалттай идэх нь хамгийн чухал.</li>
+      <li>Хоол тэжээл, жингийн талаар санаа зовж байвал эцэг эх, сургуулийн эмч, хоол тэжээлийн мэргэжилтэнтэй ярилц.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="view" id="v-plan" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Зорилго · Хугацаа · Шат · Хэрэгсэл</span>
+    <h1>Миний бэлтгэлийн план</h1>
+    <p class="lede">Өөрийн хичээл, бэлтгэлээ өөрөө бүрдүүл. Зорилгоо сонгоод "Автоматаар бүрдүүлэх" дарахад дулаалт, үндсэн хэсэг, сэргээлтийг таны шатанд тохирох дасгалуудаар бөглөнө. Дараа нь дасгал нэмж, хасаж, дарааллыг өөрчилж, хэмжээг засна. Бие даан бэлтгэл төлөвлөх нь Wellbeing-ийн "Өөрийн" (L3) түвшний гол нотолгоо.</p>
+  </div>
+  <div class="calcgrid">
+    <form class="box" id="planForm" autocomplete="off"><h3>Тохиргоо</h3></form>
+    <div id="planOut" style="display:flex;flex-direction:column;gap:14px;min-width:0"></div>
+  </div>
+  <div class="box"><h3>Хадгалсан ба багшийн нийтэлсэн планууд</h3><div id="myPlans" style="display:flex;flex-direction:column;gap:6px"></div><p class="muted" style="font-size:12.5px">Нэвтэрсэн бол планууд таны акаунтад хадгалагдаж, багш тань харах боломжтой. Нэвтрээгүй бол зөвхөн энэ төхөөрөмж дээр хадгалагдана.</p></div>
+</section>
+
+<section class="view" id="v-classes" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Анги тус бүрийн хуудас</span>
+    <h1>Ангиуд</h1>
+    <p class="lede">Анги бүрт зориулсан мэдэгдэл, хичээл, оноосон дасгал, бэлтгэлийн план, файл, зураг, бичлэг, линк.</p>
+  </div>
+  <div class="chips" id="classAdd"></div>
+  <div class="artgrid" id="classGrid"></div>
+</section>
+
+<section class="view" id="v-log" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">RPE · Хугацаа · Мэдрэмж · Тусгал</span>
+    <h1>Loading Form</h1>
+    <p class="lede">Бэлтгэл, PE хичээл бүрийн дараа 1 минутад бөглөнө. Ачаалал = RPE × минут. Өөрийн биеийг ойлгох, ачааллаа удирдах нь "Ачаалал ба шаардлага", "Биеийн дохио" чиглэлийн гол нотолгоо.</p>
+  </div>
+  <div id="logOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+<section class="view" id="v-coach" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Зөвхөн багш нарт</span>
+    <h1>Багшийн самбар</h1>
+    <p class="lede">Сурагчдын Loading Form, долоо хоногийн ачаалал, өөрийн үнэлсэн Wellbeing түвшин.</p>
+  </div>
+  <div id="coachOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+<section class="view" id="v-lessons" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">80 минутын блок · U1 заал</span>
+    <h1>Хичээлүүд</h1>
+    <p class="lede">Дасгалын сангаас бүрдсэн хичээлүүд. Дасгалын нэр дээр дарвал үзүүлбэр нээгдэнэ. Диаграм нь U1 заалны бодит хэмжээ (≈28 × 8 м, голдоо 3 багана).</p>
+  </div>
+  <div class="chips" id="lesAdd"></div>
+  <div id="lessonList" style="display:flex;flex-direction:column;gap:22px"></div>
+</section>
+
+</main>
+
+<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span>Tomujin PE · Томүжин Алтернатив сургууль · Coach Jack</span><span>Эх сурвалж: TAS Mastery Tracker, ДЭМБ (2020), AASM, NSCA, PHE Canada</span></div></footer>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/*__DATA__*/
+
+/* ---------- lookups ---------- */
+function byId(id){for(var i=0;i<EX.length;i++)if(EX[i].id===id)return EX[i];return null}
+function strand(id){for(var i=0;i<WBS.length;i++)if(WBS[i].id===id)return WBS[i];return null}
+function dim(id){for(var i=0;i<WBDIM.length;i++)if(WBDIM[i].id===id)return WBDIM[i];return null}
+WBS.forEach(function(s,i){s.en=WBEN[i]});
+var CATS=Object.keys(CAT);
+function lvl(e){return 'Шат '+e.lv}
+function wsOf(e){return (e.ws&&e.ws.length)?e.ws:(WBCAT[e.c]||['move'])}
+
+/* ---------- figure + drill engine ---------- */
+var NS='http://www.w3.org/2000/svg';
+function el(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+function txt(x,y,s,o){var t=el('text',Object.assign({x:x,y:y},o||{}));t.textContent=s;return t}
+var live=[];
+var io=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(en){var f=en.target.__f;if(f)f.vis=en.isIntersecting})},{rootMargin:'100px'}):null;
+function track(f){live.push(f);if(io){f.vis=false;f.svg.__f=f;io.observe(f.svg)}else f.vis=true}
+
+function makeVis(ex,opts){if(ex.dr)return makeDrill(ex,opts);if(ex.solved)return makeFig(ex,opts);
+  var svg=el('svg',{viewBox:'-6 -18 124 122',role:'img','aria-label':ex.n});svg.appendChild(el('rect',{x:-6,y:-18,width:124,height:122,fill:'var(--tint)'}));
+  svg.appendChild(txt(56,40,(CAT[ex.c]||'').split(' (')[0],{'text-anchor':'middle','font-size':9,fill:'var(--muted)'}));svg.appendChild(txt(56,62,ex.n.length>20?ex.n.slice(0,19)+'…':ex.n,{'text-anchor':'middle','font-size':10,fill:'var(--fg)'}));return {svg:svg}}
+
+function makeFig(ex,opts){
+  opts=opts||{};
+  var P=ex.solved,P0=P[0],P1=P[1];
+  var svg=el('svg',{viewBox:'-6 -18 124 122',role:'img','aria-label':ex.n+' — хөдөлгөөний үзүүлбэр'});
+  svg.appendChild(el('line',{x1:-6,y1:101,x2:118,y2:101,stroke:'var(--ground)','stroke-width':2}));
+  var pr=ex.pr||[];function has(x){return pr.indexOf(x)>=0}
+  function rect(x,y,w,h){svg.appendChild(el('rect',{x:x,y:y,width:w,height:h,rx:2,fill:'none',stroke:'var(--prop)','stroke-width':2}))}
+  if(has('mat'))svg.appendChild(el('rect',{x:-2,y:100,width:116,height:3,rx:1.5,fill:'var(--prop)',opacity:.45}));
+  if(has('cone'))svg.appendChild(el('polygon',{points:'104,100 108,89 112,100',fill:'#f2cd30'}));
+  if(has('benchLow')){var hp=P1[6];rect(hp[0]-18,hp[1]+4,22,100-(hp[1]+4))}
+  if(has('wallBack')){var wx=Math.min(P0[1][0],P0[6][0])-4;svg.appendChild(el('line',{x1:wx,y1:-14,x2:wx,y2:101,stroke:'var(--prop)','stroke-width':3}))}
+  if(has('wallHand')){var wh=Math.max(P0[3][0],P0[5][0])+2;svg.appendChild(el('line',{x1:wh,y1:-14,x2:wh,y2:101,stroke:'var(--prop)','stroke-width':3}))}
+  if(has('benchHands')){var bh=P0[3];rect(bh[0]-12,bh[1]+1,32,99-bh[1])}
+  if(has('benchFoot')){var bf=P0[10];rect(bf[0]-12,bf[1]+2,22,98-bf[1])}
+  if(has('stepBox')){var sb=P0[8];rect(sb[0]-14,sb[1]+1,30,99-sb[1])}
+  if(has('jumpBox')){var jb=P1[8];rect(jb[0]-16,jb[1]+1,30,99-jb[1])}
+  if(has('bar')){var br=P0[3];svg.appendChild(el('line',{x1:br[0]-22,y1:br[1]-1,x2:br[0]+22,y2:br[1]-1,stroke:'var(--prop)','stroke-width':3,'stroke-linecap':'round'}))}
+  if(has('hoop')){svg.appendChild(el('line',{x1:116,y1:-16,x2:116,y2:6,stroke:'var(--prop)','stroke-width':2}));svg.appendChild(el('line',{x1:102,y1:0,x2:116,y2:0,stroke:'#f97316','stroke-width':2.5}))}
+  if(has('net')){svg.appendChild(el('line',{x1:108,y1:-12,x2:108,y2:101,stroke:'var(--prop)','stroke-width':1.5}));svg.appendChild(el('rect',{x:106,y:-12,width:4,height:22,fill:'none',stroke:'var(--prop)','stroke-width':1.5}))}
+  if(has('table')){svg.appendChild(el('rect',{x:74,y:73,width:46,height:3,fill:'var(--prop)'}));svg.appendChild(el('line',{x1:80,y1:76,x2:80,y2:101,stroke:'var(--prop)','stroke-width':1.5}));svg.appendChild(el('line',{x1:114,y1:76,x2:114,y2:101,stroke:'var(--prop)','stroke-width':1.5}));svg.appendChild(el('line',{x1:97,y1:66,x2:97,y2:73,stroke:'var(--prop)','stroke-width':1.5}))}
+  var g={};var sw=opts.big?3.4:4;
+  function ln(c,w){var l=el('line',{stroke:c,'stroke-width':w,'stroke-linecap':'round'});svg.appendChild(l);return l}
+  if(has('band'))g.band=ln('var(--prop)',1.5);
+  if(has('bandFoot'))g.bandFoot=ln('var(--prop)',1.5);
+  if(has('strap'))g.strap=ln('var(--prop)',1.5);
+  g.uaB=ln('var(--fig-far)',sw);g.faB=ln('var(--fig-far)',sw);g.thB=ln('var(--fig-far)',sw);g.shB=ln('var(--fig-far)',sw);
+  g.torso=ln('var(--fig)',sw+1.5);
+  g.thA=ln('var(--fig)',sw);g.shA=ln('var(--fig)',sw);g.uaA=ln('var(--fig)',sw);g.faA=ln('var(--fig)',sw);
+  if(has('stick'))g.stick=ln('var(--prop)',2);
+  if(has('handBar'))g.handBar=ln('var(--prop)',3);
+  if(has('racket')||has('racketUp')){g.racket=ln('var(--prop)',2);g.rhead=el('ellipse',{rx:4.5,ry:6,fill:'none',stroke:'var(--prop)','stroke-width':2});svg.appendChild(g.rhead)}
+  if(has('paddle')){g.paddle=el('circle',{r:4,fill:'#c2410c'});svg.appendChild(g.paddle)}
+  g.head=el('circle',{r:6.5,fill:'var(--fig)'});svg.appendChild(g.head);
+  var ballC={ball:['#f97316',5],tball:['#d9f99d',2.6],bb:['#ea580c',4.5],bbHands:['#ea580c',4.5],bbShot:['#ea580c',4.5],bbTop:['#ea580c',4.5],dribble:['#ea580c',4.5],vbArm:['#ffffff',4.5],vbTop:['#ffffff',4.5],vbB:['#ffffff',4.5],fbFixed:['#ffffff',4.2],fbHead:['#ffffff',4.2],juggle:['#ffffff',4.2],racketUp:['#d9f99d',2.4],ttToss:['#ffffff',1.8],kb:null};
+  pr.forEach(function(k){if(ballC[k]){g.ballKind=k;g.ball=el('circle',{r:ballC[k][1],fill:ballC[k][0],stroke:'var(--fig)','stroke-width':k.slice(0,2)==='vb'||k.slice(0,2)==='fb'||k==='juggle'||k==='ttToss'?1:0});svg.appendChild(g.ball)}});
+  if(has('kb')){g.kb=el('rect',{width:7,height:8,rx:2,fill:'#f97316'});svg.appendChild(g.kb)}
+  var f={svg:svg,g:g,ex:ex,ph:opts.phase||0,P0:P0};
+  setPose(f,lerp(P,opts.still==null?0.5:opts.still),opts.still==null?0.5:opts.still);
+  if(opts.still==null)track(f);
+  return f;
+}
+function lerp(P,k){var a=P[0],b=P[1],r=[];for(var i=0;i<11;i++)r.push([a[i][0]+(b[i][0]-a[i][0])*k,a[i][1]+(b[i][1]-a[i][1])*k]);return r}
+function L(l,p,q){l.setAttribute('x1',p[0]);l.setAttribute('y1',p[1]);l.setAttribute('x2',q[0]);l.setAttribute('y2',q[1])}
+function C(c,p){c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1])}
+function setPose(f,p,k){
+  var g=f.g,head=p[0],sh=p[1],eA=p[2],hA=p[3],eB=p[4],hB=p[5],hip=p[6],kA=p[7],fA=p[8],kB=p[9],fB=p[10],P0=f.P0;
+  L(g.uaB,sh,eB);L(g.faB,eB,hB);L(g.thB,hip,kB);L(g.shB,kB,fB);L(g.torso,sh,hip);
+  L(g.thA,hip,kA);L(g.shA,kA,fA);L(g.uaA,sh,eA);L(g.faA,eA,hA);C(g.head,head);
+  if(g.band)L(g.band,hA,[116,P0[3][1]]);
+  if(g.bandFoot)L(g.bandFoot,fA,hA);
+  if(g.strap)L(g.strap,hA,[P0[3][0]+30,-16]);
+  if(g.stick){var dx=sh[0]-hip[0],dy=sh[1]-hip[1];L(g.stick,[hip[0]-dx*0.12-2,hip[1]-dy*0.12-3],[sh[0]+dx*0.5-2,sh[1]+dy*0.5-3])}
+  if(g.handBar)L(g.handBar,[hA[0]-8,hA[1]],[hA[0]+8,hA[1]]);
+  var fx=hA[0]-eA[0],fy=hA[1]-eA[1],fl=Math.sqrt(fx*fx+fy*fy)||1;fx/=fl;fy/=fl;
+  if(g.racket){var up=f.ex.pr.indexOf('racketUp')>=0;var end=up?[hA[0]+13,hA[1]]:[hA[0]+fx*12,hA[1]+fy*12];L(g.racket,hA,end);var hc=up?[hA[0]+17,hA[1]]:[hA[0]+fx*17,hA[1]+fy*17];C(g.rhead,hc);g.rhead.setAttribute('transform','rotate('+(up?90:Math.atan2(fy,fx)*180/Math.PI+90)+' '+hc[0]+' '+hc[1]+')')}
+  if(g.paddle)C(g.paddle,[hA[0]+fx*4,hA[1]+fy*4]);
+  if(g.kb){g.kb.setAttribute('x',hA[0]-3.5);g.kb.setAttribute('y',hA[1])}
+  if(g.ball){var b,K=g.ballKind,kk=k==null?0.5:k;
+    if(K==='ball'||K==='tball'||K==='bb')b=[hA[0]+2,hA[1]-2];
+    else if(K==='bbHands')b=[(hA[0]+hB[0])/2+4,(hA[1]+hB[1])/2-3];
+    else if(K==='bbShot'||K==='bbTop'||K==='vbTop')b=[hA[0]+2,hA[1]-7];
+    else if(K==='dribble')b=[hA[0]+3,hA[1]+5+(96-hA[1]-5)*(1-kk)];
+    else if(K==='vbArm')b=[hA[0]+3,hA[1]-5];
+    else if(K==='vbB')b=[hB[0]+2,hB[1]-4];
+    else if(K==='fbFixed')b=[P0[10][0]+10,96.8];
+    else if(K==='fbHead')b=[head[0]+10,head[1]-3];
+    else if(K==='juggle')b=[fA[0]+5,fA[1]-6-32*(1-kk)];
+    else if(K==='racketUp')b=[hA[0]+17,hA[1]-5-20*kk];
+    else if(K==='ttToss')b=[hB[0],hB[1]-6-26*kk];
+    C(g.ball,b);}
+}
+/* drills: top-down diagrams in metres */
+function polyAt(path,u){
+  if(path.length===1)return path[0];
+  var segs=[],tot=0;for(var i=1;i<path.length;i++){var dx=path[i][0]-path[i-1][0],dy=path[i][1]-path[i-1][1],l=Math.sqrt(dx*dx+dy*dy);segs.push(l);tot+=l}
+  if(!tot)return path[0];var d=u*tot;
+  for(var j=0;j<segs.length;j++){if(d<=segs[j]||j===segs.length-1){var t=segs[j]?Math.min(1,d/segs[j]):0;return [path[j][0]+(path[j+1][0]-path[j][0])*t,path[j][1]+(path[j+1][1]-path[j][1])*t]}d-=segs[j]}
+}
+function makeDrill(ex,opts){
+  opts=opts||{};var D=ex.dr,S=10,pad=8;
+  var W=D.w*S+pad*2,H=D.h*S+pad*2;
+  var svg=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':ex.n+' — дасгалын зохион байгуулалт'});
+  svg.appendChild(el('rect',{x:pad,y:pad,width:D.w*S,height:D.h*S,rx:4,fill:'var(--field)',stroke:'var(--fieldline)','stroke-width':1.5}));
+  (D.lines||[]).forEach(function(l){svg.appendChild(el('line',{x1:pad+l[0]*S,y1:pad+l[1]*S,x2:pad+l[2]*S,y2:pad+l[3]*S,stroke:'var(--fieldline)','stroke-width':1.5}))});
+  if(D.net!=null)svg.appendChild(el('line',{x1:pad+D.net*S,y1:pad,x2:pad+D.net*S,y2:pad+D.h*S,stroke:'var(--fig)','stroke-width':2.5,'stroke-dasharray':'2 2'}));
+  if(D.table){var t=D.table;svg.appendChild(el('rect',{x:pad+t[0]*S,y:pad+t[1]*S,width:t[2]*S,height:t[3]*S,fill:'var(--prop)',opacity:.5,rx:2}))}
+  D.actors.forEach(function(a){if(a.path.length>1){svg.appendChild(el('polyline',{points:a.path.map(function(p){return (pad+p[0]*S)+','+(pad+p[1]*S)}).join(' '),fill:'none',stroke:a.c==='d'?'var(--orange)':'var(--brand)','stroke-width':1.2,'stroke-dasharray':'3 3',opacity:.55}))}});
+  D.cones.forEach(function(c){var x=pad+c[0]*S,y=pad+c[1]*S;svg.appendChild(el('polygon',{points:(x-3.5)+','+(y+3)+' '+x+','+(y-4)+' '+(x+3.5)+','+(y+3),fill:'#f2cd30',stroke:'#a16207','stroke-width':.6}))});
+  (D.labels||[]).forEach(function(l){svg.appendChild(txt(pad+l[0]*S,pad+l[1]*S,l[2],{'text-anchor':'middle','font-size':7,fill:'var(--muted)'}))});
+  var dots=D.actors.map(function(a,i){var c=el('circle',{r:4.2,fill:a.c==='d'?'#f97316':a.c==='p'?'#00bcd4':'#5c1090',stroke:'var(--surface)','stroke-width':1.2});svg.appendChild(c);return c});
+  var ball=null;if(D.ballPass||D.actors.some(function(a){return a.ball})){ball=el('circle',{r:2.4,fill:'#ffffff',stroke:'var(--fig)','stroke-width':1});svg.appendChild(ball)}
+  var f={svg:svg,drill:true,ex:ex,dots:dots,ball:ball,S:S,pad:pad,ph:opts.phase||0};
+  drillAt(f,0.15);
+  if(opts.still==null)track(f);
+  return f;
+}
+function drillAt(f,u){
+  var D=f.ex.dr,S=f.S,pad=f.pad;var pos=D.actors.map(function(a){var uu=(u-(a.delay||0)+1)%1;return polyAt(a.path,uu)});
+  pos.forEach(function(p,i){C(f.dots[i],[pad+p[0]*S,pad+p[1]*S])});
+  if(f.ball){var b;
+    if(D.ballPass){var n=D.ballPass.length-1,seg=Math.min(n-1,Math.floor(u*n)),t=u*n-seg;var a=pos[D.ballPass[seg]],c=pos[D.ballPass[seg+1]];b=[a[0]+(c[0]-a[0])*t,a[1]+(c[1]-a[1])*t];if(D.arc){b[1]-=Math.sin(t*Math.PI)*1.2}}
+    else{var ai=0;D.actors.forEach(function(a,i){if(a.ball)ai=i});b=[pos[ai][0]+0.5,pos[ai][1]+0.4]}
+    C(f.ball,[pad+b[0]*S,pad+b[1]*S]);}
+}
+var reduce=false;try{reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+var paused=false,speed=1,clock=0,last=performance.now();
+function tick(now){
+  var dt=(now-last)/1000;last=now;if(!paused&&!reduce)clock+=dt*speed;
+  if(!reduce&&!paused){for(var i=0;i<live.length;i++){var f=live[i];if(!f.svg.isConnected){if(io)io.unobserve(f.svg);live.splice(i,1);i--;continue}if(!f.vis)continue;
+    if(f.drill){var T=f.ex.dr.T||5;drillAt(f,((clock+f.ph)/T)%1)}
+    else{var an=f.ex.an,per=an==='hold'?4:an==='sway'?3:an==='fast'?1.2:an==='slow'?3.6:2.4;var k=(1-Math.cos(((clock+f.ph)/per)*Math.PI*2))/2;if(an==='hold')k*=1;setPose(f,lerp(f.ex.solved,k),k)}}}
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* ---------- dom helpers ---------- */
+function $(id){return document.getElementById(id)}
+function h(tag,attrs,kids){var e=document.createElement(tag);if(attrs)for(var k in attrs){var v=attrs[k];if(v==null)continue;if(k==='text')e.textContent=v;else if(k==='cls')e.className=v;else if(k==='style')e.setAttribute('style',v);else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),v);else e.setAttribute(k,v)}(kids||[]).forEach(function(c){if(c!=null)e.appendChild(typeof c==='string'?document.createTextNode(c):c)});return e}
+var MEDIA={};var db=null,assets=null,canEdit=false;
+function wbTag(sid){var s=strand(sid),d=dim(s.dim);return h('button',{type:'button',cls:'tag wb',style:'--dc:var(--'+d.id+')',text:s.n,onclick:function(){openStrand(sid)}})}
+
+/* ---------- home ---------- */
+function dimCard(d,compact){
+  var list=WBS.filter(function(s){return s.dim===d.id});
+  return h('div',{cls:'dim',style:'--dc:var(--'+d.id+')'},[h('div',{},[h('h3',{text:d.n+' wellbeing'}),h('span',{cls:'en',text:d.en})]),compact?h('p',{cls:'muted',text:d.d}):null].concat(list.map(function(s){
+    var nEx=EX.filter(function(e){return wsOf(e).indexOf(s.id)>=0}).length;
+    return h('button',{type:'button',cls:'strandbtn',onclick:function(){openStrand(s.id)}},[h('span',{text:s.n}),h('span',{cls:'n',text:nEx?nEx+' дасгал':''})])})));
+}
+function renderHome(){
+  var st=$('heroStage');st.innerHTML='';['bb-set-shot','vb-set','squat','fb-instep','tn-forehand','a-march'].forEach(function(id,i){st.appendChild(makeVis(byId(id),{phase:i*0.4}).svg)});
+  var hd=$('homeDims');hd.innerHTML='';WBDIM.forEach(function(d){hd.appendChild(dimCard(d,true))});
+  var dd=new Date(),tp=TIPS[(dd.getDate()+dd.getMonth())%TIPS.length];
+  $('tip').innerHTML='';$('tip').appendChild(h('span',{cls:'tag g',text:'Өнөөдрийн дадал · '+tp[0]}));$('tip').appendChild(h('strong',{text:tp[1]}));
+  var T=$('tiles');T.innerHTML='';
+  [[EX.length,'Дасгалын сан',CATS.length+' ангилал: суурь хөдөлгөөн, хүч, спорт, мобилити','library'],[ART.length,'Мэдлэгийн сан','Нойр, хоол, хөдөлгөөн, дэлгэц','learn'],['ккал','Хоол тооцоолуур','Нас, жин, InBody-оор өдрийн хэрэгцээ','calc'],['+','Миний бэлтгэл','Өөрийн бэлтгэлийн планаа бүрдүүл','plan'],[LESSONS.length,'Хичээлүүд','U1 заалны диаграмтай','lessons']].forEach(function(r){
+    T.appendChild(h('a',{cls:'tile',href:'#'+r[3],'data-go':r[3]},[h('span',{cls:'n',text:String(r[0])}),h('h3',{text:r[1]}),h('p',{cls:'muted',text:r[2]})]))});
+  bindGo(T);
+}
+
+/* ---------- wellbeing ---------- */
+function renderWB(){
+  var sc=$('lvScale');sc.innerHTML='';WBLV.forEach(function(l,i){sc.appendChild(h('div',{},[h('b',{text:'L'+(i+1)+' · '+l[1]}),h('strong',{text:l[0]}),h('span',{text:l[2]})]))});
+  var w=$('wbDims');w.innerHTML='';WBDIM.forEach(function(d){w.appendChild(dimCard(d,true))});
+}
+function openStrand(sid){
+  var s=strand(sid),d=dim(s.dim),me=(typeof MYWB!=='undefined'&&MYWB[sid])?MYWB[sid].level-1:-1;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=d.n+' wellbeing · '+d.en;
+    p.style.setProperty('--dc','var(--'+d.id+')');
+    p.appendChild(h('div',{style:'display:flex;flex-direction:column;gap:6px'},[h('h2',{id:'sheetTitle',text:s.n,style:'font-size:28px;color:var(--dc)'}),h('p',{cls:'muted',style:'font-size:13px;font-weight:700',text:s.en.name}),h('p',{style:'font-size:17px;font-weight:600',text:s.w}),h('p',{cls:'muted',style:'font-size:14px',text:'“'+s.en.what+'”'})]));
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'PE ба энэ платформд'}),h('p',{text:s.pe}),sid==='fuel'?h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Хоол тооцоолуур нээх',onclick:function(){closeSheet();show('calc')}})]):null]));
+    var sc=h('div',{cls:'selfcheck'},[h('h3',{text:'Би одоо аль түвшинд байна вэ?'}),h('p',{cls:'muted',style:'font-size:14px',text:ME?'Өөрийгөө шударгаар үнэлээд товчоо дар. Таны сонголт акаунтад хадгалагдаж, багш тань харна.':'Өөрийгөө шударгаар үнэлээд товчоо дар. Нэвтэрвэл таны сонголт хадгалагдана.'})]);
+    var saved=h('p',{cls:'status',role:'status'});
+    var out=h('p',{style:'font-weight:700'});
+    var levels=h('div',{cls:'levels'});
+    var chips=h('div',{cls:'chips'});
+    function draw(){
+      chips.innerHTML='';WBLV.forEach(function(l,i){chips.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(me===i),text:'L'+(i+1)+' '+l[0],onclick:function(){me=i;draw();if(ME&&ME.emailVerified)cloudSaveWB(sid,i).then(function(){saved.textContent='Таны акаунтад хадгалагдлаа. Багш тань харна.'},function(){saved.textContent=''})}}))});
+      out.textContent=me<0?'':(me<5?'Дараагийн алхам (L'+(me+2)+' '+WBLV[me+1][0]+'): '+s.g[me+1]:'Та хамгийн дээд түвшинд байна. Одоо бусдад түгээж, хамт олны соёл болгоорой.');
+      levels.innerHTML='';
+      WBLV.forEach(function(l,i){
+        levels.appendChild(h('div',{cls:'lvrow','data-me':String(me===i)},[h('div',{cls:'hd'},[h('b',{text:'L'+(i+1)}),h('strong',{text:l[0]}),h('span',{cls:'muted',style:'font-size:12px',text:l[1]})]),h('p',{text:s.g[i]}),
+          h('details',{},[h('summary',{text:'Mastery Tracker-ийн эх (англи)'}),h('ul',{cls:'en'},s.en.levels[i].map(function(t){return h('li',{text:t})}))])]));
+      });
+    }
+    draw();sc.appendChild(chips);sc.appendChild(out);sc.appendChild(saved);p.appendChild(sc);
+    p.appendChild(h('h3',{text:'6 түвшин'}));p.appendChild(levels);
+    var exs=EX.filter(function(e){return wsOf(e).indexOf(sid)>=0});
+    if(exs.length){
+      var cats={};exs.forEach(function(e){cats[e.c]=(cats[e.c]||0)+1});
+      p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Холбогдох дасгал ('+exs.length+')'}),h('div',{cls:'chips'},Object.keys(cats).map(function(c){return h('button',{type:'button',cls:'tag t',text:CAT[c]+' · '+cats[c],onclick:function(){closeSheet();fCat=c;fPat='all';renderFilters();renderLib();show('library')}})}))]));
+    }
+    var arts=ART.filter(function(a){return (a.ws||[]).indexOf(sid)>=0});
+    if(arts.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Холбогдох нийтлэл'}),h('div',{cls:'chips'},arts.map(function(a){return h('button',{type:'button',cls:'tag g',text:a.t,onclick:function(){openArt(a.id)}})}))]));
+  });
+}
+
+/* ---------- library ---------- */
+var fCat='all',fPat='all',fLv=0,fQ='';
+function chipRow(box,opts,cur,set){box.innerHTML='';opts.forEach(function(r){box.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(cur===r[0]),text:r[1],onclick:function(){set(r[0])}}))})}
+function renderFilters(){
+  chipRow($('fCat'),[['all','Бүгд']].concat(CATS.map(function(k){return [k,CAT[k]]})),fCat,function(v){fCat=v;fPat='all';renderFilters();renderLib()});
+  $('patRow').hidden=fCat!=='str';
+  chipRow($('fPat'),[['all','Бүгд']].concat(Object.keys(PAT).map(function(k){return [k,PAT[k]]})),fPat,function(v){fPat=v;renderFilters();renderLib()});
+  chipRow($('fLv'),[0,1,2,3,4,5,6].map(function(n){return [n,n?'Шат '+n:'Бүгд']}),fLv,function(v){fLv=v;renderFilters();renderLib()});
+}
+function card(e,i){
+  var ph=(!e.solved&&!e.dr)?firstPhoto(e):null;var pic=h('div',{cls:'pic'},[ph?h('img',{src:ph,alt:''}):makeVis(e,{phase:i*0.23}).svg,h('span',{cls:'lv',text:lvl(e)})]);
+  if((e.att||[]).length)pic.appendChild(h('span',{cls:'vid',text:'▶ '+(e.att||[]).length}));
+  return h('button',{type:'button',cls:'ex'+(e.deleted?' hiddenitem':''),onclick:function(){openEx(e.id)}},[pic,h('div',{cls:'body'},[h('h3',{text:e.n}),h('small',{text:e.en}),h('div',{cls:'chips',style:'margin-top:4px'},[h('span',{cls:'tag',text:e.p?PAT[e.p]:CAT[e.c].split(' (')[0]}),e.dr?h('span',{cls:'tag g',text:'Диаграм'}):null])])]);
+}
+function renderLib(){
+  var q=fQ.trim().toLowerCase();
+  var list=EX.filter(function(e){return (fCat==='all'||e.c===fCat)&&(fPat==='all'||e.p===fPat)&&(!fLv||e.lv===fLv)&&(!q||(e.n+' '+e.en+' '+CAT[e.c]+' '+(e.p?PAT[e.p]:'')).toLowerCase().indexOf(q)>=0)});
+  $('libEyebrow').textContent=EX.length+' дасгал · '+CATS.length+' ангилал · Шат 1–6';
+  $('exCount').innerHTML='';$('exCount').appendChild(h('b',{text:String(list.length)}));$('exCount').appendChild(document.createTextNode(' дасгал олдлоо'));
+  var la=$('libAdd');la.innerHTML='';var ab=addBtn('Дасгал нэмэх',function(){openEditor('ex',null)});if(ab)la.appendChild(ab);
+  var W=$('exList');W.innerHTML='';
+  if(!list.length){W.appendChild(h('p',{cls:'muted',text:'Тохирох дасгал олдсонгүй. Шүүлтүүрээ өөрчлөөд үзээрэй.'}));return}
+  var n=0;
+  CATS.forEach(function(c){
+    var items=list.filter(function(e){return e.c===c});if(!items.length)return;
+    items.sort(function(a,b){if(c==='str'&&a.p!==b.p)return Object.keys(PAT).indexOf(a.p)-Object.keys(PAT).indexOf(b.p);return a.lv-b.lv});
+    var grid=h('div',{cls:'exgrid'},items.map(function(e){return card(e,n++)}));
+    W.appendChild(h('section',{cls:'catsec'},[h('div',{cls:'cathead'},[h('h2',{text:CAT[c]}),h('span',{cls:'muted',style:'font-size:14px',text:CATD[c]})]),grid]));
+  });
+}
+
+/* ---------- sheet ---------- */
+var lastFocus=null;
+function openSheet(build){
+  lastFocus=document.activeElement;var p=$('panel');p.innerHTML='';p.removeAttribute('style');
+  var close=h('button',{type:'button',cls:'closeb','aria-label':'Хаах',text:'×',onclick:closeSheet});
+  p.appendChild(h('div',{cls:'top'},[h('span',{cls:'eyebrow',id:'sheetEyebrow'}),close]));build(p);
+  $('sheet').hidden=false;document.body.style.overflow='hidden';p.scrollTop=0;close.focus();
+}
+function closeSheet(){$('sheet').hidden=true;document.body.style.overflow='';paused=false;if(lastFocus&&lastFocus.focus&&lastFocus.isConnected)lastFocus.focus()}
+$('sheet').addEventListener('click',function(e){if(e.target===$('sheet'))closeSheet()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('sheet').hidden)closeSheet()});
+
+function openEx(id){
+  var e=byId(id);if(!e)return;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=CAT[e.c]+(e.p?' · '+PAT[e.p]:'')+' · '+lvl(e);
+    p.appendChild(h('div',{},[h('h2',{id:'sheetTitle',text:e.n,style:'font-size:28px'}),h('p',{cls:'muted',style:'font-size:13px;font-weight:700',text:e.en})]));
+    var er=editRow('ex',e,openEx);if(er)p.appendChild(er);
+    p.appendChild(h('p',{cls:'lede',text:e.w}));
+    var vis=makeVis(e,{big:true}),ctl=[];
+    if(!reduce){var pb=h('button',{type:'button',cls:'btn line small',text:paused?'▶ Тоглуулах':'❚❚ Зогсоох',onclick:function(){paused=!paused;pb.textContent=paused?'▶ Тоглуулах':'❚❚ Зогсоох'}});
+      var sp=h('button',{type:'button',cls:'btn line small',text:speed===1?'Удаан':'Хэвийн хурд',onclick:function(){speed=speed===1?0.5:1;sp.textContent=speed===1?'Удаан':'Хэвийн хурд'}});ctl.push(pb,sp)}
+    if(!e.dr){ctl.push(h('button',{type:'button',cls:'btn line small',text:'Эхлэл',onclick:function(){paused=true;if(pb)pb.textContent='▶ Тоглуулах';setPose(vis,e.solved[0],0)}}),h('button',{type:'button',cls:'btn line small',text:'Төгсгөл',onclick:function(){paused=true;if(pb)pb.textContent='▶ Тоглуулах';setPose(vis,e.solved[1],1)}}))}
+    p.appendChild(h('div',{cls:'demo'},[vis.svg,e.dr?h('div',{cls:'legend',style:'justify-content:center'},[h('span',{},[h('i',{style:'background:#5c1090'}),'тамирчин']),h('span',{},[h('i',{style:'background:#00bcd4'}),'хамтрагч']),h('span',{},[h('i',{style:'background:#f97316'}),'хамгаалагч']),h('span',{},[h('i',{style:'background:#f2cd30'}),'конус'])]):null,h('div',{cls:'ctl'},ctl)]));
+    p.appendChild(h('div',{cls:'chips'},[h('span',{cls:'tag t',text:'Хэрэгсэл: '+e.eq}),h('a',{cls:'tag g',href:'https://www.youtube.com/results?search_query='+encodeURIComponent(e.en+' technique'),target:'_blank',rel:'noopener',text:'YouTube дээр харах ↗'})]));
+    p.appendChild(h('div',{cls:'two'},[h('div',{cls:'box'},[h('h3',{text:'Техникийн кью'}),h('ul',{cls:'cues'},e.cu.map(function(c){return h('li',{text:c})}))]),h('div',{cls:'box'},[h('h3',{text:'Түгээмэл алдаа'}),h('ul',{cls:'bad'},e.bd.map(function(c){return h('li',{text:c})}))])]));
+    var ds=typeof e.ds==='string'?DOSE[e.ds]:e.ds;
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хэр их хийх вэ'}),h('table',{cls:'dose'},[h('thead',{},[h('tr',{},[h('th',{text:'Анги'}),h('th',{text:'Хэмжээ'})])]),h('tbody',{},[['1–5',ds[0]],['6–9',ds[1]],['10–12',ds[2]]].map(function(r){return h('tr',{},[h('td',{text:r[0]}),h('td',{cls:'num',text:r[1]})])}))]),h('p',{cls:'muted',style:'font-size:13px',text:'Техникээ 2 хичээл дараалан цэвэр гүйцэтгэвэл дараагийн шат руу шилжинэ.'})]));
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Wellbeing холбоо'}),h('div',{cls:'chips'},(e.ws&&e.ws.length?e.ws:wsOf(e)).map(wbTag)),h('p',{cls:'muted',style:'font-size:13px',text:'Дасгалыг хэн ч хэлэлгүй өөрөө хийж, яагаад гэдгээ тайлбарлах нь "Өөрийн" (L3) түвшний нотолгоо.'})]));
+    var lad=EX.filter(function(x){return x.c===e.c&&(e.c!=='str'||x.p===e.p)}).sort(function(a,b){return a.lv-b.lv});
+    if(lad.length>1)p.appendChild(h('div',{cls:'box'},[h('h3',{text:(e.p?PAT[e.p]+' хэвийн':CAT[e.c].split(' (')[0]+'-ийн')+' шат'}),h('div',{cls:'ladder'},lad.map(function(x){return h('button',{type:'button','aria-current':String(x.id===e.id),onclick:function(){openEx(x.id)}},[makeVis(x,{still:1}).svg,h('small',{text:lvl(x)}),h('span',{text:x.n})])}))]));
+    var av=attView(e.att);if(av)p.appendChild(av);
+  });
+}
+/* ---------- articles ---------- */
+var AUD={s:'Сурагч',p:'Эцэг эх',t:'Багш'};var fA='all';
+function renderArts(){
+  chipRow($('fAud'),[['all','Бүгд']].concat(Object.keys(AUD).map(function(k){return [k,AUD[k]]})),fA,function(v){fA=v;renderArts()});
+  var aa=$('artAdd');aa.innerHTML='';var ab=addBtn('Нийтлэл нэмэх',function(){openEditor('art',null)});if(ab)aa.appendChild(ab);
+  var G=$('artGrid');G.innerHTML='';
+  ART.filter(function(x){return fA==='all'||x.aud.indexOf(fA)>=0}).forEach(function(x){
+    G.appendChild(h('button',{type:'button',cls:'art'+(x.deleted?' hiddenitem':''),onclick:function(){openArt(x.id)}},[h('div',{cls:'chips'},[h('span',{cls:'tag t',text:x.topic})].concat(x.aud.map(function(k){return h('span',{cls:'tag',text:AUD[k]})}))),h('span',{cls:'big',text:x.big}),h('h3',{text:x.t}),h('p',{cls:'muted',text:x.sum})]))});
+}
+function openArt(id){
+  var x=ART.filter(function(a){return a.id===id})[0];if(!x)return;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=x.topic+' · '+x.aud.map(function(k){return AUD[k]}).join(', ');
+    var er=editRow('art',x,openArt);if(er)p.appendChild(er);
+    var r=h('article',{cls:'reading'},[h('h2',{id:'sheetTitle',text:x.t,style:'font-size:28px'}),h('p',{style:'font-weight:700',text:x.sum})]);
+    x.body.forEach(function(b){if(b[0]==='p')r.appendChild(h('p',{text:b[1]}));else if(b[0]==='h')r.appendChild(h('h3',{text:b[1]}));else r.appendChild(h(b[0],{},b[1].map(function(li){return h('li',{text:li})})))});
+    r.appendChild(h('div',{cls:'chips'},[h('span',{cls:'muted',style:'font-size:13px;font-weight:700',text:'Wellbeing:'})].concat((x.ws||[]).map(wbTag))));
+    r.appendChild(h('p',{cls:'src',text:'Эх сурвалж: '+x.src}));p.appendChild(r);var av=attView(x.att);if(av)p.appendChild(av);
+  });
+}
+
+/* ---------- lessons ---------- */
+var SC={s1:'#5c1090',s2:'#0e7490',s3:'#f97316',s4:'#c9a400'};
+function court(Ls){
+  var W=28,H=8,sc=26,pad=16;
+  var svg=el('svg',{viewBox:'0 0 '+(W*sc+pad*2)+' '+(H*sc+pad*2+22),role:'img','aria-label':Ls.title+' — U1 заалны зохион байгуулалт'});
+  svg.appendChild(el('rect',{x:pad,y:pad,width:W*sc,height:H*sc,rx:6,fill:'var(--tint)',stroke:'var(--brand)','stroke-width':2}));
+  [7,14,21].forEach(function(px){svg.appendChild(el('rect',{x:pad+px*sc-7,y:pad+4*sc-7,width:14,height:14,rx:2,fill:'var(--fig)'}))});
+  svg.appendChild(txt(pad+14*sc,pad+4*sc+26,'баганууд',{'text-anchor':'middle','font-size':11,fill:'var(--muted)'}));
+  Ls.stations.forEach(function(s){var cx=pad+s.x*sc,cy=pad+s.y*sc;svg.appendChild(el('circle',{cx:cx,cy:cy,r:15,fill:SC[s.c]}));for(var i=0;i<4;i++)svg.appendChild(el('circle',{cx:cx-24+i*16,cy:cy+(s.y<4?26:-26),r:4.5,fill:'#00bcd4'}));svg.appendChild(txt(cx,cy+4,s.l.split(' ')[0],{'text-anchor':'middle','font-size':11,fill:'#ffffff'}));svg.appendChild(txt(cx,s.y<4?cy-20:cy+30,s.l,{'text-anchor':'middle','font-size':12,fill:'var(--fg)'}))});
+  svg.appendChild(el('path',{d:'M'+(pad+W*sc-40)+' '+(pad+H*sc+14)+' h-'+(W*sc-80),stroke:'var(--muted)','stroke-width':1.5,fill:'none','stroke-dasharray':'4 4'}));
+  svg.appendChild(txt(pad+W*sc/2,pad+H*sc+30,'≈ 28 м · шилжилт цагийн зүүний дагуу',{'text-anchor':'middle','font-size':11,fill:'var(--muted)'}));
+  return svg;
+}
+function renderLessons(){
+  var la=$('lesAdd');la.innerHTML='';var ab=addBtn('Хичээл нэмэх',function(){openEditor('les',null)});if(ab)la.appendChild(ab);
+  var W=$('lessonList');W.innerHTML='';
+  LESSONS.forEach(function(Ls){
+    var blocks=h('div',{cls:'blocks'},(Ls.blocks||[]).map(function(b){var line=[];b[2].forEach(function(id,i){var x=byId(id);if(!x)return;if(line.length)line.push(document.createTextNode(' · '));line.push(h('button',{type:'button',cls:'exlink',text:x.n,onclick:function(){openEx(id)}}))});
+      return h('div',{cls:'blk'},[h('span',{cls:'t',text:b[0]}),h('div',{style:'display:flex;flex-direction:column;gap:4px;min-width:0'},[h('strong',{text:b[1]}),line.length?h('div',{},line):null,h('p',{cls:'muted',text:b[3]})])])}));
+    var hasCourt=Ls.stations&&Ls.stations.length;W.appendChild(h('article',{cls:'lesson'+(Ls.deleted?' hiddenitem':''),id:'les-'+Ls.id},[h('div',{cls:'chips'},[Ls.grade?h('span',{cls:'tag g',text:Ls.grade}):null,h('span',{cls:'tag t',text:'80 мин'})].concat((Ls.cls||[]).map(function(c){var k=CLASSES.filter(function(x){return x.id===c})[0];return k?h('span',{cls:'tag',text:k.name}):null}))),h('h2',{text:Ls.title}),Ls.goal?h('p',{cls:'lede',text:'Зорилго: '+Ls.goal}):null,editRow('les',Ls,function(){}),h('div',{cls:'chips'},[h('span',{cls:'muted',style:'font-size:13px;font-weight:700',text:'Wellbeing:'})].concat((Ls.ws||[]).map(wbTag))),hasCourt?h('div',{cls:'court'},[court(Ls)]):null,hasCourt?h('div',{cls:'legend'},[h('span',{},[h('i',{style:'background:#00bcd4'}),'сурагч']),h('span',{},[h('i',{style:'background:var(--fig)'}),'багана']),h('span',{},[h('i',{style:'background:#5c1090'}),'станц'])]):null,blocks,attView(Ls.att)]));
+  });
+}
+
+/* ---------- calculator UI ---------- */
+var MEAL=[];
+function rd(n,d){var p=Math.pow(10,d||0);return Math.round(n*p)/p}
+function fmt(n){return Math.round(n).toLocaleString('en-US')}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function initCalc(){
+  var po=$('palOpts');PALS.forEach(function(p,i){po.appendChild(h('label',{},[h('input',{type:'radio',name:'cPal',value:String(p[0]),checked:i===2?'':null}),h('span',{},[p[1]+' · PAL '+p[0],h('small',{text:p[2]})])]))});
+  var fs=$('fSel');FOODS.forEach(function(f,i){fs.appendChild(h('option',{value:String(i),text:f[0]+' — '+f[1]+' ккал/100 г'}))});
+  function setDef(){$('fG').value=FOODS[+fs.value][5]}fs.addEventListener('change',setDef);setDef();
+  var saved=lsGet('tpe-calc');if(saved){['cAge','cW','cH','cPbf','cFfm','cSmm','cBmr'].forEach(function(k){if(saved[k]!=null)$(k).value=saved[k]});if(saved.sex)document.querySelector('input[name=cSex][value='+saved.sex+']').checked=true;if(saved.pal)[].forEach.call(document.querySelectorAll('input[name=cPal]'),function(r){r.checked=r.value===String(saved.pal)});$('cAth').checked=!!saved.ath}
+  MEAL=lsGet('tpe-meal')||[[4,100],[8,150],[2,120],[16,150]];
+  $('calcForm').addEventListener('input',renderCalc);$('calcForm').addEventListener('change',renderCalc);
+  $('calcForm').addEventListener('submit',function(e){e.preventDefault()});
+  $('fAdd').addEventListener('click',function(){var g=+$('fG').value;if(g>0){MEAL.push([+$('fSel').value,g]);lsSet('tpe-meal',MEAL);renderCalc()}});
+  renderCalc();
+}
+var CR=null;
+function readCalc(){
+  function n(id){var v=parseFloat($(id).value);return isFinite(v)&&v>0?v:null}
+  var sex=document.querySelector('input[name=cSex]:checked').value,pal=+(document.querySelector('input[name=cPal]:checked')||{value:1.6}).value;
+  var i={age:n('cAge')||15,sex:sex,w:n('cW')||50,h:n('cH'),pal:pal,ath:$('cAth').checked,pbf:n('cPbf'),ffm:n('cFfm'),smm:n('cSmm'),inbBmr:n('cBmr'),goal:+(document.querySelector('input[name=cGoal]:checked')||{value:0}).value};
+  lsSet('tpe-calc',{cAge:i.age,cW:i.w,cH:i.h,cPbf:i.pbf,cFfm:i.ffm,cSmm:i.smm,cBmr:i.inbBmr,sex:sex,pal:pal,ath:i.ath});
+  return i;
+}
+function kpi(v,l,s,main){return h('div',{cls:'kpi'+(main?' main':'')},[h('span',{cls:'l',text:l}),h('span',{cls:'v',text:v}),s?h('small',{text:s}):null])}
+function renderCalc(){
+  var i=readCalc(),r=calcAll(i);CR=r;
+  $('goalRow').hidden=i.age<18;
+  var O=$('calcOut');O.innerHTML='';
+  O.appendChild(h('div',{cls:'big3'},[kpi(fmt(r.target),'Өдрийн илчлэг, ккал',r.adj?('Хадгалах түвшин '+fmt(r.tdee)+' ккал'):'Энэ хэмжээгээр жин тогтвортой байна',true),kpi(fmt(r.bmr),'Суурь бодисын солилцоо (BMR)',r.bmrSrc),kpi(i.pal.toFixed(1),'Идэвхийн коэффициент (PAL)','BMR × PAL = нийт зарцуулалт')]));
+  var P=r.pg*4/r.target*100,F=r.fg*9/r.target*100,Cc=100-P-F;
+  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'Макро шим тэжээл'}),
+    h('div',{cls:'macro',role:'img','aria-label':'Уураг '+rd(P)+'%, нүүрс ус '+rd(Cc)+'%, өөх тос '+rd(F)+'%'},[h('i',{style:'width:'+P+'%;background:#5c1090'}),h('i',{style:'width:'+Cc+'%;background:#f2cd30'}),h('i',{style:'width:'+F+'%;background:#0e7490'})]),
+    h('table',{cls:'dose'},[h('thead',{},[h('tr',{},[h('th',{text:''}),h('th',{text:'Грамм/өдөр'}),h('th',{text:'Хувь'}),h('th',{text:'Үндэслэл'})])]),h('tbody',{},[
+      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#5c1090;margin-right:6px'}),'Уураг']),h('td',{cls:'num',text:fmt(r.pg)+' г'}),h('td',{cls:'num',text:rd(P)+'%'}),h('td',{cls:'muted',text:(r.pk[0]===r.pk[1]?r.pk[0]+' г/кг (насны RDA)':r.pk[0]+'–'+r.pk[1]+' г/кг (бэлтгэлтэй)')})]),
+      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#f2cd30;margin-right:6px'}),'Нүүрс ус']),h('td',{cls:'num',text:fmt(r.cg)+' г'}),h('td',{cls:'num',text:rd(Cc)+'%'}),h('td',{cls:'muted',text:rd(r.ck,1)+' г/кг · зөвлөмж 45–65%'})]),
+      h('tr',{},[h('td',{},[h('i',{style:'display:inline-block;width:10px;height:10px;border-radius:3px;background:#0e7490;margin-right:6px'}),'Өөх тос']),h('td',{cls:'num',text:fmt(r.fg)+' г'}),h('td',{cls:'num',text:rd(F)+'%'}),h('td',{cls:'muted',text:'зөвлөмж '+r.m.fat[0]+'–'+r.m.fat[1]+'%'})]),
+      h('tr',{},[h('td',{text:'Эслэг'}),h('td',{cls:'num',text:fmt(r.fiber)+' г'}),h('td',{text:''}),h('td',{cls:'muted',text:'1000 ккал тутамд 14 г'})]),
+      h('tr',{},[h('td',{text:'Нэмэлт сахар'}),h('td',{cls:'num',text:'< '+fmt(r.sugar)+' г'}),h('td',{text:''}),h('td',{cls:'muted',text:'ДЭМБ: < 10%, хамгийн сайн нь < '+fmt(r.sugar5)+' г'})])])]),
+    h('p',{cls:'muted',style:'font-size:13px',text:'Хооллолтод хуваавал: 3 үндсэн хоол (тус бүр ≈ '+fmt(r.target*0.27)+' ккал) + 2 зууш (≈ '+fmt(r.target*0.095)+' ккал).'})]));
+  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'Ус ба гол эрдэс, витамин'}),h('table',{cls:'dose'},[h('tbody',{},[
+    ['Ус (хоол + ундаа)',r.m.wat+' л','EFSA; бэлтгэлийн цаг тутам +0.4–0.8 л'],['Кальци',r.m.ca+' мг','Яс өсөх үе; сүү, тараг, бяслаг'],['Төмөр',r.m.fe+' мг','Мах, буурцаг, ногоон навч'],['Цайр',r.m.zn+' мг','Мах, самар, үр тариа'],['Д витамин',r.m.vd+' IU','Нар, загас, өндөг; өвөл дутагддаг']
+  ].map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]}),h('td',{cls:'muted',text:x[2]})])}))])]));
+  var comp=[['Schofield (ДЭМБ/FAO)',r.sch,'жин, нас, хүйс'],['Mifflin-St Jeor',r.mif,i.age<18?'18+ насанд':'жин, өндөр, нас']].concat([['Katch-McArdle',r.kat,r.ffm?'FFM '+rd(r.ffm,1)+' кг':'InBody FFM эсвэл PBF оруул'],['InBody төхөөрөмж',r.inb,r.inb?'':'InBody BMR оруул']]);
+  var body=[];if(r.bmi)body.push(['BMI',rd(r.bmi,1)+' кг/м²',i.age<18?'18-аас доош насанд насны персентилээр (WHO BMI-for-age) үнэлнэ':'18.5–24.9 хэвийн (булчинлаг хүнд хэтэрхий өндөр гарч болно)']);
+  if(r.ffmi)body.push(['FFMI',rd(r.ffmi,1)+' кг/м²','Өөх тосгүй жин / өндөр². BMI-ээс илүү булчинг харуулна']);
+  if(i.smm)body.push(['SMM / жин',rd(i.smm/i.w*100,1)+'%','Араг ясны булчингийн эзлэх хувь']);
+  O.appendChild(h('div',{cls:'box'},[h('h3',{text:'BMR-ийн тэгшитгэлүүдийг харьцуулах'}),h('table',{cls:'dose'},[h('tbody',{},comp.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]?fmt(x[1])+' ккал':'—'}),h('td',{cls:'muted',text:x[2]})])}))]),
+    h('p',{cls:'muted',style:'font-size:13px',text:'Сонголтын дараалал: InBody BMR → Katch-McArdle → Mifflin (18+) → Schofield. Булчингийн хэмжээг тусгадаг тул InBody өгөгдөл илүү нарийн.'})].concat(body.length?[h('h3',{text:'Биеийн бүтэц'}),h('table',{cls:'dose'},[h('tbody',{},body.map(function(x){return h('tr',{},[h('td',{text:x[0]}),h('td',{cls:'num',text:x[1]}),h('td',{cls:'muted',text:x[2]})])}))])]:[])));
+  var ref=DGA[i.sex].filter(function(x){return i.age>=x[0]&&i.age<=x[1]})[0];
+  if(ref)O.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Харьцуулах лавлагаа: '+(i.sex==='m'?'эрэгтэй':'эмэгтэй')+' '+ref[0]+'–'+(ref[1]>100?'+':ref[1])+' насны дунд идэвхтэй хүн ≈ '+ref[2]+' ккал/өдөр (Dietary Guidelines for Americans 2020–2025).'}));
+  renderMeal();
+}
+function renderMeal(){
+  var T=$('mealTbl');T.innerHTML='';var tot=[0,0,0,0];
+  T.appendChild(h('thead',{},[h('tr',{},['Хүнс','Хэмжээ','ккал','Уураг','Нүүрс ус','Өөх',''].map(function(x){return h('th',{text:x})}))]));
+  var tb=h('tbody');
+  MEAL.forEach(function(m,idx){var f=FOODS[m[0]];if(!f)return;var k=m[1]/100;var row=[f[1]*k,f[2]*k,f[3]*k,f[4]*k];row.forEach(function(v,j){tot[j]+=v});
+    tb.appendChild(h('tr',{},[h('td',{text:f[0]}),h('td',{cls:'num',text:m[1]+' г'}),h('td',{cls:'num',text:fmt(row[0])}),h('td',{cls:'num',text:rd(row[1],1)+' г'}),h('td',{cls:'num',text:rd(row[2],1)+' г'}),h('td',{cls:'num',text:rd(row[3],1)+' г'}),h('td',{},[h('button',{type:'button',cls:'rm','aria-label':f[0]+' хасах',text:'×',onclick:function(){MEAL.splice(idx,1);lsSet('tpe-meal',MEAL);renderMeal()}})])]))});
+  tb.appendChild(h('tr',{style:'font-weight:800'},[h('td',{text:'Нийт'}),h('td',{text:''}),h('td',{cls:'num',text:fmt(tot[0])}),h('td',{cls:'num',text:rd(tot[1],1)+' г'}),h('td',{cls:'num',text:rd(tot[2],1)+' г'}),h('td',{cls:'num',text:rd(tot[3],1)+' г'}),h('td',{text:''})]));
+  T.appendChild(tb);
+  var B=$('mealBars');B.innerHTML='';if(!CR)return;
+  [['Илчлэг',tot[0],CR.target,'ккал','#5c1090'],['Уураг',tot[1],CR.pg,'г','#5c1090'],['Нүүрс ус',tot[2],CR.cg,'г','#c9a400'],['Өөх тос',tot[3],CR.fg,'г','#0e7490']].forEach(function(x){
+    var pct=Math.min(100,x[1]/x[2]*100);
+    B.appendChild(h('div',{cls:'bar'},[h('div',{style:'display:flex;justify-content:space-between;font-size:14px;font-weight:700'},[h('span',{text:x[0]}),h('span',{cls:'num',text:fmt(x[1])+' / '+fmt(x[2])+' '+x[3]+' ('+Math.round(x[1]/x[2]*100)+'%)'})]),h('div',{cls:'tr'},[h('i',{style:'width:'+pct+'%;background:'+x[4]})])]))});
+}
+
+/* ---------- content management: everything an editor adds, changes or hides lives in db ---------- */
+var BASE={ex:EX.slice(),art:ART.slice(),les:LESSONS.slice()};
+var CLASSDEF=[['1a','1A','1'],['6-7a','6A + 7A','6–7'],['8-9a','8A + 9A','8–9'],['10a','10A','10'],['10b','10B','10'],['11a','11A','11'],['11b','11B','11'],['12a','12A','12'],['12b','12B','12'],['12c','12C','12']];
+BASE.les.forEach(function(l){if(l.id==='g11')l.cls=['11a','11b'];if(l.id==='g67')l.cls=['6-7a']});
+var OV={ex:{},art:{},les:{},classes:{}};var CLASSES=[];
+var editMode=false,showHidden=false;
+var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes'};
+function merge(kind,base){
+  var out=[],seen={};
+  base.forEach(function(b){seen[b.id]=1;var o=OV[kind][b.id];if(o&&o.deleted&&!showHidden)return;out.push(Object.assign({},b,o||{},{builtin:true}))});
+  Object.keys(OV[kind]).forEach(function(id){var o=OV[kind][id];if(seen[id]||!o.custom)return;if(o.deleted&&!showHidden)return;out.push(Object.assign({id:id},o))});
+  return out;
+}
+function applyCMS(){
+  var ex=merge('ex',BASE.ex);EX.length=0;ex.forEach(function(e){
+    if(e.from&&!e.ps&&!e.dr){var src=null;BASE.ex.forEach(function(b){if(b.id===e.from)src=b});if(src){['ps','pr','pin','an','gnd','dr'].forEach(function(k){if(src[k]!=null&&e[k]==null)e[k]=src[k]})}}
+    e.solved=e.ps?solvePoses(e):null;EX.push(e)});
+  var a=merge('art',BASE.art);ART.length=0;a.forEach(function(x){ART.push(x)});
+  var l=merge('les',BASE.les);LESSONS.length=0;l.forEach(function(x){LESSONS.push(x)});
+  var cb=CLASSDEF.map(function(c){return {id:c[0],name:c[1],grade:c[2]}});
+  CLASSES=merge('classes',cb);
+}
+function rerenderAll(){applyCMS();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses()}
+
+/* attachments */
+function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
+var ATTICON={photo:'Зураг',video:'Бичлэг',pdf:'PDF',file:'Файл',link:'Линк'};
+function attView(list){
+  list=list||[];if(!list.length)return null;
+  var box=h('div',{cls:'box'},[h('h3',{text:'Файл, зураг, бичлэг, линк ('+list.length+')'})]);
+  list.forEach(function(a){
+    var k=attKind(a),src=a.asset?'/_blob/'+a.asset:a.url;
+    var head=h('div',{style:'display:flex;gap:8px;align-items:center;flex-wrap:wrap'},[h('span',{cls:'tag t',text:ATTICON[k]}),h('strong',{text:a.title||'(нэргүй)'})]);
+    var body=null;
+    if(k==='photo')body=h('img',{src:src,alt:a.title||'',style:'width:100%;border-radius:10px'});
+    else if(k==='video')body=h('video',{src:src,controls:'',playsinline:'',preload:'metadata',style:'width:100%;border-radius:10px;background:#000'});
+    else body=h('a',{href:src,target:'_blank',rel:'noopener',cls:'btn line small',text:(k==='link'?'Нээх ↗ ':'Татах / нээх ↗ ')+(k==='link'?hostOf(src):'')});
+    box.appendChild(h('div',{style:'display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px'},[head,body]));
+  });
+  return box;
+}
+function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return ''}}
+function firstPhoto(e){var a=(e.att||[]).filter(function(x){return attKind(x)==='photo'})[0];return a?'/_blob/'+a.asset:null}
+
+/* editor chrome */
+function renderEditBar(){
+  var b=$('editBar');if(!b)return;b.innerHTML='';
+  if(!canEdit){return}
+  b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(editMode),text:editMode?'✎ Засах горим: идэвхтэй':'✎ Засах горим',onclick:function(){editMode=!editMode;if(!editMode)showHidden=false;rerenderAll()}}));
+  if(editMode)b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(showHidden),text:showHidden?'Нуусныг харуулж байна':'Нуусныг харах',onclick:function(){showHidden=!showHidden;rerenderAll()}}));
+}
+function addBtn(label,fn){return editMode?h('button',{type:'button',cls:'btn gold small',text:'+ '+label,onclick:fn}):null}
+function editRow(kind,item,openFn){
+  if(!editMode)return null;
+  var st=h('span',{cls:'status',role:'status'});
+  var row=h('div',{cls:'editrow'},[
+    h('button',{type:'button',cls:'btn line small',text:'✎ Засах',onclick:function(){openEditor(kind,item)}}),
+    item.deleted?h('button',{type:'button',cls:'btn line small',text:'↺ Сэргээх',onclick:function(){saveDoc(kind,item.id,{deleted:false},st,true).then(function(){openFn&&openFn(item.id)})}}):null,
+    !item.deleted?h('button',{type:'button',cls:'btn line small danger',text:'🗑 Устгах',onclick:function(){confirmDel()}}):null,st]);
+  function confirmDel(){
+    st.className='status err';st.textContent='';
+    var yes=h('button',{type:'button',cls:'btn small danger-fill',text:item.builtin?'Тийм, нуух':'Тийм, устгах',onclick:function(){
+      (item.builtin?saveDoc(kind,item.id,{deleted:true},st,true):delDoc(kind,item.id,st)).then(function(){closeSheet()})}});
+    var no=h('button',{type:'button',cls:'btn line small',text:'Болих',onclick:function(){st.textContent=''}});
+    st.textContent=item.builtin?'Энэ үндсэн контентыг нуух уу? Дараа нь "Нуусныг харах"-аас сэргээж болно. ':'Бүрмөсөн устгах уу? ';st.appendChild(yes);st.appendChild(no);
+  }
+  return row;
+}
+function saveDoc(kind,id,patch,st,merge){
+  if(!db)return Promise.reject();
+  var cur=OV[kind][id]||{};var doc=merge?Object.assign({},cur,patch):patch;doc.updatedAt=new Date().toISOString();
+  if(st){st.className='status';st.textContent='Хадгалж байна…'}
+  return db.doc(COLL[kind]+'/'+id).set(doc).then(function(){OV[kind][id]=doc;if(st)st.textContent='Хадгалагдлаа.';rerenderAll()},function(err){if(st){st.className='status err';st.textContent=err&&err.code==='permission_denied'?'Засах эрх алга. Эзэмшигчээс Editor эрх авна уу.':'Хадгалж чадсангүй. Дахин оролдоно уу.'}throw err});
+}
+function delDoc(kind,id,st){
+  var o=OV[kind][id]||{};
+  return db.doc(COLL[kind]+'/'+id).delete().then(function(){
+    (o.att||[]).forEach(function(a){if(a.asset&&assets)assets.delete(a.asset).catch(function(){})});
+    delete OV[kind][id];rerenderAll()},function(){if(st){st.className='status err';st.textContent='Устгаж чадсангүй.'}});
+}
+
+/* form helpers */
+function fText(id,label,val,opts){opts=opts||{};var inp=opts.area?h('textarea',{id:id,rows:String(opts.rows||4),placeholder:opts.ph||''}):h('input',{type:opts.type||'text',id:id,placeholder:opts.ph||'',min:opts.min,max:opts.max});inp.value=val==null?'':val;return h('label',{for:id,cls:'ff'},[label,opts.help?h('small',{text:opts.help}):null,inp])}
+function fSelect(id,label,opts,val){var s=h('select',{id:id},opts.map(function(o){return h('option',{value:o[0],text:o[1]})}));s.value=val==null?opts[0][0]:val;return h('label',{for:id,cls:'ff'},[label,s])}
+function fChecks(name,label,opts,vals){vals=vals||[];return h('fieldset',{cls:'checks'},[h('legend',{text:label}),h('div',{cls:'chips'},opts.map(function(o){var cb=h('input',{type:'checkbox',name:name,value:o[0]});cb.checked=vals.indexOf(o[0])>=0;return h('label',{cls:'ck'},[cb,' '+o[1]])}))])}
+function val(id){var e=$(id);return e?e.value.trim():''}
+function checked(name){return [].map.call(document.querySelectorAll('input[name="'+name+'"]:checked'),function(c){return c.value})}
+function lines(s){return s.split('\n').map(function(x){return x.trim()}).filter(Boolean)}
+function slug(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+
+/* attachments editor (uploads happen right away; cancelled uploads are removed) */
+function attEditor(list){
+  var state={list:(list||[]).slice(),fresh:[]};
+  var wrap=h('div',{cls:'box'},[h('h3',{text:'Файл, зураг, бичлэг, линк'})]);
+  var ul=h('div',{style:'display:flex;flex-direction:column;gap:6px'});
+  var st=h('p',{cls:'status',role:'status'});
+  function draw(){ul.innerHTML='';if(!state.list.length)ul.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Одоогоор хавсралт алга.'}));
+    state.list.forEach(function(a,i){ul.appendChild(h('div',{cls:'attrow'},[h('span',{cls:'tag t',text:ATTICON[attKind(a)]}),h('input',{type:'text','aria-label':'Гарчиг',value:a.title||'',oninput:function(){a.title=this.value}}),
+      h('button',{type:'button',cls:'rm','aria-label':'Хасах',text:'×',onclick:function(){state.list.splice(i,1);draw()}})]))})}
+  draw();wrap.appendChild(ul);
+  var fid='att-file-'+Math.random().toString(36).slice(2,7);
+  if(assets){
+    var fi=h('input',{type:'file',id:fid,multiple:'',accept:'image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,application/pdf,text/plain,text/csv,text/markdown'});
+    fi.addEventListener('change',function(){var files=[].slice.call(fi.files);if(!files.length)return;st.className='status';st.textContent=files.length+' файл илгээж байна…';
+      var chain=Promise.resolve();files.forEach(function(f){chain=chain.then(function(){return assets.upload(f).then(function(r){var a={asset:r.id,type:r.contentType,title:f.name.replace(/\.[^.]+$/,''),at:new Date().toISOString()};state.list.push(a);state.fresh.push(r.id);draw()},function(err){var c=err&&err.code;st.className='status err';st.textContent=f.name+': '+(c==='too_large'?'хэт том (20 MB хүртэл).':c==='unsupported_type'?'энэ төрлийг оруулах боломжгүй. Word, Excel, PowerPoint-ыг Drive линкээр нэмнэ үү.':c==='quota_or_state'?'хадгалах сан дүүрсэн.':'илгээж чадсангүй.');throw err})})});
+      chain.then(function(){st.className='status';st.textContent='Илгээгдлээ. "Хадгалах" дарахаа мартуузай.';fi.value=''},function(){fi.value=''})});
+    wrap.appendChild(h('label',{for:fid,cls:'ff'},['Файл, зураг, бичлэг оруулах',h('small',{text:'Зураг, mp4/webm бичлэг, PDF, текст · нэг файл 20 MB хүртэл'}),fi]));
+  }
+  var lt=h('input',{type:'text',id:fid+'-t',placeholder:'Гарчиг'}),lu=h('input',{type:'url',id:fid+'-u',placeholder:'https://…'});
+  wrap.appendChild(h('div',{cls:'fgrid',style:'align-items:end'},[h('label',{for:fid+'-t',cls:'ff'},['Линкийн гарчиг',lt]),h('label',{for:fid+'-u',cls:'ff'},['Линк (YouTube, Google Drive, Docs, Slides…)',lu]),
+    h('div',{},[h('button',{type:'button',cls:'btn line small',text:'+ Линк нэмэх',onclick:function(){var u=lu.value.trim();if(!/^https:\/\//.test(u)){st.className='status err';st.textContent='Линк https:// -ээр эхлэх ёстой.';return}state.list.push({url:u,title:lt.value.trim()||hostOf(u),at:new Date().toISOString()});lt.value='';lu.value='';st.textContent='';draw()}})])]));
+  wrap.appendChild(st);
+  return {el:wrap,get:function(){return state.list},discard:function(){var keep=state.list.map(function(a){return a.asset});state.fresh.forEach(function(id){if(keep.indexOf(id)<0&&assets)assets.delete(id).catch(function(){})})},commit:function(){state.fresh=[]}};
+}
+
+/* one editor for every kind */
+function classOpts(){return CLASSES.map(function(c){return [c.id,c.name]})}
+function strandOpts(){return WBS.map(function(s){return [s.id,s.n]})}
+function openEditor(kind,item){
+  var isNew=!item;item=item||{};var id=item.id||slug();
+  var att=attEditor(item.att);var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=(isNew?'Шинэ ':'Засах · ')+({ex:'дасгал',art:'нийтлэл',les:'хичээл',classes:'анги'})[kind];
+    p.appendChild(h('h2',{id:'sheetTitle',text:isNew?'Шинээр нэмэх':(item.n||item.t||item.title||item.name)}));
+    var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
+    if(kind==='ex'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('e-n','Нэр',item.n),fText('e-en','Англи нэр (хайлт, YouTube)',item.en)]));
+      f.appendChild(h('div',{cls:'fgrid'},[fSelect('e-c','Ангилал',CATS.map(function(k){return [k,CAT[k]]}),item.c||'fms'),fSelect('e-p','Хэв (Хүчний хэв бол)',[['','—']].concat(Object.keys(PAT).map(function(k){return [k,PAT[k]]})),item.p||''),fSelect('e-lv','Шат',[1,2,3,4,5,6].map(function(n){return [String(n),'Шат '+n]}),String(item.lv||1)),fText('e-eq','Хэрэгсэл',item.eq)]));
+      if(!item.builtin)f.appendChild(fSelect('e-from','Хөдөлгөөнт дүрс (байгаа дасгалаас авах)',[['','— Дүрсгүй (зураг/бичлэгээ ашиглана)']].concat(BASE.ex.map(function(b){return [b.id,CAT[b.c].split(' (')[0]+' · '+b.n]})),item.from||''));
+      f.appendChild(fText('e-w','Зорилго, яагаад хэрэгтэй',item.w,{area:1,rows:2}));
+      f.appendChild(h('div',{cls:'two'},[fText('e-cu','Техникийн кью (мөр бүрт нэг)',(item.cu||[]).join('\n'),{area:1}),fText('e-bd','Түгээмэл алдаа (мөр бүрт нэг)',(item.bd||[]).join('\n'),{area:1})]));
+      var ds=typeof item.ds==='string'?DOSE[item.ds]:(item.ds||['','','']);
+      f.appendChild(h('div',{cls:'fgrid'},[fText('e-d1','Хэмжээ 1–5-р анги',ds[0]),fText('e-d2','Хэмжээ 6–9-р анги',ds[1]),fText('e-d3','Хэмжээ 10–12-р анги',ds[2])]));
+      f.appendChild(fChecks('e-ws','Wellbeing чиглэл',strandOpts(),item.ws||wsOf(item.c?item:{c:'fms'})));
+      f.appendChild(fChecks('e-cls','Аль ангид',classOpts(),item.cls));
+    }else if(kind==='art'){
+      f.appendChild(fText('a-t','Гарчиг',item.t));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('a-topic','Сэдэв (Нойр, Хоол…)',item.topic),fText('a-big','Том тоо/тэмдэг (заавал биш)',item.big)]));
+      f.appendChild(fChecks('a-aud','Хэнд зориулсан',Object.keys(AUD).map(function(k){return [k,AUD[k]]}),item.aud||['s']));
+      f.appendChild(fText('a-sum','Товч агуулга',item.sum,{area:1,rows:2}));
+      f.appendChild(fText('a-body','Үндсэн текст',bodyToText(item.body),{area:1,rows:12,help:'"## " гарчиг, "- " цэгтэй жагсаалт, "1. " дугаартай жагсаалт. Хоосон мөрөөр догол мөр тусгаарлана.'}));
+      f.appendChild(fText('a-src','Эх сурвалж',item.src));
+      f.appendChild(fChecks('a-ws','Wellbeing чиглэл',strandOpts(),item.ws));
+      f.appendChild(fChecks('a-cls','Аль ангид',classOpts(),item.cls));
+    }else if(kind==='les'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('l-title','Хичээлийн нэр',item.title),fText('l-grade','Анги (жишээ "11-р анги")',item.grade)]));
+      f.appendChild(fText('l-goal','Зорилго',item.goal,{area:1,rows:2}));
+      f.appendChild(fText('l-blocks','Хичээлийн бүтэц',blocksToText(item.blocks),{area:1,rows:8,help:'Мөр бүр: хугацаа | хэсэг | дасгалууд (таслалаар) | тайлбар. Жишээ: 0–10 | Дулаалт | A-алхаа, Баавгайн алхаа | Баганыг тойрон'}));
+      f.appendChild(fChecks('l-ws','Wellbeing чиглэл',strandOpts(),item.ws));
+      f.appendChild(fChecks('l-cls','Аль ангид',classOpts(),item.cls));
+    }else if(kind==='classes'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('k-name','Ангийн нэр',item.name),fText('k-grade','Анги (тоо)',item.grade)]));
+      f.appendChild(fText('k-note','Мэдэгдэл, тэмдэглэл',item.note,{area:1,rows:5,help:'Сурагч, эцэг эхэд харагдана. Мөр бүр тусдаа догол мөр.'}));
+      f.appendChild(fText('k-ex','Энэ ангид оноосон дасгалууд',(item.exIds||[]).map(function(i){var e=byId(i);return e?e.n:i}).join(', '),{area:1,rows:2,help:'Дасгалын нэрийг таслалаар. Жишээ: Шалан дээр түлхэлт, TRX хэвтээ татах'}));
+    }
+    f.appendChild(att.el);
+    var save=h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
+      var d;
+      if(kind==='ex'){var n=val('e-n');if(!n){st.className='status err';st.textContent='Нэр оруулна уу.';return}
+        d={n:n,en:val('e-en'),c:val('e-c'),p:val('e-c')==='str'?(val('e-p')||'squat'):null,lv:+val('e-lv'),eq:val('e-eq')||'—',w:val('e-w'),cu:lines(val('e-cu')),bd:lines(val('e-bd')),ds:[val('e-d1')||'—',val('e-d2')||'—',val('e-d3')||'—'],ws:checked('e-ws'),cls:checked('e-cls')};
+        if(!item.builtin){d.from=val('e-from')||null;d.custom=true}}
+      else if(kind==='art'){var t=val('a-t');if(!t){st.className='status err';st.textContent='Гарчиг оруулна уу.';return}
+        d={t:t,topic:val('a-topic')||'Ерөнхий',big:val('a-big'),aud:checked('a-aud'),sum:val('a-sum'),body:textToBody($('a-body').value),src:val('a-src')||'Coach Jack · Tomujin PE',ws:checked('a-ws'),cls:checked('a-cls')};if(!item.builtin)d.custom=true}
+      else if(kind==='les'){var tt=val('l-title');if(!tt){st.className='status err';st.textContent='Нэр оруулна уу.';return}
+        d={title:tt,grade:val('l-grade'),goal:val('l-goal'),blocks:textToBlocks($('l-blocks').value),ws:checked('l-ws'),cls:checked('l-cls')};if(!item.builtin)d.custom=true}
+      else{var nm=val('k-name');if(!nm){st.className='status err';st.textContent='Нэр оруулна уу.';return}
+        d={name:nm,grade:val('k-grade'),note:$('k-note').value,exIds:val('k-ex').split(',').map(function(s){s=s.trim();var hit=EX.filter(function(e){return e.n===s||e.id===s})[0];return hit?hit.id:null}).filter(Boolean)};if(!item.builtin)d.custom=true}
+      d.att=att.get();if(item.deleted)d.deleted=true;
+      saveDoc(kind,id,d,st,true).then(function(){att.commit();closeSheet();if(kind==='ex')openEx(id);else if(kind==='art')openArt(id);else if(kind==='classes')openClass(id)},function(){});
+    }});
+    var cancel=h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){att.discard();closeSheet()}});
+    f.appendChild(h('div',{cls:'editrow'},[save,cancel,st]));
+    p.appendChild(f);
+    if(!db)st.textContent='Мэдээллийн сан холбогдоогүй байна.';
+  });
+}
+function bodyToText(b){if(!b)return '';return b.map(function(x){if(x[0]==='p')return x[1];if(x[0]==='h')return '## '+x[1];if(x[0]==='ul')return x[1].map(function(l){return '- '+l}).join('\n');return x[1].map(function(l,i){return (i+1)+'. '+l}).join('\n')}).join('\n\n')}
+function textToBody(s){var out=[];s.split(/\n\s*\n/).forEach(function(par){var ls=lines(par);if(!ls.length)return;
+  if(ls.every(function(l){return /^[-•]\s/.test(l)}))out.push(['ul',ls.map(function(l){return l.replace(/^[-•]\s+/,'')})]);
+  else if(ls.every(function(l){return /^\d+[.)]\s/.test(l)}))out.push(['ol',ls.map(function(l){return l.replace(/^\d+[.)]\s+/,'')})]);
+  else ls.forEach(function(l){if(/^##\s/.test(l))out.push(['h',l.replace(/^##\s+/,'')]);else out.push(['p',l])})});return out}
+function blocksToText(b){return (b||[]).map(function(x){return [x[0],x[1],(x[2]||[]).map(function(i){var e=byId(i);return e?e.n:i}).join(', '),x[3]].join(' | ')}).join('\n')}
+function textToBlocks(s){return lines(s).map(function(l){var p=l.split('|').map(function(x){return x.trim()});return [p[0]||'',p[1]||'',(p[2]||'').split(',').map(function(n){n=n.trim();var e=EX.filter(function(x){return x.n===n||x.id===n})[0];return e?e.id:null}).filter(Boolean),p[3]||'']})}
+
+/* class pages */
+function renderClasses(){
+  var W=$('classGrid');if(!W)return;W.innerHTML='';
+  var add=$('classAdd');add.innerHTML='';var b=addBtn('Анги нэмэх',function(){openEditor('classes',null)});if(b)add.appendChild(b);
+  CLASSES.forEach(function(c){
+    var nL=LESSONS.filter(function(l){return (l.cls||[]).indexOf(c.id)>=0}).length,nE=classExercises(c).length,nA=(c.att||[]).length;
+    W.appendChild(h('button',{type:'button',cls:'art'+(c.deleted?' hiddenitem':''),onclick:function(){openClass(c.id)}},[h('span',{cls:'big',text:c.name}),h('span',{cls:'muted',text:c.grade?c.grade+'-р анги':''}),
+      h('div',{cls:'chips'},[h('span',{cls:'tag',text:nL+' хичээл'}),h('span',{cls:'tag t',text:nE+' дасгал'}),h('span',{cls:'tag g',text:nA+' файл'})]),c.note?h('p',{cls:'muted',style:'font-size:14px',text:c.note.split('\n')[0].slice(0,90)}):null]));
+  });
+}
+function classExercises(c){var ids=(c.exIds||[]).slice();EX.forEach(function(e){if((e.cls||[]).indexOf(c.id)>=0&&ids.indexOf(e.id)<0)ids.push(e.id)});return ids.map(byId).filter(Boolean)}
+function openClass(id){
+  var c=CLASSES.filter(function(x){return x.id===id})[0];if(!c)return;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Анги'+(c.grade?' · '+c.grade+'-р анги':'');
+    p.appendChild(h('h2',{id:'sheetTitle',text:c.name,style:'font-size:30px'}));
+    var er=editRow('classes',c,openClass);if(er)p.appendChild(er);
+    if(c.note)p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Мэдэгдэл'})].concat(lines(c.note).map(function(l){return h('p',{text:l})}))));
+    var les=LESSONS.filter(function(l){return (l.cls||[]).indexOf(c.id)>=0});
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хичээлүүд ('+les.length+')'}),les.length?h('div',{cls:'chips'},les.map(function(l){return h('button',{type:'button',cls:'tag g',text:l.title,onclick:function(){closeSheet();show('lessons');setTimeout(function(){var t=document.getElementById('les-'+l.id);if(t)t.scrollIntoView()},50)}})})):h('p',{cls:'muted',text:'Одоогоор хичээл оноогоогүй.'})]));
+    var exs=classExercises(c);
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Энэ ангийн дасгалууд ('+exs.length+')'}),exs.length?h('div',{cls:'ladder'},exs.map(function(x){return h('button',{type:'button',onclick:function(){openEx(x.id)}},[makeVis(x,{still:1}).svg,h('small',{text:lvl(x)}),h('span',{text:x.n})])})):h('p',{cls:'muted',text:'Засах горимоос дасгал оноож болно.'})]));
+    var arts=ART.filter(function(a){return (a.cls||[]).indexOf(c.id)>=0});
+    if(arts.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Унших материал'}),h('div',{cls:'chips'},arts.map(function(a){return h('button',{type:'button',cls:'tag g',text:a.t,onclick:function(){openArt(a.id)}})}))]));
+    var pls=Object.keys(PUBPLANS).map(function(k){return PUBPLANS[k]}).filter(function(x){return (x.cls||[]).indexOf(c.id)>=0});
+    if(pls.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Бэлтгэлийн планууд'}),h('div',{cls:'chips'},pls.map(function(pl){return h('button',{type:'button',cls:'tag g',text:pl.name+' · '+pl.min+' мин',onclick:function(){PLAN=JSON.parse(JSON.stringify(pl));PLAN.id='p'+Date.now().toString(36);delete PLAN.cls;saveDraft();syncPlanForm();renderPlan();closeSheet();show('plan')}})}))]));
+    var av=attView(c.att);if(av)p.appendChild(av);
+  });
+}
+
+/* boot: load editor rights and every collection */
+async function cmsInit(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    db=await window.claude.use('db');if(!db)return;
+    var user=await window.claude.use('user');canEdit=!!(user&&user.canEdit&&(await user.canEdit()));
+    if(canEdit)assets=await window.claude.use('assets');
+    renderEditBar();
+    Object.keys(COLL).forEach(function(kind){
+      db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){if(d.exists)m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){});
+    });
+    db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){if(d.exists){var x=d.data();if(GOALS[x.goal])m[d.id]=x}});PUBPLANS=m;renderMyPlans()},function(){});
+  }catch(e){}
+}
+
+/* ---------- personal training-plan builder ---------- */
+var GOALS={
+ str:{n:'Хүч',cats:['str'],pats:['squat','push','hinge','pull','single','core'],dose:'3 × 8–10',rest:'90 сек',rpe:7,why:'NSCA: эхлэгч 2–3 сет, 8–12 давталт; техник эхэнд.'},
+ end:{n:'Тэсвэр (тойрог)',cats:['fun','str'],pats:['squat','push','core','jump','run'],dose:'40 сек ажил / 20 сек амралт × 3 тойрог',rest:'20 сек',rpe:7,why:'Олон дасгалыг тасралтгүй тойргоор: зүрх уушиг + булчингийн тэсвэр.'},
+ spd:{n:'Хурд ба авхаалж',cats:['agi','str'],pats:['run','jump'],dose:'4–6 оролдлого, бүрэн хурдаар',rest:'60–90 сек',rpe:8,why:'Богино, бүрэн хүчтэй; ажил:амралт 1:12–1:20 (фосфагены систем).'},
+ mob:{n:'Уян хатан ба сэргэлт',cats:['mob','flx'],pats:[],dose:'2 × 30 сек',rest:'—',rpe:3,why:'Хүнд бэлтгэлийн маргааш эсвэл ядарсан өдөр.'},
+ bb:{n:'Сагсан бөмбөг',cats:['bb','agi'],pats:[],dose:'3 × 10 / 3 × 30 сек',rest:'45 сек',rpe:6,why:'Чадварын давталт + авхаалж.'},
+ vb:{n:'Волейбол',cats:['vb','str'],pats:['jump'],dose:'3 × 10 / 3 × 6 үсрэлт',rest:'45 сек',rpe:6,why:'Тосолт, сервис + үсрэлтийн хүч.'},
+ fb:{n:'Хөл бөмбөг',cats:['fb','agi'],pats:[],dose:'3 × 10 / 4 оролдлого',rest:'45 сек',rpe:6,why:'Бөмбөгтэй чадвар + чиглэл солих.'}
+};
+var EQUIP=[['none','Хэрэгсэлгүй'],['band','Резин'],['mb','Медбол'],['trx','TRX'],['bench','Вандан'],['ball','Бөмбөг'],['cone','Конус']];
+function needsEq(e){var q=(e.eq||'').toLowerCase(),r=[];if(/резин/.test(q))r.push('band');if(/медбол/.test(q)&&!/сонголттой|хэрэгсэлгүй/.test(q))r.push('mb');if(/trx/.test(q))r.push('trx');if(/вандан|хайрцаг/.test(q))r.push('bench');if(/бөмбөг|цохиур|ракетка/.test(q))r.push('ball');if(/конус/.test(q))r.push('cone');if(/турник/.test(q))r.push('bar');return r}
+function eqOk(e,have){return needsEq(e).every(function(x){return have.indexOf(x)>=0})}
+var PLAN=null,MYPLANS=[],PUBPLANS={};
+function newPlan(){return {id:'p'+Date.now().toString(36),name:'Миний бэлтгэл',goal:'str',min:45,lv:3,eq:['none','band','cone'],blocks:[{n:'Дулаалт',items:[]},{n:'Үндсэн хэсэг',items:[]},{n:'Сэргээлт',items:[]}]}}
+function pick(pool,n,used){var out=[];pool.forEach(function(e){if(out.length<n&&used.indexOf(e.id)<0){out.push(e);used.push(e.id)}});return out}
+function autoPlan(pl){
+  var g=GOALS[pl.goal],used=[],have=pl.eq;
+  function near(list){return list.filter(function(e){return eqOk(e,have)}).sort(function(a,b){return Math.abs(a.lv-pl.lv)-Math.abs(b.lv-pl.lv)||b.lv-a.lv}).filter(function(e){return e.lv<=pl.lv+1})}
+  var warm=pick(near(EX.filter(function(e){return e.c==='mob'})),1,used).concat(pick(near(EX.filter(function(e){return e.p==='run'||(e.c==='fms'&&/гүйлт|алгасалт|алхаа/i.test(e.n))})),2,used));
+  var nMain=pl.min>=80?6:pl.min>=60?5:pl.min>=45?4:3,main=[];
+  if(g.pats.length&&g.cats.indexOf('str')>=0){g.pats.forEach(function(p){if(main.length<nMain)main=main.concat(pick(near(EX.filter(function(e){return e.p===p})),1,used))})}
+  g.cats.forEach(function(c){if(main.length<nMain)main=main.concat(pick(near(EX.filter(function(e){return e.c===c&&!e.p})),nMain-main.length,used))});
+  if(main.length<nMain)main=main.concat(pick(near(EX.filter(function(e){return g.cats.indexOf(e.c)>=0})),nMain-main.length,used));
+  var cool=pick(near(EX.filter(function(e){return e.c==='flx'})),pl.min>=60?3:2,used);
+  pl.blocks=[{n:'Дулаалт (RAMP)',items:warm.map(function(e){return {id:e.id,d:'1–2 × 30 сек',r:'—'}})},{n:'Үндсэн хэсэг · '+g.n,items:main.map(function(e){return {id:e.id,d:g.dose,r:g.rest}})},{n:'Сэргээлт',items:cool.map(function(e){return {id:e.id,d:'2 × 30 сек',r:'—'}})}];
+  return pl;
+}
+function planMinutes(pl){var m=0;pl.blocks.forEach(function(b,bi){m+=b.items.length*(bi===1?(pl.goal==='end'?3:6):3)});return m}
+function planText(pl){var g=GOALS[pl.goal];var s=pl.name+'\nЗорилго: '+g.n+' · '+pl.min+' мин · Шат '+pl.lv+'\n';
+  pl.blocks.forEach(function(b){s+='\n'+b.n+'\n';b.items.forEach(function(it,i){var e=byId(it.id);s+='  '+(i+1)+'. '+(e?e.n:it.id)+' — '+it.d+(it.r&&it.r!=='—'?' · амралт '+it.r:'')+'\n'})});
+  s+='\nТөлөвлөсөн RPE: '+g.rpe+' · ачаалал ≈ '+g.rpe*pl.min+' (RPE × минут)\n— Tomujin PE';return s}
+function loadMine(){MYPLANS=lsGet('tpe-plans')||[];PLAN=lsGet('tpe-plan-draft')||autoPlan(newPlan())}
+function saveDraft(){lsSet('tpe-plan-draft',PLAN)}
+function renderPlan(){
+  var W=$('planOut');if(!W)return;W.innerHTML='';var g=GOALS[PLAN.goal];
+  var est=planMinutes(PLAN);
+  W.appendChild(h('div',{cls:'big3'},[kpi(PLAN.min+' мин','Төлөвлөсөн хугацаа','Дасгалуудаар ≈ '+est+' мин',true),kpi(String(g.rpe),'Төлөвлөсөн RPE (1–10)',g.why),kpi(String(g.rpe*PLAN.min),'Ачаалал (RPE × мин)','Loading Form-той харьцуул')]));
+  PLAN.blocks.forEach(function(b,bi){
+    var box=h('div',{cls:'box'},[h('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap'},[h('h3',{text:b.n}),h('span',{cls:'muted',style:'font-size:13px',text:b.items.length+' дасгал'})])]);
+    b.items.forEach(function(it,i){var e=byId(it.id);if(!e)return;
+      var dIn=h('input',{type:'text',value:it.d,'aria-label':e.n+' хэмжээ',oninput:function(){it.d=this.value;saveDraft()}});
+      var rIn=h('input',{type:'text',value:it.r,'aria-label':e.n+' амралт',oninput:function(){it.r=this.value;saveDraft()}});
+      box.appendChild(h('div',{cls:'planrow'},[h('button',{type:'button',cls:'pthumb','aria-label':e.n+' үзүүлбэр',onclick:function(){openEx(e.id)}},[makeVis(e,{still:1}).svg]),
+        h('div',{style:'display:flex;flex-direction:column;gap:6px;min-width:0;flex:1 1 200px'},[h('strong',{text:e.n}),h('span',{cls:'muted',style:'font-size:12px',text:CAT[e.c].split(' (')[0]+' · '+lvl(e)+' · '+e.eq}),h('div',{cls:'fgrid tight'},[h('label',{cls:'ff'},['Хэмжээ',dIn]),h('label',{cls:'ff'},['Амралт',rIn])])]),
+        h('div',{cls:'chips',style:'flex:none'},[h('button',{type:'button',cls:'rm','aria-label':'Дээш',text:'↑',onclick:function(){if(i>0){b.items.splice(i-1,0,b.items.splice(i,1)[0]);saveDraft();renderPlan()}}}),h('button',{type:'button',cls:'rm','aria-label':'Доош',text:'↓',onclick:function(){if(i<b.items.length-1){b.items.splice(i+1,0,b.items.splice(i,1)[0]);saveDraft();renderPlan()}}}),h('button',{type:'button',cls:'rm','aria-label':'Хасах',text:'×',onclick:function(){b.items.splice(i,1);saveDraft();renderPlan()}})])]))});
+    var sid='padd-'+bi;var sel=h('select',{id:sid},[h('option',{value:'',text:'+ Дасгал нэмэх…'})].concat(CATS.map(function(c){return h('optgroup',{label:CAT[c]},EX.filter(function(e){return e.c===c}).map(function(e){return h('option',{value:e.id,text:e.n+' · '+lvl(e)})}))})));
+    sel.addEventListener('change',function(){if(sel.value){var g2=GOALS[PLAN.goal];b.items.push({id:sel.value,d:bi===1?g2.dose:'2 × 30 сек',r:bi===1?g2.rest:'—'});saveDraft();renderPlan()}});
+    box.appendChild(h('label',{for:sid,cls:'ff'},['Дасгал нэмэх',sel]));
+    W.appendChild(box);
+  });
+  var st=h('span',{cls:'status',role:'status'});
+  var acts=[h('button',{type:'button',cls:'btn gold',text:'Хадгалах (энэ төхөөрөмж дээр)',onclick:function(){PLAN.name=$('pName').value||PLAN.name;var ix=MYPLANS.findIndex(function(x){return x.id===PLAN.id});var copy=JSON.parse(JSON.stringify(PLAN));if(ix>=0)MYPLANS[ix]=copy;else MYPLANS.unshift(copy);lsSet('tpe-plans',MYPLANS);cloudSavePlan(copy);st.className='status';st.textContent='Хадгалагдлаа.';renderMyPlans()}}),
+    h('button',{type:'button',cls:'btn line',text:'Текстээр хуулах',onclick:function(){var t=planText(PLAN);try{navigator.clipboard.writeText(t).then(function(){st.className='status';st.textContent='Хуулагдлаа.'},function(){showText(t)})}catch(e){showText(t)}}})];
+  if(DL)acts.push(h('button',{type:'button',cls:'btn line',text:'Файлаар татах',onclick:function(){DL.save({filename:(PLAN.name||'plan').replace(/[^\wА-Яа-яӨөҮүЁё -]/g,'')+'.txt',data:planText(PLAN)}).then(function(){st.className='status';st.textContent='Татлаа.'},function(){})}}));
+  if(canEdit&&db)acts.push(h('button',{type:'button',cls:'btn line',text:'Ангид нийтлэх',onclick:function(){publishPlan(st)}}));
+  W.appendChild(h('div',{cls:'editrow'},acts.concat([st])));
+  function showText(t){var ta=h('textarea',{rows:'10',style:'width:100%;font:inherit;font-size:13px'});ta.value=t;W.appendChild(ta);ta.select()}
+}
+function publishPlan(st){
+  var pick2=h('div',{cls:'box'},[h('h3',{text:'Аль ангид нийтлэх вэ?'}),fChecks('pp-cls','Ангиуд',classOpts(),PLAN.cls||[]),h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold small',text:'Нийтлэх',onclick:function(){
+    var doc=JSON.parse(JSON.stringify(PLAN));doc.cls=checked('pp-cls');doc.name=$('pName').value||doc.name;doc.updatedAt=new Date().toISOString();
+    db.doc('plans/'+doc.id).set(doc).then(function(){st.className='status';st.textContent='Ангид нийтлэгдлээ.';pick2.remove()},function(){st.className='status err';st.textContent='Нийтэлж чадсангүй.'})}})])]);
+  $('planOut').appendChild(pick2);pick2.scrollIntoView({block:'nearest'});
+}
+function renderMyPlans(){
+  var W=$('myPlans');if(!W)return;W.innerHTML='';
+  var pub=Object.keys(PUBPLANS).map(function(k){return PUBPLANS[k]});
+  function row(pl,own){return h('div',{cls:'attrow'},[h('span',{cls:'tag '+(own?'':'g'),text:own?'Миний':'Багшийн'}),h('strong',{text:pl.name,style:'flex:1 1 160px'}),h('span',{cls:'muted',style:'font-size:12px',text:GOALS[pl.goal].n+' · '+pl.min+' мин'+(pl.cls&&pl.cls.length?' · '+pl.cls.map(function(c){var x=CLASSES.filter(function(k){return k.id===c})[0];return x?x.name:c}).join(', '):'')}),
+    h('button',{type:'button',cls:'btn line small',text:own?'Нээх':'Хуулж авах',onclick:function(){PLAN=JSON.parse(JSON.stringify(pl));if(!own){PLAN.id='p'+Date.now().toString(36);PLAN.name=pl.name+' (хуулбар)';delete PLAN.cls}saveDraft();syncPlanForm();renderPlan();$('pName').scrollIntoView({block:'center'})}}),
+    own?h('button',{type:'button',cls:'rm','aria-label':'Устгах',text:'×',onclick:function(){MYPLANS=MYPLANS.filter(function(x){return x.id!==pl.id});lsSet('tpe-plans',MYPLANS);cloudDelPlan(pl.id);renderMyPlans()}}):(canEdit&&db?h('button',{type:'button',cls:'rm','aria-label':'Нийтлэлээс хасах',text:'×',onclick:function(){db.doc('plans/'+pl.id).delete().catch(function(){})}}):null)])}
+  if(!MYPLANS.length&&!pub.length){W.appendChild(h('p',{cls:'muted',text:'Хадгалсан план алга. Дээрх тохиргоогоор план бүрдүүлээд "Хадгалах" дарна уу.'}));return}
+  pub.forEach(function(p){W.appendChild(row(p,false))});MYPLANS.forEach(function(p){W.appendChild(row(p,true))});
+}
+function syncPlanForm(){$('pName').value=PLAN.name;$('pGoal').value=PLAN.goal;$('pMin').value=String(PLAN.min);$('pLv').value=String(PLAN.lv);[].forEach.call(document.querySelectorAll('input[name=pEq]'),function(c){c.checked=PLAN.eq.indexOf(c.value)>=0})}
+function initPlan(){
+  loadMine();
+  var F=$('planForm');
+  F.appendChild(h('div',{cls:'fgrid'},[fText('pName','Планы нэр',PLAN.name),fSelect('pGoal','Зорилго',Object.keys(GOALS).map(function(k){return [k,GOALS[k].n]}),PLAN.goal),fSelect('pMin','Хугацаа',[['30','30 мин'],['45','45 мин'],['60','60 мин'],['80','80 мин (PE блок)']],String(PLAN.min)),fSelect('pLv','Миний шат',[1,2,3,4,5,6].map(function(n){return [String(n),'Шат '+n]}),String(PLAN.lv))]));
+  F.appendChild(fChecks('pEq','Надад байгаа хэрэгсэл',EQUIP,PLAN.eq));
+  F.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Автоматаар бүрдүүлэх',onclick:function(){readPlanForm();autoPlan(PLAN);saveDraft();renderPlan()}}),h('button',{type:'button',cls:'btn line',text:'Шинэ хоосон план',onclick:function(){PLAN=newPlan();readPlanForm();saveDraft();renderPlan()}})]));
+  F.addEventListener('change',function(){readPlanForm();saveDraft();renderPlan()});
+  renderPlan();renderMyPlans();
+}
+function readPlanForm(){PLAN.name=$('pName').value||PLAN.name;PLAN.goal=$('pGoal').value;PLAN.min=+$('pMin').value;PLAN.lv=+$('pLv').value;PLAN.eq=checked('pEq')}
+
+/* ---------- accounts, Loading Form, teacher dashboard (Firebase) ---------- */
+var ME=null,MYROLE=null,MYPROFILE=null,USERS={},LOADS=[],WBALL=[],MYLOADS=[],MYWB={};
+var RPEL=['','1 · Маш хөнгөн','2 · Хөнгөн','3 · Дунд зэрэг','4 · Бага зэрэг хүнд','5 · Хүнд','6 · Хүнд+','7 · Маш хүнд','8 · Маш хүнд+','9 · Бараг хамгийн хүнд','10 · Хамгийн хүнд'];
+var FEELL=['','1 · Муу','2 · Ядарсан','3 · Хэвийн','4 · Сайн','5 · Маш сайн'];
+var SOREL=['','1 · Өвдөлтгүй','2 · Бага зэрэг','3 · Дунд','4 · Их','5 · Маш их'];
+var unsubs=[];
+function authErr(e){var c=e&&e.code||'';return c==='tpe/domain'?'Зөвхөн @'+((window.TPE&&TPE.domain)||'tomujin.edu.mn')+' хаягаар бүртгүүлнэ.':/invalid-credential|wrong-password|user-not-found/.test(c)?'Имэйл эсвэл нууц үг буруу байна.':/email-already-in-use/.test(c)?'Энэ имэйлээр бүртгэл бий. "Нэвтрэх" хэсгээр орно уу.':/weak-password/.test(c)?'Нууц үг дор хаяж 6 тэмдэгт байна.':/too-many-requests/.test(c)?'Хэт олон оролдлого. Түр хүлээгээд дахин оролдоно уу.':/network/.test(c)?'Интернэт холболтоо шалгана уу.':'Алдаа гарлаа. Дахин оролдоно уу.'}
+function renderAccount(){
+  var b=$('acctBar');if(!b)return;b.innerHTML='';
+  if(!window.TPE||!TPE.configured){return}
+  if(!ME){b.appendChild(h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:openLogin}));return}
+  var label=(MYPROFILE&&MYPROFILE.name)||ME.name||ME.email.split('@')[0];
+  b.appendChild(h('button',{type:'button',cls:'chip',text:(MYROLE==='admin'?'Админ · ':MYROLE==='teacher'?'Багш · ':'')+label,onclick:openAccount}));
+}
+function openLogin(mode){
+  mode=mode==='up'?'up':'in';
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Tomujin PE';
+    p.appendChild(h('h2',{id:'sheetTitle',text:mode==='up'?'Анх удаа бүртгүүлэх':'Нэвтрэх'}));
+    var st=h('p',{cls:'status',role:'status'});
+    var f=h('form',{cls:'edform'});
+    f.appendChild(fText('li-email','Сургуулийн имэйл','',{type:'email',ph:'нэр@'+TPE.domain}));
+    f.appendChild(fText('li-pw','Нууц үг','',{type:'password',ph:mode==='up'?'дор хаяж 6 тэмдэгт':''}));
+    if(mode==='up'){f.appendChild(fText('li-name','Овог нэр','',{ph:'жишээ: Бат-Эрдэнэ Тэмүүлэн'}));f.appendChild(fSelect('li-class','Анги',CLASSES.filter(function(c){return !c.deleted}).map(function(c){return [c.id,c.name]}),''))}
+    f.addEventListener('submit',function(ev){ev.preventDefault();go()});
+    function go(){
+      var em=val('li-email'),pw=$('li-pw').value;st.className='status';st.textContent='Түр хүлээнэ үү…';
+      if(mode==='up'){var nm=val('li-name');if(!nm){st.className='status err';st.textContent='Нэрээ оруулна уу.';return}
+        try{localStorage.setItem('tpe-pending',JSON.stringify({name:nm,classId:val('li-class')}))}catch(e){}
+        TPE.signUp(em,pw,nm).then(function(){st.textContent='Баталгаажуулах холбоос '+em+' хаяг руу илгээгдлээ. Имэйлээ нээж холбоос дээр дараад энд буцаж ирнэ үү.';openVerify()},function(e){st.className='status err';st.textContent=authErr(e)})}
+      else TPE.signIn(em,pw).then(function(){closeSheet()},function(e){st.className='status err';st.textContent=authErr(e)});
+    }
+    f.appendChild(h('div',{cls:'editrow'},[h('button',{type:'submit',cls:'btn gold',text:mode==='up'?'Бүртгүүлэх':'Нэвтрэх'}),st]));
+    p.appendChild(f);
+    p.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn line small',text:mode==='up'?'Бүртгэлтэй юу? Нэвтрэх':'Анх удаа бүртгүүлэх',onclick:function(){openLogin(mode==='up'?'in':'up')}}),
+      mode==='in'?h('button',{type:'button',cls:'btn line small',text:'Нууц үгээ мартсан',onclick:function(){var em=val('li-email');if(!em){st.className='status err';st.textContent='Эхлээд имэйлээ бичнэ үү.';return}TPE.reset(em).then(function(){st.className='status';st.textContent='Нууц үг сэргээх холбоос имэйл рүү илгээгдлээ.'},function(e){st.className='status err';st.textContent=authErr(e)})}}):null]));
+    p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Дасгалын сан, мэдлэгийн сан, тооцоолуурыг нэвтрэлгүйгээр ашиглана. Нэвтэрснээр Loading Form, бэлтгэлийн план, Wellbeing түвшнээ хадгалж, багштайгаа хуваалцана.'}));
+  });
+}
+function openVerify(){
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Имэйл баталгаажуулах';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Имэйлээ баталгаажуулна уу'}));
+    var st=h('p',{cls:'status',role:'status'});
+    p.appendChild(h('p',{text:(ME?ME.email:'Таны имэйл')+' руу холбоос илгээсэн. Сургуулийн Gmail-ээ нээж, холбоос дээр дарсны дараа доорх товчийг дарна уу. Spam хавтсаа ч шалгаарай.'}));
+    p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Баталгаажуулсан',onclick:function(){TPE.refresh().then(function(u){if(u&&u.emailVerified){st.textContent='Баталгаажлаа.';closeSheet()}else{st.className='status err';st.textContent='Одоогоор баталгаажаагүй байна.'}})}}),
+      h('button',{type:'button',cls:'btn line small',text:'Дахин илгээх',onclick:function(){TPE.resend().then(function(){st.className='status';st.textContent='Дахин илгээлээ.'},function(e){st.className='status err';st.textContent=authErr(e)})}}),
+      h('button',{type:'button',cls:'btn line small',text:'Гарах',onclick:function(){TPE.signOut();closeSheet()}}),st]));
+  });
+}
+function openAccount(){
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=MYROLE==='admin'?'Админ':MYROLE==='teacher'?'Багш':'Сурагч';
+    p.appendChild(h('h2',{id:'sheetTitle',text:(MYPROFILE&&MYPROFILE.name)||ME.name||ME.email}));
+    p.appendChild(h('p',{cls:'muted',text:ME.email}));
+    if(MYPROFILE){var c=CLASSES.filter(function(k){return k.id===MYPROFILE.classId})[0];p.appendChild(h('p',{text:'Анги: '+(c?c.name:'—')}))}
+    var links=[];
+    if(MYROLE==='student'||MYPROFILE)links.push(h('button',{type:'button',cls:'btn line small',text:'Loading Form',onclick:function(){closeSheet();show('log')}}));
+    if(MYROLE==='teacher'||MYROLE==='admin')links.push(h('button',{type:'button',cls:'btn line small',text:'Багшийн самбар',onclick:function(){closeSheet();show('coach')}}));
+    links.push(h('button',{type:'button',cls:'btn line small',text:'Гарах',onclick:function(){TPE.signOut();closeSheet()}}));
+    p.appendChild(h('div',{cls:'editrow'},links));
+  });
+}
+async function ensureProfile(){
+  if(!ME||!ME.emailVerified||!db)return;
+  var ref=db.doc('users/'+ME.uid);var s=await ref.get().catch(function(){return null});
+  if(s&&s.exists){MYPROFILE=s.data();return}
+  if(MYROLE!=='student')return;
+  var pend={};try{pend=JSON.parse(localStorage.getItem('tpe-pending'))||{}}catch(e){}
+  var prof={email:ME.email.toLowerCase(),name:pend.name||ME.name||ME.email.split('@')[0],classId:pend.classId||'',createdAt:Date.now()};
+  await ref.set(prof).then(function(){MYPROFILE=prof;try{localStorage.removeItem('tpe-pending')}catch(e){}},function(){});
+}
+function stopSubs(){unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
+function startSubs(){
+  stopSubs();if(!ME||!db)return;
+  unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
+  unsubs.push(db.collection('users/'+ME.uid+'/wellbeing').onSnapshot(function(s){MYWB={};s.docs.forEach(function(d){MYWB[d.id]=d.data()})}));
+  unsubs.push(db.collection('users/'+ME.uid+'/plans').onSnapshot(function(s){var cloud=s.docs.map(function(d){return d.data().plan}).filter(Boolean);var ids={};cloud.forEach(function(p){ids[p.id]=1});MYPLANS=cloud.concat(MYPLANS.filter(function(p){return !ids[p.id]}));renderMyPlans()}));
+  if(MYROLE==='teacher'||MYROLE==='admin'){
+    unsubs.push(db.collection('users').onSnapshot(function(s){USERS={};s.docs.forEach(function(d){USERS[d.id]=d.data()});renderCoach()}));
+    unsubs.push(db.group('loading',{orderBy:['at','desc'],limit:600},function(s){LOADS=s.docs.map(function(d){return d.data()});renderCoach()}));
+    unsubs.push(db.group('wellbeing',{},function(s){WBALL=s.docs.map(function(d){var x=d.data();x.sid=d.id;return x});renderCoach()}));
+  }
+}
+/* hooks used by the plan builder and the wellbeing self-check */
+function cloudSavePlan(pl){if(ME&&ME.emailVerified&&db)db.doc('users/'+ME.uid+'/plans/'+pl.id).set({plan:pl,at:Date.now()}).catch(function(){})}
+function cloudDelPlan(id){if(ME&&db)db.doc('users/'+ME.uid+'/plans/'+id).delete().catch(function(){})}
+function cloudSaveWB(sid,level){if(ME&&ME.emailVerified&&db){MYWB[sid]={uid:ME.uid,level:level+1,at:Date.now()};return db.doc('users/'+ME.uid+'/wellbeing/'+sid).set(MYWB[sid])}return Promise.reject()}
+
+/* ---------- Loading Form ---------- */
+function weekKey(t){var d=new Date(t);var day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d.getTime()}
+function weeklyBars(list,weeks){
+  var now=weekKey(Date.now()),out=[];for(var i=weeks-1;i>=0;i--){var k=now-i*7*864e5;var sum=list.filter(function(x){return weekKey(x.at)===k}).reduce(function(a,x){return a+x.rpe*x.min},0);out.push({k:k,v:sum})}
+  var max=Math.max.apply(null,out.map(function(x){return x.v}).concat([1]));
+  return h('div',{cls:'wbars',role:'img','aria-label':'Сүүлийн '+weeks+' долоо хоногийн ачаалал'},out.map(function(x,i){var d=new Date(x.k);return h('div',{cls:'wb'},[h('span',{cls:'num',style:'font-size:11px',text:x.v?String(x.v):''}),h('i',{style:'height:'+Math.max(2,x.v/max*100)+'%;background:'+(i===out.length-1?'#f2cd30':'#a855f7')}),h('small',{text:(d.getMonth()+1)+'/'+d.getDate()})])}));
+}
+function renderLog(){
+  var W=$('logOut');if(!W)return;W.innerHTML='';
+  if(!window.TPE||!TPE.configured){W.appendChild(h('p',{cls:'muted',text:'Сайт тохируулагдаагүй байна.'}));return}
+  if(!ME){W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Нэвтэрч орно уу'}),h('p',{cls:'muted',text:'Loading Form-оо хадгалж, багштайгаа хуваалцахын тулд сургуулийн имэйлээрээ нэвтэрнэ.'}),h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:openLogin})])]));return}
+  if(!ME.emailVerified){W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Имэйлээ баталгаажуулна уу'}),h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Баталгаажуулах',onclick:openVerify})])]));return}
+  var st=h('p',{cls:'status',role:'status'});
+  var f=h('form',{cls:'box edform'},[h('h3',{text:'Өнөөдрийн бэлтгэл'}),
+    h('div',{cls:'fgrid'},[fSelect('lf-rpe','RPE: хэр хүнд байсан бэ?',RPEL.slice(1).map(function(x,i){return [String(i+1),x]}),'6'),fText('lf-min','Идэвхтэй хугацаа (мин)','60',{type:'number',min:1,max:300}),fSelect('lf-feel','Биеийн мэдрэмж',FEELL.slice(1).map(function(x,i){return [String(i+1),x]}),'4'),fSelect('lf-sore','Булчингийн өвдөлт',SOREL.slice(1).map(function(x,i){return [String(i+1),x]}),'1')]),
+    fText('lf-note','Нэг өгүүлбэр: юу сурав, юу мэдрэв?','',{area:1,rows:2}),
+    h('div',{cls:'editrow'},[h('button',{type:'submit',cls:'btn gold',text:'Илгээх'}),st])]);
+  f.addEventListener('submit',function(ev){ev.preventDefault();var rpe=+val('lf-rpe'),min=Math.round(+val('lf-min'));if(!(min>=1&&min<=300)){st.className='status err';st.textContent='Хугацааг 1–300 минутаар оруулна уу.';return}
+    var doc={uid:ME.uid,rpe:rpe,min:min,load:rpe*min,feel:+val('lf-feel'),sore:+val('lf-sore'),note:val('lf-note').slice(0,500),classId:(MYPROFILE&&MYPROFILE.classId)||'',name:(MYPROFILE&&MYPROFILE.name)||ME.name||'',at:Date.now()};
+    st.className='status';st.textContent='Илгээж байна…';db.collection('users/'+ME.uid+'/loading').add(doc).then(function(){st.textContent='Хадгалагдлаа. Ачаалал: '+doc.load},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})});
+  W.appendChild(f);
+  var wk=MYLOADS.filter(function(x){return weekKey(x.at)===weekKey(Date.now())}).reduce(function(a,x){return a+x.load},0);
+  W.appendChild(h('div',{cls:'big3'},[kpi(String(wk),'Энэ долоо хоногийн ачаалал','RPE × минут',true),kpi(String(MYLOADS.length),'Нийт бүртгэл',''),kpi(MYLOADS.length?(MYLOADS.slice(0,5).reduce(function(a,x){return a+x.rpe},0)/Math.min(5,MYLOADS.length)).toFixed(1):'—','Сүүлийн 5-ийн дундаж RPE','')]));
+  W.appendChild(h('div',{cls:'box'},[h('h3',{text:'8 долоо хоногийн ачаалал'}),weeklyBars(MYLOADS,8),h('p',{cls:'muted',style:'font-size:13px',text:'Ачаалал долоо хоногт огцом (≈ 1.5 дахин илүү) нэмэгдвэл гэмтэх, ядрах эрсдэл өсдөг. Аажмаар нэм.'})]));
+  if(MYLOADS.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бүртгэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('thead',{},[h('tr',{},['Огноо','RPE','Мин','Ачаалал','Мэдрэмж','Тэмдэглэл'].map(function(x){return h('th',{text:x})}))]),h('tbody',{},MYLOADS.slice(0,20).map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:(d.getMonth()+1)+'/'+d.getDate()}),h('td',{cls:'num',text:String(x.rpe)}),h('td',{cls:'num',text:String(x.min)}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:FEELL[x.feel]||''}),h('td',{cls:'muted',text:x.note||''})])}))])])]));
+}
+
+/* ---------- teacher dashboard ---------- */
+var coachClass='all';
+function renderCoach(){
+  var W=$('coachOut');if(!W)return;W.innerHTML='';
+  if(!(MYROLE==='teacher'||MYROLE==='admin')){W.appendChild(h('p',{cls:'muted',text:'Энэ хэсэг зөвхөн багш нарт харагдана.'}));return}
+  var users=Object.keys(USERS).map(function(id){var u=USERS[id];u.uid=id;return u});
+  var opts=[['all','Бүх анги']].concat(CLASSES.map(function(c){return [c.id,c.name]})).concat([['','Ангигүй']]);
+  var row=h('div',{cls:'chips'});chipRow(row,opts,coachClass,function(v){coachClass=v;renderCoach()});W.appendChild(row);
+  var list=users.filter(function(u){return coachClass==='all'||(u.classId||'')===coachClass}).sort(function(a,b){return (a.name||'').localeCompare(b.name||'')});
+  var wk=weekKey(Date.now());
+  var tbl=h('table',{cls:'dose'},[h('thead',{},[h('tr',{},['Сурагч','Анги','Энэ 7 хоног','Дундаж RPE','Сүүлд','Wellbeing (дундаж)',''].map(function(x){return h('th',{text:x})}))]),h('tbody',{},list.map(function(u){
+    var L=LOADS.filter(function(x){return x.uid===u.uid}),wl=L.filter(function(x){return weekKey(x.at)===wk}).reduce(function(a,x){return a+x.load},0);
+    var wbs=WBALL.filter(function(x){return x.uid===u.uid}),wavg=wbs.length?(wbs.reduce(function(a,x){return a+x.level},0)/wbs.length).toFixed(1):'—';
+    var c=CLASSES.filter(function(k){return k.id===u.classId})[0];var last=L[0]?new Date(L[0].at):null;
+    return h('tr',{},[h('td',{},[h('button',{type:'button',cls:'exlink',text:u.name||u.email,onclick:function(){openStudent(u)}})]),h('td',{text:c?c.name:'—'}),h('td',{cls:'num',text:String(wl)}),h('td',{cls:'num',text:L.length?(L.slice(0,5).reduce(function(a,x){return a+x.rpe},0)/Math.min(5,L.length)).toFixed(1):'—'}),h('td',{cls:'num',text:last?(last.getMonth()+1)+'/'+last.getDate():'—'}),h('td',{cls:'num',text:wavg+(wbs.length?' ('+wbs.length+')':'')}),h('td',{},[h('button',{type:'button',cls:'btn line small',text:'Дэлгэрэнгүй',onclick:function(){openStudent(u)}})])])}))]);
+  W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сурагчид ('+list.length+')'}),list.length?h('div',{cls:'scroll'},[tbl]):h('p',{cls:'muted',text:'Одоогоор бүртгүүлсэн сурагч алга. Сурагчид сургуулийн имэйлээрээ "Анх удаа бүртгүүлэх" хэсгээр бүртгүүлнэ.'})]));
+  var recent=LOADS.filter(function(x){return coachClass==='all'||x.classId===coachClass}).slice(0,15);
+  if(recent.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн Loading Form-ууд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},recent.map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:(d.getMonth()+1)+'/'+d.getDate()}),h('td',{text:x.name||''}),h('td',{cls:'num',text:'RPE '+x.rpe}),h('td',{cls:'num',text:x.min+' мин'}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:(x.sore>=4?'⚠ ':'')+(SOREL[x.sore]||'')}),h('td',{cls:'muted',text:x.note||''})])}))])])]));
+  if(MYROLE==='admin')W.appendChild(rolesBox());
+}
+function openStudent(u){
+  openSheet(function(p){
+    var c=CLASSES.filter(function(k){return k.id===u.classId})[0];
+    $('sheetEyebrow').textContent='Сурагч'+(c?' · '+c.name:'');
+    p.appendChild(h('h2',{id:'sheetTitle',text:u.name||u.email}));p.appendChild(h('p',{cls:'muted',text:u.email}));
+    var st=h('span',{cls:'status',role:'status'});var sel=fSelect('su-class','Анги',[['','—']].concat(CLASSES.map(function(k){return [k.id,k.name]})),u.classId||'');
+    p.appendChild(h('div',{cls:'editrow'},[sel,h('button',{type:'button',cls:'btn line small',text:'Анги солих',onclick:function(){db.doc('users/'+u.uid).update({classId:val('su-class')}).then(function(){st.className='status';st.textContent='Солигдлоо.'},function(){st.className='status err';st.textContent='Солиж чадсангүй.'})}}),st]));
+    var L=LOADS.filter(function(x){return x.uid===u.uid});
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Ачаалал (8 долоо хоног)'}),weeklyBars(L,8)]));
+    var wbs=WBALL.filter(function(x){return x.uid===u.uid});
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Өөрийн үнэлсэн Wellbeing түвшин'}),wbs.length?h('table',{cls:'dose'},[h('tbody',{},wbs.map(function(x){var s=strand(x.sid);return h('tr',{},[h('td',{text:s?s.n:x.sid}),h('td',{cls:'num',text:'L'+x.level+' '+(WBLV[x.level-1]||[''])[0]}),h('td',{cls:'muted',text:new Date(x.at).toLocaleDateString()})])}))]):h('p',{cls:'muted',text:'Одоогоор үнэлгээ хийгээгүй.'})]));
+    if(L.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тэмдэглэлүүд'})].concat(L.filter(function(x){return x.note}).slice(0,10).map(function(x){var d=new Date(x.at);return h('p',{},[h('span',{cls:'num muted',text:(d.getMonth()+1)+'/'+d.getDate()+'  '}),x.note])}))));
+  });
+}
+function rolesBox(){
+  var box=h('div',{cls:'box'},[h('h3',{text:'Багш нар ба админ (зөвхөн админд харагдана)'})]);var st=h('p',{cls:'status',role:'status'});
+  var ta=fText('ro-t','Багш нарын имэйл (мөр бүрт нэг)','',{area:1,rows:4});var tb=fText('ro-a','Админы имэйл (мөр бүрт нэг)','',{area:1,rows:2});
+  box.appendChild(ta);box.appendChild(tb);
+  db.doc('config/roles').get().then(function(s){if(s.exists){$('ro-t').value=(s.data().teachers||[]).join('\n');$('ro-a').value=(s.data().admins||[]).join('\n')}}).catch(function(){});
+  box.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold small',text:'Хадгалах',onclick:function(){
+    function clean(s){return lines(s).map(function(x){return x.toLowerCase()}).filter(function(x){return /@/.test(x)})}
+    db.doc('config/roles').set({teachers:clean($('ro-t').value),admins:clean($('ro-a').value),updatedAt:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа. Шинэ багш дахин нэвтэрмэгц эрх нь идэвхжинэ.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st]));
+  box.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Багш нар сурагчдын адил "Анх удаа бүртгүүлэх" хэсгээр бүртгүүлж, имэйлээ баталгаажуулна. Тэдний имэйлийг энд нэмэхэд засах эрх, багшийн самбар нээгдэнэ.'}));
+  return box;
+}
+
+/* ---------- boot ---------- */
+async function fbInit(){
+  await new Promise(function(r){if(window.TPE)r();else window.addEventListener('tpe-ready',r,{once:true})});
+  if(!TPE.configured){renderAccount();renderLog();return}
+  db=TPE.db;
+  Object.keys(COLL).forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
+  db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){var x=d.data();if(GOALS[x.goal])m[d.id]=x});PUBPLANS=m;renderMyPlans()},function(){});
+  TPE.onAuth(async function(u,role){
+    ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='teacher'||role==='admin';if(!canEdit)editMode=false;
+    if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
+    await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
+    [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!canEdit});
+  });
+}
+
+/* ---------- routing ---------- */
+var VIEWS=['home','wellbeing','library','learn','plan','calc','lessons','classes','log','coach'];
+function show(v){if(VIEWS.indexOf(v)<0)v='home';VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
+  [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  try{history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo(0,0)}
+function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
+bindGo(document.querySelector('header'));bindGo($('v-home'));
+$('q').addEventListener('input',function(){fQ=this.value;renderLib()});
+var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();initCalc();initPlan();
+DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
+fbInit();
+show((location.hash||'').slice(1));
+
+})();
+</script>

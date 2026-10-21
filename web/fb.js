@@ -1,0 +1,108 @@
+// Tomujin PE — Firebase connection (Auth + Firestore).
+// Security is enforced by firestore.rules on the server; this file only talks to Firebase.
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendEmailVerification, sendPasswordResetEmail, signOut, updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
+  query, where, orderBy, limit
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const C = window.TPE_CONFIG || {};
+const DOMAIN = (C.SCHOOL_DOMAIN || "tomujin.edu.mn").toLowerCase();
+const BOOT_ADMIN = (C.ADMIN_EMAIL || "").toLowerCase();
+
+function ready() {
+  window.dispatchEvent(new Event("tpe-ready"));
+}
+
+if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PASTE") === 0) {
+  // Not configured yet: the public parts of the site still work from the built-in content.
+  window.TPE = { configured: false, user: null, role: null, onAuth() {}, db: null };
+  ready();
+} else {
+  const app = initializeApp(C.firebase);
+  const auth = getAuth(app);
+  const fs = getFirestore(app);
+  const listeners = [];
+  let current = null, role = null;
+
+  const snapWrap = (qs) => ({ docs: qs.docs.map((d) => ({ id: d.id, exists: true, ref: d.ref.path, data: () => d.data() })) });
+  function build(base, o) {
+    const parts = [];
+    (o && o.where || []).forEach((w) => parts.push(where(w[0], w[1], w[2])));
+    if (o && o.orderBy) parts.push(orderBy(o.orderBy[0], o.orderBy[1] || "asc"));
+    if (o && o.limit) parts.push(limit(o.limit));
+    return parts.length ? query(base, ...parts) : base;
+  }
+  const db = {
+    doc(path) {
+      const r = doc(fs, path);
+      return {
+        set: (data) => setDoc(r, data),
+        update: (data) => setDoc(r, data, { merge: true }),
+        get: () => getDoc(r).then((s) => ({ id: s.id, exists: s.exists(), data: () => s.data() })),
+        delete: () => deleteDoc(r)
+      };
+    },
+    collection(path) {
+      const c = collection(fs, path);
+      return {
+        onSnapshot: (next, err, o) => onSnapshot(build(c, o), (qs) => next(snapWrap(qs)), err || (() => {})),
+        add: (data) => addDoc(c, data)
+      };
+    },
+    group(name, o, next, err) {
+      return onSnapshot(build(collectionGroup(fs, name), o), (qs) => next(snapWrap(qs)), err || (() => {}));
+    }
+  };
+
+  async function loadRole(u) {
+    if (!u || !u.emailVerified) return null;
+    const email = (u.email || "").toLowerCase();
+    if (!email.endsWith("@" + DOMAIN)) return null;
+    let admins = [], teachers = [];
+    try {
+      const s = await getDoc(doc(fs, "config/roles"));
+      if (s.exists()) { admins = (s.data().admins || []).map((x) => x.toLowerCase()); teachers = (s.data().teachers || []).map((x) => x.toLowerCase()); }
+    } catch (e) { /* not readable yet */ }
+    if (email === BOOT_ADMIN || admins.includes(email)) return "admin";
+    if (teachers.includes(email)) return "teacher";
+    return "student";
+  }
+
+  onAuthStateChanged(auth, async (u) => {
+    current = u ? { uid: u.uid, email: u.email, name: u.displayName || "", emailVerified: u.emailVerified } : null;
+    role = await loadRole(u);
+    window.TPE.user = current; window.TPE.role = role;
+    listeners.forEach((cb) => { try { cb(current, role); } catch (e) { console.error(e); } });
+  });
+
+  window.TPE = {
+    configured: true, user: null, role: null, domain: DOMAIN, db,
+    onAuth(cb) { listeners.push(cb); },
+    async signIn(email, pw) { await signInWithEmailAndPassword(auth, email.trim(), pw); },
+    async signUp(email, pw, name) {
+      email = email.trim().toLowerCase();
+      if (!email.endsWith("@" + DOMAIN)) throw { code: "tpe/domain" };
+      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      if (name) await updateProfile(cred.user, { displayName: name });
+      await sendEmailVerification(cred.user);
+    },
+    async resend() { if (auth.currentUser) await sendEmailVerification(auth.currentUser); },
+    async refresh() {
+      if (!auth.currentUser) return null;
+      await auth.currentUser.reload(); await auth.currentUser.getIdToken(true);
+      const u = auth.currentUser;
+      current = { uid: u.uid, email: u.email, name: u.displayName || "", emailVerified: u.emailVerified };
+      role = await loadRole(u); window.TPE.user = current; window.TPE.role = role;
+      listeners.forEach((cb) => cb(current, role));
+      return current;
+    },
+    async reset(email) { await sendPasswordResetEmail(auth, email.trim()); },
+    async signOut() { await signOut(auth); }
+  };
+  ready();
+}

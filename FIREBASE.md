@@ -1,0 +1,96 @@
+# Tomujin PE — Firebase хувилбар
+
+Нэг вэб, хоёр хэсэг:
+
+- **Нээлттэй** (нэвтрэхгүй): 4 талт Wellbeing, 120+ дасгалын сан, мэдлэгийн сан, хоол тэжээлийн тооцоолуур, бэлтгэлийн план бүрдүүлэгч, хичээлүүд, ангиуд.
+- **Нэвтэрсэн** (`@tomujin.edu.mn` имэйл + нууц үг):
+  - **Сурагч:** Loading Form, өөрийн планууд, Wellbeing-ийн өөрийн үнэлгээ. Зөвхөн өөрийнхөө өгөгдлийг харна.
+  - **Багш:** засах горим (дасгал, нийтлэл, хичээл, анги, линк нэмэх, засах, устгах), багшийн самбар.
+  - **Админ** (`saikhanjargal.j@tomujin.edu.mn`): дээрх бүгд + багш нарыг нэмэх, хасах.
+
+Хамгаалалт товч нуухад биш, **сервер дээрх `firestore.rules`** дотор ажилладаг.
+
+## Файлууд
+
+| Файл | Юу вэ |
+|---|---|
+| `web/index.html` | Вэб хуудас (`tools/build.py` автоматаар үүсгэдэг, гараар бүү засаарай) |
+| `web/config.js` | Firebase-ийн тохиргоо. **Энд л та өөрийн утгуудаа буулгана** |
+| `web/fb.js` | Firebase-тэй холбогдох код |
+| `firestore.rules` | Хэн юуг унших, бичих эрхтэй вэ |
+| `src/` | Эх код: дасгалууд (`data.js`), Wellbeing хүрээ, нийтлэлүүд, тооцоолуур, хуудасны загвар |
+
+---
+
+## Суулгах заавар (нэг удаа, ~20 минут)
+
+### 1. Firebase төсөл үүсгэх
+1. **console.firebase.google.com** руу сургуулийн акаунтаараа (`saikhanjargal.j@tomujin.edu.mn`) орно.
+2. **Create a project** → нэр: `tomujin-pe` → Google Analytics: **унтраана** → **Create**.
+3. Төслийн ID-г тэмдэглэж авна (жишээ нь `tomujin-pe` эсвэл `tomujin-pe-1a2b3`).
+
+### 2. Нэвтрэлт асаах
+1. Зүүн цэс → **Build → Authentication** → **Get started**.
+2. **Sign-in method** → **Email/Password** → **Enable** (эхний товч) → **Save**.
+3. **Settings → Authorized domains**: `tomujin-pe.web.app` автоматаар байгаа. Дараа нь `pe.tomujin.edu.mn`-г энд нэмнэ.
+
+### 3. Өгөгдлийн сан асаах
+1. **Build → Firestore Database** → **Create database**.
+2. Location: **asia-east2 (Hong Kong)** эсвэл **asia-northeast1 (Tokyo)**. Дараа нь солих боломжгүй.
+3. **Start in production mode** → **Create**. (Жинхэнэ дүрмийг 5-р алхамд байршуулна.)
+
+### 4. config.js бөглөх
+1. ⚙ **Project settings** → **General** → доод хэсэг **Your apps** → **`</>` (Web)** дүрс.
+2. App nickname: `tomujin-pe-web`. "Also set up Firebase Hosting" **чагтлахгүй** → **Register app**.
+3. Гарч ирэх `firebaseConfig = { ... }` доторх 6 утгыг GitHub дээр `web/config.js` файлын `PASTE_...` бичигдсэн газруудад хуулж буулгана.
+   (GitHub дээр файлаа нээгээд ✏️ дарж засаад **Commit changes**.)
+   Эдгээр утгыг нийтэд ил байлгахад аюулгүй. Эрхийг `firestore.rules` шийддэг.
+
+### 5. Нийтлэх (Cloud Shell, юу ч суулгах шаардлагагүй)
+1. **shell.cloud.google.com** руу ижил акаунтаараа орно (хөтөч дотор терминал нээгдэнэ).
+2. Доорх мөрүүдийг нэг нэгээр нь хуулж буулгаад Enter дарна. `ТӨСЛИЙН-ID`-г 1-р алхмын ID-гаар солино:
+
+```bash
+git clone https://github.com/saikhanjargalj-coder/tomujin-pe-app
+cd tomujin-pe-app
+git checkout firebase-app
+npx -y firebase-tools@13 login --no-localhost
+npx -y firebase-tools@13 deploy --project ТӨСЛИЙН-ID
+```
+
+3. `login` үед холбоос гарч ирнэ. Түүнийг нээж, зөвшөөрөөд, гарсан кодыг терминал руу буулгана.
+4. Эцэст нь `Hosting URL: https://ТӨСЛИЙН-ID.web.app` гарч ирнэ. **Энэ бол таны вэб.**
+
+### 6. Анхны нэвтрэлт
+1. Вэб → **Нэвтрэх** → **Анх удаа бүртгүүлэх** → `saikhanjargal.j@tomujin.edu.mn` + шинэ нууц үг.
+2. Gmail-ээ нээж баталгаажуулах холбоос дээр дарна → вэб рүү буцаж **Баталгаажуулсан** дарна.
+3. Та автоматаар **Админ** болно. **Багшийн самбар** → доод хэсэгт бусад багш нарын имэйлийг нэмнэ.
+
+### Дараа нь шинэчлэх
+Код өөрчлөгдсөн бол Cloud Shell дээр:
+```bash
+cd tomujin-pe-app && git pull && npx -y firebase-tools@13 deploy --project ТӨСЛИЙН-ID
+```
+
+### `pe.tomujin.edu.mn` хаяг холбох
+1. Firebase → **Hosting** → **Add custom domain** → `pe.tomujin.edu.mn`.
+2. Firebase-ийн өгөх **DNS бичлэгүүдийг** (A эсвэл TXT) сургуулийн IT-д илгээж нэмүүлнэ.
+3. Хэдэн цагийн дараа идэвхжинэ. Мөн **Authentication → Settings → Authorized domains**-д `pe.tomujin.edu.mn`-г нэмнэ.
+
+---
+
+## Хэрэглээ
+
+- **Сурагч бүртгүүлэх:** вэб → Нэвтрэх → Анх удаа бүртгүүлэх → сургуулийн имэйл, нууц үг, нэр, анги → имэйлээ баталгаажуулна.
+- **Нууц үг мартвал:** Нэвтрэх → имэйлээ бичээд "Нууц үгээ мартсан" → имэйлээр холбоос ирнэ.
+- **Сурагчийн анги солих:** Багшийн самбар → сурагч → Анги солих.
+- **Бичлэг, зураг:** одоогоор YouTube / Google Drive линкээр (засах горим → хавсралт → линк). Firebase Storage асаавал (банкны карт холбох шаардлагатай) шууд файл оруулах боломжтой болно.
+
+## Үнэ
+Firebase-ийн үнэгүй (Spark) багц хангалттай: өдөрт 50,000 уншилт, 20,000 бичилт, 10 GB хостинг. Сургуулийн хэмжээнд төлбөргүй.
+
+## Хөгжүүлэгчид
+```bash
+python3 tools/build.py          # src/ → web/index.html
+npx firebase-tools emulators:start   # дотоод туршилт
+```

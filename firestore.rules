@@ -1,0 +1,84 @@
+rules_version = '2';
+// Tomujin PE — who may read and write what.
+// - Content (exercises, articles, lessons, classes, published plans): anyone may read; teachers write.
+// - Student data (profile, plans, Loading Form, wellbeing self-checks): the student and teachers read;
+//   only the student writes their own entries; teachers may change a student's class or name.
+// - Only verified @tomujin.edu.mn accounts count. The first admin is fixed below.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function school() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && myEmail().matches('.*@tomujin[.]edu[.]mn$');
+    }
+    function rolesDoc() { return /databases/$(database)/documents/config/roles; }
+    function isAdmin() {
+      return school() && (
+        myEmail() == 'saikhanjargal.j@tomujin.edu.mn'
+        || (exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.admins)
+      );
+    }
+    function isTeacher() {
+      return isAdmin() || (school() && exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.teachers);
+    }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // ---------- public content ----------
+    match /ex/{id}      { allow read: if true; allow write: if isTeacher(); }
+    match /art/{id}     { allow read: if true; allow write: if isTeacher(); }
+    match /lessons/{id} { allow read: if true; allow write: if isTeacher(); }
+    match /classes/{id} { allow read: if true; allow write: if isTeacher(); }
+    match /plans/{id}   { allow read: if true; allow write: if isTeacher(); }
+
+    // ---------- roles ----------
+    match /config/roles {
+      allow read: if signedIn();
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['admins', 'teachers', 'updatedAt'])
+        && request.resource.data.admins is list
+        && request.resource.data.teachers is list;
+    }
+
+    // ---------- people ----------
+    match /users/{uid} {
+      allow read: if isMe(uid) || isTeacher();
+      allow create: if school() && isMe(uid)
+        && request.resource.data.keys().hasOnly(['email', 'name', 'classId', 'createdAt'])
+        && request.resource.data.email == myEmail()
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.classId is string && request.resource.data.classId.size() <= 40;
+      allow update: if (school() && isMe(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80)
+        || isTeacher();
+      allow delete: if isAdmin();
+
+      // A student's own records. Teachers read them; nobody else does.
+      match /plans/{id} {
+        allow read: if isMe(uid) || isTeacher();
+        allow write: if school() && isMe(uid);
+      }
+      match /loading/{id} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create, update: if school() && isMe(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
+          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300;
+        allow delete: if school() && isMe(uid);
+      }
+      match /wellbeing/{strand} {
+        allow read: if isMe(uid) || isTeacher();
+        allow write: if school() && isMe(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 6;
+      }
+    }
+
+    // Teacher dashboard reads across all students at once.
+    match /{path=**}/loading/{id}   { allow read: if isTeacher(); }
+    match /{path=**}/wellbeing/{id} { allow read: if isTeacher(); }
+  }
+}
