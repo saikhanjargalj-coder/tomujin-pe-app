@@ -1,10 +1,10 @@
 rules_version = '2';
 // Tomujin PE — who may read and write what.
-// - Content (exercises, articles, lessons, published plans): only verified school accounts read; teachers write.
-// - Class names stay public so the sign-up form can list them.
-// - Student data (profile, plans, Loading Form, wellbeing self-checks): the student and teachers read;
-//   only the student writes their own entries; teachers may change a student's class or name.
-// - Only verified @tomujin.edu.mn accounts count. The first admin is fixed below.
+// - Only ONE account can add, edit, upload or delete site content: the owner below.
+// - Teachers listed in config/roles may only READ student records (dashboard). They cannot change anything.
+// - Students: read content after login; write only their own entries. Loading Form entries cannot be
+//   edited or deleted after sending. Nobody can touch another person's data.
+// - Only verified @tomujin.edu.mn accounts count.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -15,37 +15,39 @@ service cloud.firestore {
         && request.auth.token.email_verified == true
         && myEmail().matches('.*@tomujin[.]edu[.]mn$');
     }
+    function isOwner() { return school() && myEmail() == 'saikhanjargal.j@tomujin.edu.mn'; }
     function rolesDoc() { return /databases/$(database)/documents/config/roles; }
-    function isAdmin() {
-      return school() && (
-        myEmail() == 'saikhanjargal.j@tomujin.edu.mn'
-        || (exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.admins)
-      );
-    }
     function isTeacher() {
-      return isAdmin() || (school() && exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.teachers);
+      return isOwner() || (school() && exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.teachers);
     }
     function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function shortStr(f, n) { return !(f in request.resource.data) || (request.resource.data[f] is string && request.resource.data[f].size() <= n); }
 
-    // ---------- public content ----------
-    match /ex/{id}      { allow read: if school(); allow write: if isTeacher(); }
-    match /art/{id}     { allow read: if school(); allow write: if isTeacher(); }
-    match /lessons/{id} { allow read: if school(); allow write: if isTeacher(); }
-    match /classes/{id} { allow read: if true; allow write: if isTeacher(); }
-    // Landing page: clubs and student success stories (stories need parent consent, enforced in the editor).
-    match /clubs/{id}   { allow read: if true; allow write: if isTeacher(); }
-    match /teams/{id}   { allow read: if true; allow write: if isTeacher(); }
-    match /stories/{id} { allow read: if true; allow create, update: if isTeacher() && request.resource.data.consent == true; allow delete: if isTeacher(); }
-    match /plans/{id}   { allow read: if school(); allow write: if isTeacher(); }
-
-    // ---------- roles ----------
-    match /config/roles {
-      allow read: if signedIn();
-      allow write: if isAdmin()
-        && request.resource.data.keys().hasOnly(['admins', 'teachers', 'updatedAt'])
-        && request.resource.data.admins is list
-        && request.resource.data.teachers is list;
+    // ---------- site content: everyone signed in reads, ONLY the owner writes ----------
+    match /ex/{id}      { allow read: if school(); allow write: if isOwner(); }
+    match /art/{id}     { allow read: if school(); allow write: if isOwner(); }
+    match /lessons/{id} { allow read: if school(); allow write: if isOwner(); }
+    match /plans/{id}   { allow read: if school(); allow write: if isOwner(); }
+    // Public landing page content (class names are needed by the sign-up form).
+    match /classes/{id} { allow read: if true; allow write: if isOwner(); }
+    match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    // Student stories are public only with parent consent.
+    match /stories/{id} {
+      allow read: if true;
+      allow create, update: if isOwner() && request.resource.data.consent == true && shortStr('img', 900000);
+      allow delete: if isOwner();
     }
+
+    // ---------- roles: only the owner manages the read-only teacher list ----------
+    match /config/roles {
+      allow read: if school();
+      allow write: if isOwner()
+        && request.resource.data.keys().hasOnly(['teachers', 'updatedAt'])
+        && request.resource.data.teachers is list
+        && request.resource.data.teachers.size() <= 100;
+    }
+    match /config/{other} { allow read, write: if false; }
 
     // ---------- people ----------
     match /users/{uid} {
@@ -58,31 +60,37 @@ service cloud.firestore {
       allow update: if (school() && isMe(uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
           && request.resource.data.name is string && request.resource.data.name.size() <= 80)
-        || isTeacher();
-      allow delete: if isAdmin();
+        || isOwner();
+      allow delete: if isOwner();
 
-      // A student's own records. Teachers read them; nobody else does.
+      // A student's own training plans (private drafts).
       match /plans/{id} {
         allow read: if isMe(uid) || isTeacher();
-        allow write: if school() && isMe(uid);
+        allow create, update: if school() && isMe(uid) && request.resource.data.keys().size() <= 30;
+        allow delete: if (school() && isMe(uid)) || isOwner();
       }
+      // Loading Form: the student sends it once; it cannot be edited or deleted afterwards (owner can remove mistakes).
       match /loading/{id} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
+          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
+          && shortStr('note', 2000);
+        allow update: if false;
+        allow delete: if isOwner();
+      }
+      // Wellbeing self-check: the student keeps their current level up to date; no deleting.
+      match /wellbeing/{strand} {
         allow read: if isMe(uid) || isTeacher();
         allow create, update: if school() && isMe(uid)
           && request.resource.data.uid == uid
-          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
-          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300;
-        allow delete: if school() && isMe(uid);
-      }
-      match /wellbeing/{strand} {
-        allow read: if isMe(uid) || isTeacher();
-        allow write: if school() && isMe(uid)
-          && request.resource.data.uid == uid
           && request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 6;
+        allow delete: if isOwner();
       }
     }
 
-    // Teacher dashboard reads across all students at once.
+    // Teacher dashboard reads across all students at once (read only).
     match /{path=**}/loading/{id}   { allow read: if isTeacher(); }
     match /{path=**}/wellbeing/{id} { allow read: if isTeacher(); }
   }
