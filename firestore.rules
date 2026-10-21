@@ -32,6 +32,9 @@ service cloud.firestore {
     match /art/{id}     { allow read: if school(); allow write: if isTeacher(); }
     match /lessons/{id} { allow read: if school(); allow write: if isTeacher(); }
     match /classes/{id} { allow read: if true; allow write: if isTeacher(); }
+    // Landing page: clubs and student success stories (stories need parent consent, enforced in the editor).
+    match /clubs/{id}   { allow read: if true; allow write: if isTeacher(); }
+    match /stories/{id} { allow read: if true; allow create, update: if isTeacher() && request.resource.data.consent == true; allow delete: if isTeacher(); }
     match /plans/{id}   { allow read: if school(); allow write: if isTeacher(); }
 
     // ---------- roles ----------
