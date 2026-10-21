@@ -262,6 +262,14 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 .fgrid.tight{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .fgrid.tight input{font-size:14px;padding:7px 9px}
 .hiddenitem{opacity:.5;border-style:dashed}
+.teamphoto{width:100%;max-height:420px;object-fit:cover;border-radius:12px;display:block}
+.season{display:flex;flex-direction:column;gap:12px}
+.athgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.ath{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;min-width:0}
+.ath b{font-size:14px;line-height:1.25}.ath small{font-size:12px}
+.av{width:84px;height:84px;border-radius:50%;background:var(--tint);border:2px solid var(--line);overflow:hidden;display:grid;place-items:center;font-weight:900;color:var(--brand);font-size:24px;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}.av.big{width:52px;height:52px;font-size:18px}
+.athrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px dashed var(--line);padding-bottom:8px}.athrow input{flex:1;min-width:110px;font:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg)}
 .imgprev{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.imgprev img{max-width:260px;max-height:180px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
 .ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
 .rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
@@ -920,10 +928,10 @@ function renderMeal(){
 var BASE={ex:EX.slice(),art:ART.slice(),les:LESSONS.slice()};
 var CLASSDEF=[['1a','1A','1'],['6-7a','6A + 7A','6–7'],['8-9a','8A + 9A','8–9'],['10a','10A','10'],['10b','10B','10'],['11a','11A','11'],['11b','11B','11'],['12a','12A','12'],['12b','12B','12'],['12c','12C','12']];
 BASE.les.forEach(function(l){if(l.id==='g11')l.cls=['11a','11b'];if(l.id==='g67')l.cls=['6-7a']});
-var OV={ex:{},art:{},les:{},classes:{},club:{},story:{},team:{}};var CLASSES=[],CLUBS=[],STORIES=[],TEAMS=[];
+var OV={ex:{},art:{},les:{},classes:{},club:{},story:{},team:{},roster:{}};var CLASSES=[],CLUBS=[],STORIES=[],TEAMS=[],ROSTERS=[];
 var editMode=false,showHidden=false;
-var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes',club:'clubs',story:'stories',team:'teams'};
-var PUBLIC_KINDS=['classes','club','story','team'];
+var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes',club:'clubs',story:'stories',team:'teams',roster:'rosters'};
+var PUBLIC_KINDS=['classes','club','story','team','roster'];
 function merge(kind,base){
   var out=[],seen={};
   base.forEach(function(b){seen[b.id]=1;var o=OV[kind][b.id];if(o&&o.deleted&&!showHidden)return;out.push(Object.assign({},b,o||{},{builtin:true}))});
@@ -940,6 +948,7 @@ function applyCMS(){
   CLASSES=merge('classes',cb);
   CLUBS=merge('club',CLUBDEF);
   TEAMS=merge('team',TEAMDEF);
+  ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
 function rerenderAll(){applyCMS();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop()}
@@ -992,7 +1001,8 @@ function saveDoc(kind,id,patch,st,merge){
   if(!db)return Promise.reject();
   var cur=OV[kind][id]||{};var doc=merge?Object.assign({},cur,patch):patch;doc.updatedAt=new Date().toISOString();
   if(st){st.className='status';st.textContent='Хадгалж байна…'}
-  return db.doc(COLL[kind]+'/'+id).set(doc).then(function(){OV[kind][id]=doc;if(st)st.textContent='Хадгалагдлаа.';rerenderAll()},function(err){if(st){st.className='status err';st.textContent=err&&err.code==='permission_denied'?'Засах эрх алга. Эзэмшигчээс Editor эрх авна уу.':'Хадгалж чадсангүй. Дахин оролдоно уу.'}throw err});
+  var to;var slow=new Promise(function(_,rej){to=setTimeout(function(){rej({code:'tpe/timeout'})},20000)});
+  return Promise.race([db.doc(COLL[kind]+'/'+id).set(doc),slow]).then(function(){clearTimeout(to);OV[kind][id]=doc;if(st)st.textContent='Хадгалагдлаа.';rerenderAll()},function(err){if(st){st.className='status err';st.textContent=err&&err.code==='permission_denied'?'Засах эрх алга.':err&&err.code==='tpe/timeout'?'Сервер хариу өгсөнгүй, хадгалагдаагүй байж магадгүй. Интернэтээ шалгаад дахин оролдоно уу.':'Хадгалж чадсангүй. Дахин оролдоно уу.'}throw err});
 }
 function delDoc(kind,id,st){
   var o=OV[kind][id]||{};
@@ -1013,9 +1023,9 @@ function fImage(id,label,v){
   inp.addEventListener('change',paint);paint();
   return h('div',{cls:'ff'},[h('label',{for:id},[label]),inp,h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn gold small',text:'📷 Зураг оруулах',onclick:function(){file.click()}}),st]),file,prev]);
 }
-function shrinkImage(f){return new Promise(function(res,rej){var r=new FileReader();r.onerror=rej;r.onload=function(){var im=new Image();im.onerror=rej;im.onload=function(){
-  var max=1280,q=0.82,out;for(var i=0;i<8;i++){var sc=Math.min(1,max/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<600000)return res(out);if(q>0.6)q-=0.1;else max=Math.round(max*0.8)}
-  out.length<600000?res(out):rej()};im.src=r.result};r.readAsDataURL(f)})}
+function shrinkImage(f,MAX,LIM){MAX=MAX||1280;LIM=LIM||600000;return new Promise(function(res,rej){var r=new FileReader();r.onerror=rej;r.onload=function(){var im=new Image();im.onerror=rej;im.onload=function(){
+  var max=MAX,q=0.82,out;for(var i=0;i<8;i++){var sc=Math.min(1,max/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<LIM)return res(out);if(q>0.6)q-=0.1;else max=Math.round(max*0.8)}
+  out.length<LIM?res(out):rej()};im.src=r.result};r.readAsDataURL(f)})}
 function fSelect(id,label,opts,val){var s=h('select',{id:id},opts.map(function(o){return h('option',{value:o[0],text:o[1]})}));s.value=val==null?opts[0][0]:val;return h('label',{for:id,cls:'ff'},[label,s])}
 function fChecks(name,label,opts,vals){vals=vals||[];return h('fieldset',{cls:'checks'},[h('legend',{text:label}),h('div',{cls:'chips'},opts.map(function(o){var cb=h('input',{type:'checkbox',name:name,value:o[0]});cb.checked=vals.indexOf(o[0])>=0;return h('label',{cls:'ck'},[cb,' '+o[1]])}))])}
 function val(id){var e=$(id);return e?e.value.trim():''}
@@ -1549,6 +1559,7 @@ function openTeam(id){
     var er=editRow('team',t,openTeam);if(er)p.appendChild(er);
     p.appendChild(h('div',{cls:'team',style:'cursor:default;--cc:'+teamColor(t)},[h('div',{cls:'pic'},[teamPic(t)])]));
     p.appendChild(h('p',{cls:'lede',text:t.d}));
+    p.appendChild(rosterBlock(t));
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Баг'}),h('div',{cls:'fgrid'},[
       h('div',{},[h('small',{cls:'muted',text:'Дасгалжуулагч'}),h('p',{style:'margin:0;font-weight:700',text:t.coach||'Удахгүй зарлана'})]),
       h('div',{},[h('small',{cls:'muted',text:'Бэлтгэл'}),h('p',{style:'margin:0;font-weight:700',text:t.when||'Удахгүй зарлана'})]),
@@ -1559,6 +1570,65 @@ function openTeam(id){
     if(mem.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тамирчдын түүх'}),h('div',{cls:'storygrid'},mem.map(function(x){return storyCard(x)}))]));
     p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Багт хэрхэн орох'}),h('p',{style:'margin:0',text:t.join||'Тухайн спортын дугуйланд тогтмол хамрагдаж, дасгалжуулагчийн сонгон шалгаруулалтад орно. Дэлгэрэнгүйг биеийн тамирын багш Coach Jack-аас асуугаарай.'})]));
     var at=attView(t.att);if(at)p.appendChild(at);
+  });
+}
+/* ---------- season rosters (team photo + athletes per year) ---------- */
+function rosterBlock(t){
+  var wrap=h('div',{cls:'sub'});
+  var list=ROSTERS.filter(function(r){return r.team===t.id});
+  var head=h('div',{cls:'chips',style:'justify-content:space-between'},[h('h3',{style:'margin:0',text:'Улирлын бүрэлдэхүүн'}),editMode?h('button',{type:'button',cls:'btn gold small',text:'+ Улирал нэмэх',onclick:function(){openRosterEditor(t,null)}}):null]);
+  wrap.appendChild(head);
+  if(!list.length){wrap.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Улирал бүрийн багийн зураг, тамирчдын танилцуулга удахгүй нэмэгдэнэ.'}));return wrap}
+  list.forEach(function(r){
+    var box=h('div',{cls:'box season'+(r.deleted?' hiddenitem':'')},[h('div',{cls:'chips',style:'justify-content:space-between'},[h('h3',{style:'margin:0',text:(r.season||'')+' улирал'}),r.res?h('span',{cls:'tag',style:'background:var(--gold);color:#1c1c1c',text:r.res}):null])]);
+    if(editMode)box.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'✎ Засах',onclick:function(){openRosterEditor(t,r)}}),h('button',{type:'button',cls:'btn line small danger',text:'🗑 Устгах',onclick:function(ev){var b=ev.currentTarget;if(b.dataset.sure){delDoc('roster',r.id,null).then(function(){openTeam(t.id)})}else{b.dataset.sure='1';b.textContent='Тийм, устгах уу?'}}})]));
+    if(r.img)box.appendChild(h('img',{cls:'teamphoto',src:imgSrc(r.img),alt:t.n+' '+(r.season||''),loading:'lazy'}));
+    if(r.note)box.appendChild(h('p',{style:'margin:0',text:r.note}));
+    var g=h('div',{cls:'athgrid'});
+    (r.athletes||[]).forEach(function(a){g.appendChild(h('div',{cls:'ath'},[h('div',{cls:'av'},[a.img?h('img',{src:imgSrc(a.img),alt:a.n,loading:'lazy'}):h('span',{text:initials(a.n)})]),h('b',{text:a.n}),(a.no||a.pos)?h('small',{text:[a.no?'#'+a.no:null,a.pos||null].filter(Boolean).join(' · ')}):null,a.gr?h('small',{cls:'muted',text:a.gr}):null]))});
+    if((r.athletes||[]).length)box.appendChild(g);
+    wrap.appendChild(box);
+  });
+  return wrap;
+}
+function imgPick(v,MAX,LIM,round){
+  var cur=v||'';var prev=h('div',{cls:round?'av big':'imgprev'});var st=h('small',{cls:'muted'});
+  var file=h('input',{type:'file',accept:'image/*',style:'display:none'});
+  function paint(){prev.innerHTML='';if(cur)prev.appendChild(h('img',{src:imgSrc(cur),alt:''}));else if(round)prev.appendChild(h('span',{text:'📷'}))}
+  file.addEventListener('change',function(){var f=file.files&&file.files[0];if(!f)return;st.textContent='Шахаж байна…';shrinkImage(f,MAX,LIM).then(function(d){cur=d;st.textContent='';paint()},function(){st.textContent='Зургийг уншиж чадсангүй.'});file.value=''});
+  paint();
+  var el=h('div',{cls:'chips',style:'align-items:center'},[prev,file,h('button',{type:'button',cls:'btn line small',text:'Зураг',onclick:function(){file.click()}}),h('button',{type:'button',cls:'btn line small',text:'×','aria-label':'Зураг арилгах',onclick:function(){cur='';paint()}}),st]);
+  return {el:el,get:function(){return cur}};
+}
+function openRosterEditor(t,item){
+  var isNew=!item;item=item||{athletes:[]};var id=item.id||slug();var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=(isNew?'Шинэ улирал · ':'Засах · ')+t.n;
+    p.appendChild(h('h2',{id:'sheetTitle',text:isNew?'Улирал нэмэх':(item.season+' улирал')}));
+    var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
+    f.appendChild(h('div',{cls:'fgrid'},[fText('r-season','Улирал / он',item.season,{ph:'жишээ: 2026–27'}),fText('r-res','Үр дүн (заавал биш)',item.res,{ph:'жишээ: UBAC U19 — 2-р байр'})]));
+    var tp=imgPick(item.img,1280,380000,false);
+    f.appendChild(h('div',{cls:'ff'},[h('span',{text:'Багийн зураг'}),tp.el]));
+    f.appendChild(fText('r-note','Товч танилцуулга',item.note,{area:1,rows:3}));
+    var rows=[];var rb=h('div',{cls:'sub'});
+    function addRow(a){a=a||{};var pk=imgPick(a.img,320,40000,true);
+      var r={n:h('input',{type:'text',placeholder:'Нэр',value:a.n||''}),no:h('input',{type:'text',placeholder:'№',value:a.no||'',style:'width:60px'}),pos:h('input',{type:'text',placeholder:'Байрлал',value:a.pos||''}),gr:h('input',{type:'text',placeholder:'Анги',value:a.gr||'',style:'width:90px'}),pk:pk};
+      var line=h('div',{cls:'athrow'},[pk.el,r.n,r.no,r.pos,r.gr,h('button',{type:'button',cls:'rm',text:'×','aria-label':'Тамирчин хасах',onclick:function(){rows.splice(rows.indexOf(r),1);line.remove()}})]);
+      rows.push(r);rb.appendChild(line)}
+    (item.athletes||[]).forEach(addRow);if(!rows.length)addRow();
+    f.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тамирчид'}),h('small',{cls:'muted',text:'Нэр, тоглогчийн дугаар, байрлал, анги, зураг. Танилцуулгын зорилготой.'}),rb,h('button',{type:'button',cls:'btn line small',text:'+ Тамирчин нэмэх',onclick:function(){addRow()}})]));
+    var ok=h('input',{type:'checkbox',id:'r-consent'});ok.checked=!!item.consent;
+    f.appendChild(h('label',{cls:'chk',for:'r-consent'},[ok,' Тамирчид болон эцэг эхээс нь нэр, зургийг нийтэд харуулах зөвшөөрөл авсан']));
+    var save=h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
+      var season=val('r-season');if(!season){st.className='status err';st.textContent='Улирал / он оруулна уу.';return}
+      if(!ok.checked){st.className='status err';st.textContent='Нийтлэхийн өмнө эцэг эхийн зөвшөөрөл авсан байх шаардлагатай.';return}
+      var ath=rows.map(function(r){return {n:r.n.value.trim(),no:r.no.value.trim(),pos:r.pos.value.trim(),gr:r.gr.value.trim(),img:r.pk.get()}}).filter(function(a){return a.n});
+      var d={team:t.id,season:season,res:val('r-res'),note:val('r-note'),img:tp.get(),athletes:ath,consent:true,custom:true};
+      if(JSON.stringify(d).length>950000){st.className='status err';st.textContent='Зургууд хэт их байна. Багийн зургийг жижиг болгох эсвэл тамирчдын тоог багасгана уу.';return}
+      saveDoc('roster',id,d,st,false).then(function(){openTeam(t.id)},function(){});
+    }});
+    f.appendChild(h('div',{cls:'editrow'},[save,h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){openTeam(t.id)}}),st]));
+    p.appendChild(f);
   });
 }
 function storyCard(x){return card('story'+(x.deleted?' hiddenitem':''),null,function(){openStory(x.id)},[storyPh(x),h('div',{cls:'bd'},[
