@@ -32,6 +32,8 @@ service cloud.firestore {
     match /classes/{id} { allow read: if true; allow write: if isOwner(); }
     match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
     match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    // Site texts and lists (page headings, how-it-works, morning routine, daily tips).
+    match /site/{id}    { allow read: if true; allow write: if isOwner(); }
     // Team rosters per season (team photo + athletes): public only with parent consent.
     match /rosters/{id} {
       allow read: if true;
