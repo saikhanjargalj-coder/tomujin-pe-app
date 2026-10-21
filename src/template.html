@@ -355,6 +355,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <h1>Wellbeing хүрээ</h1>
     <p class="lede">Сургуулийн Mastery Tracker-ийн "Timeless Competencies". Түвшин нь чадварыг биш, хэр бие даан эзэмшсэнийг хэмждэг: багш хөтөлсөн үеэс эхлээд бусдад түгээдэг болох хүртэл. Чиглэл дээр дарж түвшин бүрийн тайлбар, PE-д хэрхэн харагдах, холбогдох дасгал, нийтлэлийг үзнэ.</p>
   </div>
+  <div class="chips" id="wbEdit"></div>
   <div class="lvscale" id="lvScale" aria-label="6 түвшин"></div>
   <div class="dims" id="wbDims"></div>
 </section>
@@ -388,6 +389,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
 </section>
 
 <section class="view" id="v-calc" hidden>
+  <div class="chips" id="calcEdit"></div>
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Нас · Хүйс · Жин · Өндөр · InBody</span>
     <h1>Хоол тэжээлийн тооцоолуур</h1>
@@ -718,6 +720,7 @@ function renderHome(){
 
 /* ---------- wellbeing ---------- */
 function renderWB(){
+  var E=$('wbEdit');if(E){E.innerHTML='';if(editMode){E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ 4 хэмжээс',onclick:function(){editList('wbdim')}}));E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ 6 түвшин',onclick:function(){editList('wblv')}}));E.appendChild(h('span',{cls:'muted',style:'font-size:13px',text:'14 чиглэлийг засахдаа тухайн чиглэл дээр дарна.'}))}}
   var sc=$('lvScale');sc.innerHTML='';WBLV.forEach(function(l,i){sc.appendChild(h('div',{},[h('b',{text:'L'+(i+1)+' · '+l[1]}),h('strong',{text:l[0]}),h('span',{text:l[2]})]))});
   var w=$('wbDims');w.innerHTML='';WBDIM.forEach(function(d){w.appendChild(dimCard(d,true))});
 }
@@ -727,6 +730,7 @@ function openStrand(sid){
     $('sheetEyebrow').textContent=d.n+' wellbeing · '+d.en;
     p.style.setProperty('--dc','var(--'+d.id+')');
     p.appendChild(h('div',{style:'display:flex;flex-direction:column;gap:6px'},[h('h2',{id:'sheetTitle',text:s.n,style:'font-size:28px;color:var(--dc)'}),h('p',{cls:'muted',style:'font-size:13px;font-weight:700',text:s.en.name}),h('p',{style:'font-size:17px;font-weight:600',text:s.w}),h('p',{cls:'muted',style:'font-size:14px',text:'“'+s.en.what+'”'})]));
+    if(editMode)p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'✎ Энэ чиглэлийг засах',onclick:function(){editStrand(sid)}})]));
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'PE ба энэ платформд'}),h('p',{text:s.pe}),sid==='fuel'?h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Хоол тооцоолуур нээх',onclick:function(){closeSheet();show('calc')}})]):null]));
     var sc=h('div',{cls:'selfcheck'},[h('h3',{text:'Би одоо аль түвшинд байна вэ?'}),h('p',{cls:'muted',style:'font-size:14px',text:ME?'Өөрийгөө шударгаар үнэлээд товчоо дар. Таны сонголт акаунтад хадгалагдаж, багш тань харна.':'Өөрийгөө шударгаар үнэлээд товчоо дар. Нэвтэрвэл таны сонголт хадгалагдана.'})]);
     var saved=h('p',{cls:'status',role:'status'});
@@ -869,10 +873,15 @@ function rd(n,d){var p=Math.pow(10,d||0);return Math.round(n*p)/p}
 function fmt(n){return Math.round(n).toLocaleString('en-US')}
 function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function fillPals(){var po=$('palOpts');if(!po)return;var cur=(document.querySelector('input[name=cPal]:checked')||{}).value;po.innerHTML='';
+  PALS.forEach(function(p,i){var r=h('input',{type:'radio',name:'cPal',value:String(p[0])});r.checked=cur!=null?String(p[0])===cur:i===Math.min(2,PALS.length-1);po.appendChild(h('label',{},[r,h('span',{},[p[1]+' · PAL '+p[0],h('small',{text:p[2]})])]))})}
+function fillFoods(){var fs=$('fSel');if(!fs)return;var cur=fs.value;fs.innerHTML='';FOODS.forEach(function(f,i){fs.appendChild(h('option',{value:String(i),text:f[0]+' — '+f[1]+' ккал/100 г'}))});if(cur&&FOODS[+cur])fs.value=cur}
+function renderCalcEdit(){var E=$('calcEdit');if(!E)return;E.innerHTML='';if(!editMode)return;
+  E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Хүнсний жагсаалт',onclick:function(){editList('foods')}}));
+  E.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Идэвхийн түвшин (PAL)',onclick:function(){editList('pals')}}))}
 function initCalc(){
-  var po=$('palOpts');PALS.forEach(function(p,i){po.appendChild(h('label',{},[h('input',{type:'radio',name:'cPal',value:String(p[0]),checked:i===2?'':null}),h('span',{},[p[1]+' · PAL '+p[0],h('small',{text:p[2]})])]))});
-  var fs=$('fSel');FOODS.forEach(function(f,i){fs.appendChild(h('option',{value:String(i),text:f[0]+' — '+f[1]+' ккал/100 г'}))});
-  function setDef(){$('fG').value=FOODS[+fs.value][5]}fs.addEventListener('change',setDef);setDef();
+  fillPals();fillFoods();var fs=$('fSel');
+  function setDef(){var f=FOODS[+fs.value];if(f)$('fG').value=f[5]}fs.addEventListener('change',setDef);setDef();
   var saved=lsGet('tpe-calc');if(saved){['cAge','cW','cH','cPbf','cFfm','cSmm','cBmr'].forEach(function(k){if(saved[k]!=null)$(k).value=saved[k]});if(saved.sex)document.querySelector('input[name=cSex][value='+saved.sex+']').checked=true;if(saved.pal)[].forEach.call(document.querySelectorAll('input[name=cPal]'),function(r){r.checked=r.value===String(saved.pal)});$('cAth').checked=!!saved.ath}
   MEAL=lsGet('tpe-meal')||[[4,100],[8,150],[2,120],[16,150]];
   $('calcForm').addEventListener('input',renderCalc);$('calcForm').addEventListener('change',renderCalc);
@@ -958,7 +967,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -1774,7 +1783,8 @@ primeLeft=primeTotal();
 
 /* ---------- site CMS: every static text + lists, owner edits ---------- */
 var SITE={},TXT={};
-var DEF={how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice()};
+var DEF={how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice(),foods:FOODS.slice(),pals:PALS.slice(),wbdim:WBDIM.slice(),wblv:WBLV.slice()};
+var DEFWBS=WBS.map(function(x){return {n:x.n,w:x.w,pe:x.pe,g:x.g.slice()}});
 var LISTS={
   how:{title:'Хэрхэн явагддаг: алхмууд',fields:[['when','Хэзээ'],['title','Гарчиг'],['text','Тайлбар',1]],
     toRow:function(x){return {when:x[0],title:x[1],text:x[2]}},fromRow:function(r){return [r.when||'',r.title||'',r.text||'']},arr:HOW},
@@ -1788,10 +1798,33 @@ var LISTS={
     toRow:function(x){return {n:x.n,k:x.k,min:Math.round(x.t/6)/10,c:x.c,w:x.w,moves:(x.m||[]).map(function(m){var e=m[0]&&byId(m[0]);return [m[1],m[2],m[3],e?e.n:''].join(' | ')}).join('\n')}},
     fromRow:function(r){return {n:r.n||'',k:r.k||'',t:Math.max(10,Math.round((+r.min||1)*60)),c:r.c||'var(--brand)',w:r.w||'',m:lines(r.moves||'').map(function(l){var q=l.split('|').map(function(x){return x.trim()});var e=q[3]?EX.filter(function(x){return x.n===q[3]||x.id===q[3]})[0]:null;return [e?e.id:null,q[0]||'',q[1]||'',q[2]||'']})}},arr:PRIME}
 };
+LISTS.foods={title:'Хоол тооцоолуур: хүнсний жагсаалт',note:'Бүх тоо 100 г тутамд. Нэг удаагийн хэмжээ нь сонгоход автоматаар бөглөгдөнө.',fields:[['name','Хүнсний нэр'],['kcal','Ккал / 100 г','num'],['p','Уураг (г)','num'],['c','Нүүрс ус (г)','num'],['f','Өөх тос (г)','num'],['g','Нэг удаагийн хэмжээ (г)','num']],
+  toRow:function(x){return {name:x[0],kcal:x[1],p:x[2],c:x[3],f:x[4],g:x[5]}},fromRow:function(r){return [r.name||'',+r.kcal||0,+r.p||0,+r.c||0,+r.f||0,+r.g||100]},arr:FOODS};
+LISTS.pals={title:'Хоол тооцоолуур: идэвхийн түвшин (PAL)',note:'PAL нь ихэвчлэн 1.2–2.4 хооронд байдаг.',fields:[['x','PAL коэффициент','num'],['name','Нэр'],['desc','Тайлбар',1]],
+  toRow:function(x){return {x:x[0],name:x[1],desc:x[2]}},fromRow:function(r){return [Math.min(3,Math.max(1,+r.x||1.4)),r.name||'',r.desc||'']},arr:PALS};
+LISTS.wbdim={title:'Wellbeing: 4 хэмжээс',fixed:true,fields:[['n','Нэр'],['en','Англи нэр'],['d','Тайлбар',1]],
+  toRow:function(x){return {n:x.n,en:x.en,d:x.d}},fromRow:function(r,i){var b=DEF.wbdim[i]||{};return Object.assign({},b,{n:r.n||b.n,en:r.en||b.en,d:r.d||b.d})},arr:WBDIM};
+LISTS.wblv={title:'Wellbeing: 6 түвшин',fixed:true,fields:[['n','Нэр'],['en','Англи нэр'],['d','Тайлбар',1]],
+  toRow:function(x){return {n:x[0],en:x[1],d:x[2]}},fromRow:function(r,i){var b=DEF.wblv[i]||[];return [r.n||b[0],r.en||b[1],r.d||b[2]]},arr:WBLV};
+function applyStrands(){var o=(SITE.wbs&&SITE.wbs.o)||{};WBS.forEach(function(x,i){var d=DEFWBS[i],v=o[x.id]||{};x.n=v.n||d.n;x.w=v.w!=null?v.w:d.w;x.pe=v.pe!=null?v.pe:d.pe;x.g=d.g.map(function(t,j){return v.g&&v.g[j]!=null&&v.g[j]!==''?v.g[j]:t})})}
+function editStrand(sid){
+  var x=strand(sid);var i=WBS.indexOf(x);var st=h('p',{cls:'status',role:'status'});var o=(SITE.wbs&&SITE.wbs.o)||{};
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Wellbeing чиглэл засах';p.appendChild(h('h2',{id:'sheetTitle',text:x.n}));
+    var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
+    f.appendChild(fText('ws-n','Нэр',x.n));f.appendChild(fText('ws-w','Товч утга',x.w,{area:1,rows:2}));f.appendChild(fText('ws-pe','PE ба энэ платформд',x.pe,{area:1,rows:3}));
+    WBLV.forEach(function(l,j){f.appendChild(fText('ws-g'+j,'L'+(j+1)+' '+l[0],x.g[j],{area:1,rows:3}))});
+    f.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var m=Object.assign({},o);m[sid]={n:val('ws-n'),w:$('ws-w').value.trim(),pe:$('ws-pe').value.trim(),g:WBLV.map(function(_,j){return $('ws-g'+j).value.trim()})};saveSite('wbs',{o:m},st).then(function(){openStrand(sid)},function(){})}}),
+      o[sid]?h('button',{type:'button',cls:'btn line',text:'↺ Анхны хувилбар',onclick:function(){var m=Object.assign({},o);delete m[sid];saveSite('wbs',{o:m},st).then(function(){openStrand(sid)},function(){})}}):null,
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){openStrand(sid)}}),st]));
+    p.appendChild(f);
+  });
+}
 var COLORS=[['var(--teal)','Цэнхэр'],['var(--orange)','Улбар шар'],['#15803d','Ногоон'],['var(--brand)','Нил ягаан'],['#be185d','Ягаан'],['var(--gold)','Шар']];
 function applySite(){
   TXT=(SITE.texts&&SITE.texts.t)||{};
-  Object.keys(LISTS).forEach(function(k){var L=LISTS[k],d=SITE[k];var src=d&&d.items?d.items.map(L.fromRow):DEF[k];L.arr.length=0;src.forEach(function(x){L.arr.push(x)})});
+  Object.keys(LISTS).forEach(function(k){var L=LISTS[k],d=SITE[k];var src=d&&d.items&&d.items.length?d.items.map(function(r,i){return L.fromRow(r,i)}):DEF[k];L.arr.length=0;src.forEach(function(x){L.arr.push(x)})});applyStrands();
   if(typeof primeRun!=='undefined'&&!primeRun)primeLeft=primeTotal();
 }
 function tagTexts(){var n=0;[].forEach.call(document.querySelectorAll('main h1, main h2, main h3, main .eyebrow, main .lede, main a.step.link p, main a.step.link .go, main .hero .btn, main .gate .btn, footer span'),function(el){
@@ -1826,7 +1859,7 @@ function editList(name){
   var L=LISTS[name];var rows=L.arr.map(L.toRow);var st=h('p',{cls:'status',role:'status'});
   openSheet(function(p){
     $('sheetEyebrow').textContent='Жагсаалт засах';
-    p.appendChild(h('h2',{id:'sheetTitle',text:L.title}));
+    p.appendChild(h('h2',{id:'sheetTitle',text:L.title}));if(L.note)p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:L.note}));
     var box=h('div',{cls:'sub'});
     function draw(){box.innerHTML='';rows.forEach(function(r,i){
       var card=h('div',{cls:'lrow'});
@@ -1836,13 +1869,13 @@ function editList(name){
         else{inp=h('input',{type:f[2]==='num'?'number':'text',step:'0.5'});inp.value=r[f[0]]==null?'':r[f[0]]}
         inp.addEventListener('input',function(){r[f[0]]=inp.value});inp.addEventListener('change',function(){r[f[0]]=inp.value});
         card.appendChild(h('label',{cls:'ff'},[f[1],inp]))});
-      card.appendChild(h('div',{cls:'ctl'},[
+      if(!L.fixed)card.appendChild(h('div',{cls:'ctl'},[
         i>0?h('button',{type:'button',cls:'btn line small',text:'↑',onclick:function(){rows.splice(i-1,0,rows.splice(i,1)[0]);draw()}}):null,
         i<rows.length-1?h('button',{type:'button',cls:'btn line small',text:'↓',onclick:function(){rows.splice(i+1,0,rows.splice(i,1)[0]);draw()}}):null,
         h('button',{type:'button',cls:'btn line small danger',text:'🗑 Хасах',onclick:function(){rows.splice(i,1);draw()}})]));
       box.appendChild(card)})}
     draw();p.appendChild(box);
-    p.appendChild(h('button',{type:'button',cls:'btn line',text:'+ Шинээр нэмэх',onclick:function(){rows.push({});draw()}}));
+    if(!L.fixed)p.appendChild(h('button',{type:'button',cls:'btn line',text:'+ Шинээр нэмэх',onclick:function(){rows.push({});draw()}}));
     p.appendChild(h('div',{cls:'editrow'},[
       h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var items=rows.map(function(r){var o={};L.fields.forEach(function(f){o[f[0]]=r[f[0]]==null?'':String(r[f[0]])});return o});saveSite(name,{items:items},st).then(function(){closeSheet()},function(){})}}),
       SITE[name]?h('button',{type:'button',cls:'btn line',text:'↺ Анхны хувилбар',onclick:function(){if(!db)return;db.doc('site/'+name).delete().then(function(){delete SITE[name];applySite();rerenderAll();closeSheet()})}}):null,
