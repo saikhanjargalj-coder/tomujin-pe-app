@@ -27,8 +27,10 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-display);font-size:15px;line-height:1.55}
-body:not(.authed) nav.tabs a:not([data-go=home]):not(.gl){display:none}
-body.authed nav.tabs a.gl{display:none}
+body:not(.authed) nav.tabs a:not([data-pub]){display:none}
+a.step.link{color:inherit;text-decoration:none;cursor:pointer;transition:border-color .15s,transform .15s}
+a.step.link:hover{border-color:var(--brand);transform:translateY(-2px)}
+a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14px}
 .bar .wrap>.logo{order:1}
 #acctBar{order:2;margin-left:auto}
 .bar .wrap>nav.tabs{order:3;flex-basis:100%}
@@ -261,12 +263,11 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
       <span><b>TOMUJIN</b><small>PHYSICAL EDUCATION</small></span>
     </a>
     <nav class="tabs" aria-label="Хэсгүүд">
-      <a href="#home" data-go="home">Нүүр</a>
-      <a href="#how" class="gl" data-scroll="how">Хэрхэн явагддаг</a>
-      <a href="#clubs" class="gl" data-scroll="clubs">Дугуйлан</a>
-      <a href="#prime" class="gl" data-scroll="prime">Өглөөний 20 минут</a>
-      <a href="#stories" class="gl" data-scroll="stories">Амжилтын түүх</a>
-      <a href="#priming" data-go="priming">Өглөөний priming</a>
+      <a href="#home" data-go="home" data-pub>Нүүр</a>
+      <a href="#how" data-go="how" data-pub>Хэрхэн явагддаг</a>
+      <a href="#clubs" data-go="clubs" data-pub>Дугуйлан</a>
+      <a href="#priming" data-go="priming" data-pub>Өглөөний 20 минут</a>
+      <a href="#stories" data-go="stories" data-pub>Амжилтын түүх</a>
       <a href="#wellbeing" data-go="wellbeing">Wellbeing</a>
       <a href="#library" data-go="library">Дасгалын сан</a>
       <a href="#learn" data-go="learn">Мэдлэгийн сан</a>
@@ -291,7 +292,7 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
       <h1>Хөдөлгөөнөөр эхэлдэг 4 талт wellbeing</h1>
       <p class="lede">Бие махбодь, оюун санаа, сэтгэл хөдлөл, нийгмийн сайн сайхан байдал. Томүжингийн Wellbeing хүрээ, 1–12-р ангийн хөтөлбөр, дасгалын сан, мэдлэгийн сан нэг дор, бүгд хоорондоо уялдсан.</p>
       <div class="chips members"><a class="btn gold" href="#wellbeing" data-go="wellbeing">Wellbeing хүрээ</a><a class="btn line" href="#library" data-go="library">Дасгалын сан</a></div>
-      <div class="chips guest"><a class="btn gold" href="#how" data-scroll="how">Tomujin PE хэрхэн явагддаг</a><a class="btn line" href="#clubs" data-scroll="clubs">Дугуйлангууд</a></div>
+      <div class="chips guest"><a class="btn gold" href="#how" data-go="how">Tomujin PE хэрхэн явагддаг</a><a class="btn line" href="#clubs" data-go="clubs">Дугуйлангууд</a></div>
     </div>
     <div class="stage" id="heroStage" aria-label="Дасгалын хөдөлгөөнт жишээ"></div>
   </div>
@@ -299,48 +300,12 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
   <div class="tip members" id="tip"></div>
   <div class="tiles members" id="tiles"></div>
 
-  <section class="sec" id="how" aria-labelledby="howT">
-    <div class="head">
-      <span class="eyebrow">Бидний арга барил</span>
-      <h2 id="howT">Tomujin PE хэрхэн явагддаг вэ</h2>
-      <p class="lede">Биеийн тамир бол зөвхөн 80 минутын хичээл биш. Сурагч бүр бусадтай биш, өчигдрийн өөртэйгөө өрсөлдөж, хөдөлгөөнийг өдөр тутмын амьдралынхаа хэсэг болгоход бид зорьдог.</p>
-    </div>
-    <div class="steps" id="howSteps"></div>
-  </section>
-
-  <section class="sec" id="clubs" aria-labelledby="clubsT">
-    <div class="head">
-      <span class="eyebrow">Хичээлээс гадуурх хөдөлгөөн</span>
-      <h2 id="clubsT">Дугуйлангууд</h2>
-      <p class="lede">Спорт, оюун ухаан, тулааны урлаг, бүжиг, фитнесс. Сурагч бүр өөрт таалагдах хөдөлгөөнөө олж, түүндээ тогтмол ирэх нь хамгийн чухал. Карт дээр дарж дэлгэрэнгүйг үзнэ.</p>
-    </div>
-    <div class="chips" id="clubFilter"></div>
-    <div class="chips" id="clubAdd"></div>
-    <div class="clubgrid" id="clubGrid"></div>
-  </section>
-
-  <section class="sec" id="prime" aria-labelledby="primeT">
-    <div class="two-col">
-      <div class="head" style="justify-content:center">
-        <span class="eyebrow">Body &amp; Mind Priming</span>
-        <h2 id="primeT">Өглөөний 20 минут: биеэ сэрээж, оюунаа төвлөрүүлнэ</h2>
-        <p class="lede">Хичээл эхлэхээс өмнө сурагч, багш нар хамтдаа хийх 20 минутын дасгал. Хүнд биш, харин сэргээдэг: амьсгал, биеэ халаах, үе мөчөө хөдөлгөх, булчингаа сэрээх, тархиа идэвхжүүлэх, биеийн байрлалаа засах. Ямар ч хэрэгсэлгүй, 2 × 2 метр зай хангалттай.</p>
-        <div class="chips"><a class="btn gold members" href="#priming" data-go="priming">Дасгалыг эхлүүлэх</a><span class="tag g guest">Бүтэн дасгалыг нэвтэрч үзнэ</span></div>
-      </div>
-      <div class="steps" id="primeTeaser" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
-    </div>
-  </section>
-
-  <section class="sec" id="stories" aria-labelledby="storiesT">
-    <div class="head">
-      <span class="eyebrow">UBAC · Тэмцээн · Өөрчлөлт</span>
-      <h2 id="storiesT">Амжилтын түүх</h2>
-      <p class="lede">UBAC-д оролцсон тамирчид, тэмцээн уралдааны замнал, мөн өөрийгөө өөрчилж чадсан сурагчид. Медаль бол нэг хэсэг нь, илүү чухал нь тогтмол ирж, өсөж хөгжсөн түүх.</p>
-    </div>
-    <div class="chips" id="storyFilter"></div>
-    <div class="chips" id="storyAdd"></div>
-    <div class="storygrid" id="storyGrid"></div>
-  </section>
+  <div class="steps guest">
+    <a class="step link" href="#how" data-go="how"><span class="when">Бидний арга барил</span><h3>Tomujin PE хэрхэн явагддаг</h3><p class="muted" style="margin:0;font-size:14px">Эхлэлийн үнэлгээнээс тусгал хүртэлх 6 алхам.</p><span class="go">Үзэх →</span></a>
+    <a class="step link" href="#clubs" data-go="clubs"><span class="when">Хичээлээс гадуур</span><h3>Дугуйлангууд</h3><p class="muted" style="margin:0;font-size:14px">Спорт, оюун ухаан, тулааны урлаг, бүжиг, фитнесс.</p><span class="go">Үзэх →</span></a>
+    <a class="step link" href="#priming" data-go="priming"><span class="when">Body &amp; Mind Priming</span><h3>Өглөөний 20 минут</h3><p class="muted" style="margin:0;font-size:14px">Хичээлийн өмнө биеэ сэрээж, оюунаа төвлөрүүлэх дасгал.</p><span class="go">Үзэх →</span></a>
+    <a class="step link" href="#stories" data-go="stories" id="storiesCard"><span class="when">UBAC · Тэмцээн · Өөрчлөлт</span><h3>Амжилтын түүх</h3><p class="muted" style="margin:0;font-size:14px">Тамирчид, замнал, өөрийгөө өөрчилсөн сурагчид.</p><span class="go">Үзэх →</span></a>
+  </div>
 
   <div class="gate guest" id="gate">
     <span class="eyebrow">Зөвхөн Томүжингийн сурагч, багш нарт</span>
@@ -464,11 +429,48 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 <section class="view" id="v-priming" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Body &amp; Mind Priming · 20 минут · Хэрэгсэлгүй</span>
-    <h1>Өглөөний priming</h1>
-    <p class="lede">Сурагч, багш, ажилчид бүгд хамтдаа хийх өглөөний 20 минут. Зорилго нь ядраах биш, сэрээх: хичээлдээ сэргэг, төвлөрсөн, биеэ мэдэрсэн байдлаар орох. Эрчим нь 10-аас 3–5 (амьсгал хурдсана, харин ярьж чадна).</p>
+    <h1>Өглөөний 20 минут</h1>
+    <p class="lede">Хичээл эхлэхээс өмнө сурагч, багш, ажилчид бүгд хамтдаа хийх 20 минутын дасгал. Зорилго нь ядраах биш, сэрээх: амьсгал, биеэ халаах, үе мөчөө хөдөлгөх, булчингаа сэрээх, тархиа идэвхжүүлэх, биеийн байрлалаа засах. Ямар ч хэрэгсэлгүй, 2 × 2 метр зай хангалттай. Эрчим нь 10-аас 3–5 (амьсгал хурдсана, харин ярьж чадна).</p>
   </div>
-  <div id="primeOut" style="display:flex;flex-direction:column;gap:16px"></div>
+  <div class="guest" style="display:flex;flex-direction:column;gap:14px">
+    <div class="steps" id="primeTeaser" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+    <div class="gate"><h2>Бүтэн дасгал, таймерыг нэвтэрч үзнэ</h2><p class="lede">Дасгал бүрийн хөдөлгөөнт дүрс, 20 минутын таймер, нас ба орчинд тохируулах хувилбарууд сургуулийн имэйлээр нэвтэрсний дараа нээгдэнэ.</p><div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button></div></div>
+  </div>
+  <div class="members" id="primeOut" style="display:flex;flex-direction:column;gap:16px"></div>
 </section>
+
+<section class="view" id="v-how" hidden aria-labelledby="howT">
+    <div class="head">
+      <span class="eyebrow">Бидний арга барил</span>
+      <h2 id="howT">Tomujin PE хэрхэн явагддаг вэ</h2>
+      <p class="lede">Биеийн тамир бол зөвхөн 80 минутын хичээл биш. Сурагч бүр бусадтай биш, өчигдрийн өөртэйгөө өрсөлдөж, хөдөлгөөнийг өдөр тутмын амьдралынхаа хэсэг болгоход бид зорьдог.</p>
+    </div>
+    <div class="steps" id="howSteps"></div>
+  </section>
+
+<section class="view" id="v-clubs" hidden aria-labelledby="clubsT">
+    <div class="head">
+      <span class="eyebrow">Хичээлээс гадуурх хөдөлгөөн</span>
+      <h2 id="clubsT">Дугуйлангууд</h2>
+      <p class="lede">Спорт, оюун ухаан, тулааны урлаг, бүжиг, фитнесс. Сурагч бүр өөрт таалагдах хөдөлгөөнөө олж, түүндээ тогтмол ирэх нь хамгийн чухал. Карт дээр дарж дэлгэрэнгүйг үзнэ.</p>
+    </div>
+    <div class="chips" id="clubFilter"></div>
+    <div class="chips" id="clubAdd"></div>
+    <div class="clubgrid" id="clubGrid"></div>
+  </section>
+
+<section class="view" id="v-stories" hidden aria-labelledby="storiesT">
+    <div class="head">
+      <span class="eyebrow">UBAC · Тэмцээн · Өөрчлөлт</span>
+      <h2 id="storiesT">Амжилтын түүх</h2>
+      <p class="lede">UBAC-д оролцсон тамирчид, тэмцээн уралдааны замнал, мөн өөрийгөө өөрчилж чадсан сурагчид. Медаль бол нэг хэсэг нь, илүү чухал нь тогтмол ирж, өсөж хөгжсөн түүх.</p>
+    </div>
+    <div class="chips" id="storyFilter"></div>
+    <div class="chips" id="storyAdd"></div>
+    <p class="muted" id="storyEmpty" hidden>Амжилтын түүх удахгүй нэмэгдэнэ.</p>
+    <div class="storygrid" id="storyGrid"></div>
+  </section>
+
 
 <section class="view" id="v-log" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
@@ -1481,7 +1483,7 @@ function renderStories(){
   var used=Object.keys(STORYTYPE).filter(function(k){return STORIES.some(function(s){return s.type===k})});
   if(used.length>1)[['all','Бүгд']].concat(used.map(function(k){return [k,STORYTYPE[k]]})).forEach(function(o){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(storyType===o[0]),text:o[1],onclick:function(){storyType=o[0];renderStories()}}))});
   var list=STORIES.filter(function(s){return storyType==='all'||s.type===storyType});
-  sec.hidden=!STORIES.length&&!editMode;[].forEach.call(document.querySelectorAll('[data-scroll=stories]'),function(a){a.hidden=!STORIES.length});
+  $('storyEmpty').hidden=!!STORIES.length;[].forEach.call(document.querySelectorAll('[data-go=stories]'),function(a){a.hidden=!STORIES.length&&!editMode&&!AUTHED});
   if(!STORIES.length&&editMode)W.appendChild(h('p',{cls:'muted',text:'Одоогоор түүх алга. "+ Амжилтын түүх нэмэх" дарж эхний сурагчаа оруулаарай. Нийтлэхээс өмнө сурагч, эцэг эхийн зөвшөөрөл авна.'}));
   list.forEach(function(x){
     W.appendChild(h('button',{type:'button',cls:'story'+(x.deleted?' hiddenitem':''),onclick:function(){openStory(x.id)}},[storyPh(x),h('div',{cls:'bd'},[
@@ -1602,19 +1604,21 @@ function stopContentSubs(){contentSubs.forEach(function(f){try{f()}catch(e){}});
 function setAuthed(on){
   var was=AUTHED;AUTHED=on;document.body.classList.toggle('authed',on);
   if(on&&!was){startContentSubs();if(PENDING){var v=PENDING;PENDING=null;show(v)}}
-  if(!on){stopContentSubs();PENDING=null;var cur=(location.hash||'').slice(1);if(cur&&cur!=='home')show('home')}
+  if(!on){stopContentSubs();PENDING=null;var cur=(location.hash||'').slice(1);if(cur&&PUBVIEWS.indexOf(cur)<0)show('home')}
 }
 [].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
 
 /* ---------- routing ---------- */
-var VIEWS=['home','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
+var VIEWS=['home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
+var PUBVIEWS=['home','how','clubs','stories','priming'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
-  if(!AUTHED&&v!=='home'){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
+  if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  try{history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo(0,0)}
+  try{if(show.ready&&location.hash!=='#'+v)history.pushState(null,'','#'+v);else history.replaceState(null,'','#'+v)}catch(e){}window.scrollTo(0,0)}
+window.addEventListener('popstate',function(){show((location.hash||'').slice(1))});
 function bindGo(root){[].forEach.call(root.querySelectorAll('[data-go]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();show(a.dataset.go)})})}
-bindGo(document.querySelector('header'));bindGo($('v-home'));
+bindGo(document.querySelector('header'));bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
 var DL=null;applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderPrimeTeaser();renderPriming();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
