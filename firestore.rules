@@ -69,8 +69,18 @@ service cloud.firestore {
       allow update: if (school() && isMe(uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
           && request.resource.data.name is string && request.resource.data.name.size() <= 80)
+        || (school() && isMe(uid) && resource.data.classId == ''
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classId'])
+          && request.resource.data.classId is string && request.resource.data.classId.size() <= 40)
         || isOwner();
       allow delete: if isOwner();
+
+      // Exercises a student saved from the library (their own list only).
+      match /saved/{exId} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && request.resource.data.keys().hasOnly(['at']);
+        allow delete: if (school() && isMe(uid)) || isOwner();
+      }
 
       // A student's own training plans (private drafts).
       match /plans/{id} {
