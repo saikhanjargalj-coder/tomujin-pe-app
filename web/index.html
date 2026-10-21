@@ -268,6 +268,7 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 .fgrid.tight{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .fgrid.tight input{font-size:14px;padding:7px 9px}
 .hiddenitem{opacity:.5;border-style:dashed}
+.imgprev{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.imgprev img{max-width:260px;max-height:180px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
 .ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
 .rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
 @media (max-width:860px){ .calcgrid{grid-template-columns:1fr} }
@@ -1342,6 +1343,19 @@ function delDoc(kind,id,st){
 
 /* form helpers */
 function fText(id,label,val,opts){opts=opts||{};var inp=opts.area?h('textarea',{id:id,rows:String(opts.rows||4),placeholder:opts.ph||''}):h('input',{type:opts.type||'text',id:id,placeholder:opts.ph||'',min:opts.min,max:opts.max});inp.value=val==null?'':val;return h('label',{for:id,cls:'ff'},[label,opts.help?h('small',{text:opts.help}):null,inp])}
+function fImage(id,label,v){
+  var inp=h('input',{type:'text',id:id,placeholder:'https://… (Google Drive "Anyone with the link" зураг) эсвэл доороос зураг оруулна'});inp.value=v||'';
+  var prev=h('div',{cls:'imgprev'});var st=h('small',{cls:'muted'});
+  var file=h('input',{type:'file',accept:'image/*',style:'display:none'});
+  function paint(){prev.innerHTML='';var u=inp.value.trim();inp.hidden=/^data:/.test(u);if(u){prev.appendChild(h('img',{src:imgSrc(u),alt:''}));prev.appendChild(h('button',{type:'button',cls:'btn line small',text:'Зураг арилгах',onclick:function(){inp.value='';st.textContent='';paint()}}))}}
+  file.addEventListener('change',function(){var f=file.files&&file.files[0];if(!f)return;st.textContent='Зургийг шахаж байна…';
+    shrinkImage(f).then(function(d){inp.value=d;st.textContent='Зураг бэлэн ('+Math.round(d.length*0.75/1024)+' KB). "Хадгалах" дарна уу.';paint()},function(){st.textContent='Энэ зургийг уншиж чадсангүй. JPG эсвэл PNG зураг сонгоно уу.'});file.value=''});
+  inp.addEventListener('change',paint);paint();
+  return h('div',{cls:'ff'},[h('label',{for:id},[label]),inp,h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn gold small',text:'📷 Зураг оруулах',onclick:function(){file.click()}}),st]),file,prev]);
+}
+function shrinkImage(f){return new Promise(function(res,rej){var r=new FileReader();r.onerror=rej;r.onload=function(){var im=new Image();im.onerror=rej;im.onload=function(){
+  var max=1280,q=0.82,out;for(var i=0;i<8;i++){var sc=Math.min(1,max/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<600000)return res(out);if(q>0.6)q-=0.1;else max=Math.round(max*0.8)}
+  out.length<600000?res(out):rej()};im.src=r.result};r.readAsDataURL(f)})}
 function fSelect(id,label,opts,val){var s=h('select',{id:id},opts.map(function(o){return h('option',{value:o[0],text:o[1]})}));s.value=val==null?opts[0][0]:val;return h('label',{for:id,cls:'ff'},[label,s])}
 function fChecks(name,label,opts,vals){vals=vals||[];return h('fieldset',{cls:'checks'},[h('legend',{text:label}),h('div',{cls:'chips'},opts.map(function(o){var cb=h('input',{type:'checkbox',name:name,value:o[0]});cb.checked=vals.indexOf(o[0])>=0;return h('label',{cls:'ck'},[cb,' '+o[1]])}))])}
 function val(id){var e=$(id);return e?e.value.trim():''}
@@ -1419,17 +1433,17 @@ function openEditor(kind,item){
       f.appendChild(fText('c-d','Товч тайлбар',item.d,{area:1,rows:2}));
       f.appendChild(h('div',{cls:'two'},[fText('c-gain','Юу хөгжүүлдэг (мөр бүрт нэг)',(item.gain||[]).join('\n'),{area:1}),fText('c-do','Юу хийдэг (мөр бүрт нэг)',(item.does||[]).join('\n'),{area:1})]));
       f.appendChild(fText('c-join','Хэрхэн нэгдэх',item.join,{area:1,rows:2}));
-      f.appendChild(fText('c-img','Зургийн линк (заавал биш)',item.img,{type:'url',ph:'https://… (Google Drive "Anyone with the link" зураг)'}));
+      f.appendChild(fImage('c-img','Зураг (заавал биш)',item.img));
     }else if(kind==='team'){
       f.appendChild(h('div',{cls:'fgrid'},[fText('t-n','Багийн нэр',item.n),fSelect('t-fig','Зураг (спорт)',[['bb-set-shot','Сагсан бөмбөг'],['vb-set','Волейбол'],['fb-instep','Хөл бөмбөг']],item.fig||'bb-set-shot'),fText('t-league','Лиг / холбоо',item.league,{ph:'жишээ: UBAC'}),fText('t-div','Ангилал',item.div,{ph:'жишээ: U19 охид, хөвгүүд'})]));
       f.appendChild(h('div',{cls:'fgrid'},[fText('t-coach','Дасгалжуулагч',item.coach),fText('t-when','Бэлтгэлийн хуваарь',item.when,{ph:'жишээ: Даваа, Лхагва 17:00–18:30'}),fText('t-where','Хаана',item.where,{ph:'жишээ: U1 заал'})]));
       f.appendChild(fText('t-d','Товч тайлбар',item.d,{area:1,rows:2}));
       f.appendChild(fText('t-ach','Амжилт (мөр бүрт: он | тэмцээн | үр дүн)',(item.ach||[]).map(function(x){return x.join(' | ')}).join('\n'),{area:1,rows:5,help:'Жишээ: 2025–26 | UBAC U19 охид | 2-р байр'}));
       f.appendChild(fText('t-join','Багт хэрхэн орох',item.join,{area:1,rows:2}));
-      f.appendChild(fText('t-img','Багийн зургийн линк (заавал биш)',item.img,{type:'url',ph:'https://… (Google Drive "Anyone with the link" зураг)'}));
+      f.appendChild(fImage('t-img','Багийн зураг (заавал биш)',item.img));
     }else if(kind==='story'){
       f.appendChild(h('div',{cls:'fgrid'},[fText('s-n','Нэр',item.n),fSelect('s-type','Төрөл',Object.keys(STORYTYPE).map(function(k){return [k,STORYTYPE[k]]}),item.type||'ubac'),fText('s-sport','Спорт / чиглэл',item.sport),fText('s-gr','Анги / төгсөлтийн он',item.gr,{ph:'жишээ: 12-р анги эсвэл 2025 оны төгсөгч'})]));
-      f.appendChild(fText('s-img','Зургийн линк',item.img,{type:'url',ph:'https://… (Google Drive "Anyone with the link" зураг)'}));
+      f.appendChild(fImage('s-img','Зураг',item.img));
       f.appendChild(fText('s-q','Ишлэл (өөрийнх нь үг)',item.q,{area:1,rows:2}));
       f.appendChild(fText('s-body','Түүх, намтар',bodyToText(item.body),{area:1,rows:8,help:'"## " гарчиг, "- " жагсаалт. Хоосон мөрөөр догол мөр тусгаарлана.'}));
       f.appendChild(fText('s-path','Тэмцээн, замнал (мөр бүрт: он | тэмцээн | үр дүн)',(item.path||[]).map(function(x){return x.join(' | ')}).join('\n'),{area:1,rows:5,help:'Жишээ: 2025 | UBAC U19 волейбол | 2-р байр'}));
@@ -1750,7 +1764,7 @@ function openStudent(u){
     $('sheetEyebrow').textContent='Сурагч'+(c?' · '+c.name:'');
     p.appendChild(h('h2',{id:'sheetTitle',text:u.name||u.email}));p.appendChild(h('p',{cls:'muted',text:u.email}));
     var st=h('span',{cls:'status',role:'status'});var sel=fSelect('su-class','Анги',[['','—']].concat(CLASSES.map(function(k){return [k.id,k.name]})),u.classId||'');
-    p.appendChild(h('div',{cls:'editrow'},[sel,h('button',{type:'button',cls:'btn line small',text:'Анги солих',onclick:function(){db.doc('users/'+u.uid).update({classId:val('su-class')}).then(function(){st.className='status';st.textContent='Солигдлоо.'},function(){st.className='status err';st.textContent='Солиж чадсангүй.'})}}),st]));
+    if(MYROLE==='admin')p.appendChild(h('div',{cls:'editrow'},[sel,h('button',{type:'button',cls:'btn line small',text:'Анги солих',onclick:function(){db.doc('users/'+u.uid).update({classId:val('su-class')}).then(function(){st.className='status';st.textContent='Солигдлоо.'},function(){st.className='status err';st.textContent='Солиж чадсангүй.'})}}),st]));
     var L=LOADS.filter(function(x){return x.uid===u.uid});
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Ачаалал (8 долоо хоног)'}),weeklyBars(L,8)]));
     var wbs=WBALL.filter(function(x){return x.uid===u.uid});
@@ -1759,14 +1773,13 @@ function openStudent(u){
   });
 }
 function rolesBox(){
-  var box=h('div',{cls:'box'},[h('h3',{text:'Багш нар ба админ (зөвхөн админд харагдана)'})]);var st=h('p',{cls:'status',role:'status'});
-  var ta=fText('ro-t','Багш нарын имэйл (мөр бүрт нэг)','',{area:1,rows:4});var tb=fText('ro-a','Админы имэйл (мөр бүрт нэг)','',{area:1,rows:2});
-  box.appendChild(ta);box.appendChild(tb);
-  db.doc('config/roles').get().then(function(s){if(s.exists){$('ro-t').value=(s.data().teachers||[]).join('\n');$('ro-a').value=(s.data().admins||[]).join('\n')}}).catch(function(){});
+  var box=h('div',{cls:'box'},[h('h3',{text:'Багш нар (зөвхөн танд харагдана)'})]);var st=h('p',{cls:'status',role:'status'});
+  box.appendChild(fText('ro-t','Багш нарын имэйл (мөр бүрт нэг)','',{area:1,rows:4}));
+  db.doc('config/roles').get().then(function(s){if(s.exists)$('ro-t').value=(s.data().teachers||[]).join('\n')}).catch(function(){});
   box.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold small',text:'Хадгалах',onclick:function(){
-    function clean(s){return lines(s).map(function(x){return x.toLowerCase()}).filter(function(x){return /@/.test(x)})}
-    db.doc('config/roles').set({teachers:clean($('ro-t').value),admins:clean($('ro-a').value),updatedAt:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа. Шинэ багш дахин нэвтэрмэгц эрх нь идэвхжинэ.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st]));
-  box.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Багш нар сурагчдын адил "Анх удаа бүртгүүлэх" хэсгээр бүртгүүлж, имэйлээ баталгаажуулна. Тэдний имэйлийг энд нэмэхэд засах эрх, багшийн самбар нээгдэнэ.'}));
+    var t=lines($('ro-t').value).map(function(x){return x.toLowerCase()}).filter(function(x){return /^[^@\s]+@tomujin\.edu\.mn$/.test(x)});
+    db.doc('config/roles').set({teachers:t,updatedAt:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st]));
+  box.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Энд нэмсэн багш нар зөвхөн сурагчдын Loading Form, Wellbeing мэдээллийг харж чадна. Сайтын агуулга, зураг нэмэх, засах, устгах эрх зөвхөн танд байна.'}));
   return box;
 }
 
@@ -1777,11 +1790,11 @@ async function fbInit(){
   db=TPE.db;
   PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
-    ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='teacher'||role==='admin';if(!canEdit)editMode=false;
+    ME=u;MYROLE=role;MYPROFILE=null;canEdit=role==='admin';if(!canEdit)editMode=false;
     setAuthed(!!(u&&u.emailVerified&&role));
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
     await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
-    [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!canEdit});
+    [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!(role==='admin'||role==='teacher')});
   });
 }
 

@@ -68,7 +68,7 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
       const s = await getDoc(doc(fs, "config/roles"));
       if (s.exists()) { admins = (s.data().admins || []).map((x) => x.toLowerCase()); teachers = (s.data().teachers || []).map((x) => x.toLowerCase()); }
     } catch (e) { /* not readable yet */ }
-    if (email === BOOT_ADMIN || admins.includes(email)) return "admin";
+    if (BOOT_ADMIN && email === BOOT_ADMIN) return "admin"; // only the owner edits
     if (teachers.includes(email)) return "teacher";
     return "student";
   }
