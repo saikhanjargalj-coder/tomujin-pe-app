@@ -36,7 +36,7 @@ function calcAll(i){
   r.bmrSrc=r.inb?'InBody-ийн BMR':r.kat?'Katch-McArdle (өөх тосгүй жин)':r.mif?'Mifflin-St Jeor':'Schofield (ДЭМБ/FAO)';
   r.tdee=r.bmr*i.pal;
   var adj=(i.age>=18&&i.goal)?i.goal:0;r.adj=adj;r.target=r.tdee*(1+adj);
-  var pk=i.ath?(i.age<18?[1.2,1.6]:[1.4,2.0]):[m.prot,m.prot];r.pk=pk;
+  var pk=(i.ath||i.pal>=1.8)?(i.age<18?[1.2,1.6]:[1.4,2.0]):[m.prot,m.prot];r.pk=pk;
   var pg=i.w*(pk[0]+pk[1])/2;r.pg=pg;
   var fatPct=(m.fat[0]+m.fat[1])/2;r.fg=r.target*fatPct/100/9;
   r.cg=Math.max(0,(r.target-pg*4-r.fg*9)/4);
