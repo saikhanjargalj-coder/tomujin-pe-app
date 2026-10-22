@@ -54,6 +54,16 @@ a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14p
 .team .pic{background:var(--tint);border-radius:12px;aspect-ratio:16/10;overflow:hidden}
 .team .pic>svg,.team .pic>img{width:100%;height:100%;display:block;object-fit:cover}
 .team h3{font-size:18px;margin:0}.team p{margin:0;font-size:14px}
+.coachcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;align-items:start}
+.coachcard .cph{aspect-ratio:4/5;border-radius:16px;background:linear-gradient(135deg,var(--brand-ink),var(--brand));display:grid;place-items:center;overflow:hidden}
+.coachcard .cph img{width:100%;height:100%;object-fit:cover}.coachcard .cph .ini{font-size:56px;font-weight:900;color:var(--gold)}
+.coachcard .cbd{display:flex;flex-direction:column;gap:10px}.coachcard h2{margin:0}.coachcard .role{margin:0;font-weight:700;color:var(--brand)}.coachcard .lede{margin:0}
+.faq,.privacy{display:flex;flex-direction:column;gap:12px}.faq h2,.privacy h2{margin:0}.privacy .lede{margin:0}
+.faqgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.faqi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:6px}.faqi h3{margin:0;font-size:16px}.faqi .lede{margin:0;font-size:15px}
+.footgrid{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}.fcol{display:flex;flex-direction:column;gap:4px}.fcol strong{color:var(--fg);font-size:15px}
+.flinks{display:flex;gap:8px;flex-wrap:wrap}.flinks a{display:inline-flex;gap:6px;align-items:baseline;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;text-decoration:none;color:var(--fg);font-size:14px}.flinks a:hover{border-color:var(--brand);color:var(--brand)}.flinks b{color:var(--brand)}
+@media (max-width:720px){.coachcard{grid-template-columns:1fr}.coachcard .cph{width:150px}}
 .topath{background:linear-gradient(135deg,var(--brand-ink),var(--brand));color:var(--on-brand);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px}
 .topath .eyebrow{color:var(--gold)}.topath h2{color:var(--on-brand);margin:0}.topath .lede{color:rgba(255,255,255,.85);margin:0}
 .topath .story{color:var(--fg)}
@@ -376,6 +386,18 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
     <div class="chips" id="topAdd"></div>
     <div class="storygrid" id="topGrid"></div>
   </section>
+  <section class="coachcard" id="coachIntro" aria-labelledby="coachT">
+    <div class="cph" id="coachPh"><span class="ini">JC</span></div>
+    <div class="cbd">
+      <span class="eyebrow" data-cms="cj_eb">Танай хүүхэдтэй хэн ажилладаг вэ</span>
+      <h2 id="coachT" data-cms="cj_h">Жак багш</h2>
+      <p class="role" data-cms="cj_role">Биеийн тамирын багш, амьдралын хэв маягийн дасгалжуулагч</p>
+      <p class="lede" data-cms="cj_p1">Сайн байна уу! Би Жак багш — Жаргалсайханы Сайханжаргал. Тэмүжин Альтернатив Сургуулийн биеийн тамирын багш, амьдралын хэв маягийн дасгалжуулагч.</p>
+      <p class="lede" data-cms="cj_p2">Би 20 гаруй жил спортоор хичээллэсэн. Хөлбөмбөгийн мэргэжлийн хаалгач байсан бөгөөд одоо ч идэвхтэй тоглосоор байна. Мөн тамирчдын бие бялдрын дасгалжуулагч, хувийн дасгалжуулагчаар ажилладаг. Надад AFC D лиценз, AFC хаалгачийн 2-р түвшний дасгалжуулагчийн лиценз бий. Одоо NSCA-ийн гэрчилгээ авахаар бэлдэж байна.</p>
+      <p class="lede" data-cms="cj_p3">Тэмүжинд би 1–12-р ангийн биеийн тамирын хичээлийг удирдаж, UBAC-ийн сургуулийн багуудыг дасгалжуулдаг. Сурагчид, багш ажилтнууд, гэр бүлүүдэд эрүүл зуршил төлөвшүүлэхэд тусалдаг.</p>
+      <p class="lede" data-cms="cj_p4">Миний итгэл үнэмшил энгийн: зүгээр л ирээрэй. Хамгийн шилдэг нь байх шаардлагагүй — ирж, оролдоод, өөрийнхөө хурдаар өсөж хөгжөөрэй. Миний заадаг бүхнийг би өөр дээрээ туршиж, амьдарч үзсэн.</p>
+    </div>
+  </section>
   <div class="members" id="homeToday"></div>
   <div class="dims members" id="homeDims"></div>
   <div class="tip members" id="tip"></div>
@@ -387,6 +409,22 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
     <p class="lede">Сайн сайхан байдлын хүрээ, дасгалын сан, мэдлэгийн сан, хоол тооцоолуур, бэлтгэлийн план, хичээлүүд, бэлтгэлийн тэмдэглэл нь зөвхөн @tomujin.edu.mn хаягаар нэвтэрч, имэйлээ баталгаажуулсан хэрэглэгчдэд нээгдэнэ.</p>
     <div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
   </div>
+  <section class="faq" id="parentFaq" aria-labelledby="faqT">
+    <span class="eyebrow" data-cms="faq_eb">Эцэг эхчүүдэд</span>
+    <h2 id="faqT" data-cms="faq_h">Түгээмэл асуулт</h2>
+    <div class="faqgrid">
+      <div class="faqi"><h3 data-cms="faq_q1">Хүүхэд маань биеийн тамирын хичээлд юу өмсөх вэ?</h3><p class="lede" data-cms="faq_a1">Эвтэйхэн спорт хувцас, заалны пүүз. Урт үсээ боож, гоёл чимэглэл зүүхгүй.</p></div>
+      <div class="faqi"><h3 data-cms="faq_q2">Юу авчрах вэ?</h3><p class="lede" data-cms="faq_a2">Усны сав, жижиг алчуур, солих хувцас.</p></div>
+      <div class="faqi"><h3 data-cms="faq_q3">Хүүхэд маань өвчтэй эсвэл бэртсэн бол яах вэ?</h3><p class="lede" data-cms="faq_a3">Хичээлээс өмнө Жак багшид мэдэгдээрэй. Хүүхэд аюулгүй, тохируулсан хэлбэрээр хичээлд оролцоно. Хичээл дээр бэртвэл анхны тусламж үзүүлж, тантай шууд холбогдоно.</p></div>
+      <div class="faqi"><h3 data-cms="faq_q4">Хүүхэд маань спортод тийм ч сайн биш бол?</h3><p class="lede" data-cms="faq_a4">Зүгээр шүү. Бид хүүхэд бүрийг бусадтай биш, өөрийнх нь ахицтай харьцуулдаг. Зүгээр л ирээд оролдоорой.</p></div>
+      <div class="faqi"><h3 data-cms="faq_q5">Багштай яаж холбогдох вэ?</h3><p class="lede" data-cms="faq_a5">Энэ хуудасны хамгийн доод хэсэгт байгаа холбоо барих мэдээллийг харна уу.</p></div>
+    </div>
+  </section>
+  <section class="privacy" id="privacy" aria-labelledby="privT">
+    <span class="eyebrow" data-cms="pv_eb">Нууцлал</span>
+    <h2 id="privT" data-cms="pv_h">Сурагчийн мэдээллийг бид хэрхэн хамгаалдаг вэ</h2>
+    <p class="lede" data-cms="pv_p">Бид сурагч бүрийг хөгжүүлэхэд хэрэгтэй мэдээллийг л цуглуулдаг: анги, бие бялдрын сорилын дүн, InBody дүн, дасгалын бүртгэл. Сурагч бүр зөвхөн өөрийн мэдээллийг хардаг, засах болон устгах эрх зөвхөн Жак багшид байна. Мэдээллийг Тэмүжингээс гадна хэнд ч өгөхгүй, зар сурталчилгаанд ашиглахгүй. Эцэг эхчүүд хүүхдийнхээ мэдээллийг хүссэн үедээ харж, засуулж болно.</p>
+  </section>
 </section>
 
 <section class="view" id="v-wellbeing" hidden>
@@ -607,7 +645,10 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 
 </main>
 
-<footer><div class="wrap" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span>Tomujin PE · Томүжин Алтернатив сургууль · Coach Jack</span></div></footer>
+<footer id="contact"><div class="wrap footgrid">
+  <div class="fcol"><strong data-cms="ft_h">Холбоо барих</strong><span>Tomujin PE · Томүжин Алтернатив сургууль · Coach Jack</span></div>
+  <nav class="flinks" id="footLinks" aria-label="Холбоо барих"></nav>
+</div></footer>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="panel" id="panel"></div>
@@ -790,7 +831,15 @@ function dimCard(d,compact){
     var nEx=EX.filter(function(e){return wsOf(e).indexOf(s.id)>=0}).length;
     return h('button',{type:'button',cls:'strandbtn',onclick:function(){openStrand(s.id)}},[h('span',{text:s.n}),h('span',{cls:'n',text:nEx?nEx+' дасгал':''})])})));
 }
+function renderContact(){
+  var C=(window.TPE_CONFIG||{}),K=C.CONTACT||{},ok=function(u){return /^https:\/\//i.test(u||'')?u:''};
+  var ph=$('coachPh');if(ph&&ok(C.COACH_PHOTO)&&!ph.querySelector('img')){ph.innerHTML='';ph.appendChild(h('img',{src:C.COACH_PHOTO,alt:'Жак багш'}))}
+  var F=$('footLinks');if(!F)return;F.innerHTML='';
+  [[K.email,'Имэйл','mailto:'+K.email,K.email],[K.phone,'Утас','tel:'+String(K.phone||'').replace(/[^\d+]/g,''),K.phone],[ok(K.facebook),'Facebook',K.facebook,''],[ok(K.instagram),'Instagram',K.instagram,''],[ok(K.youtube),'YouTube',K.youtube,'']].forEach(function(r){
+    if(!r[0])return;var a=h('a',{href:r[2]},[h('b',{text:r[1]}),r[3]?h('span',{text:r[3]}):null]);if(/^https/.test(r[2])){a.target='_blank';a.rel='noopener'}F.appendChild(a)});
+}
 function renderHome(){
+  renderContact();
   var st=$('heroStage');st.innerHTML='';['bb-set-shot','vb-set','squat','fb-instep','tn-forehand','a-march'].forEach(function(id,i){st.appendChild(makeVis(byId(id),{phase:i*0.4}).svg)});
   var hd=$('homeDims');hd.innerHTML='';WBDIM.forEach(function(d){hd.appendChild(dimCard(d,true))});
   var dd=new Date(),tp=TIPS.length?TIPS[(dd.getDate()+dd.getMonth())%TIPS.length]:null;
@@ -2080,7 +2129,7 @@ function applySite(){
   Object.keys(LISTS).forEach(function(k){var L=LISTS[k],d=SITE[k];var src=d&&d.items&&d.items.length?d.items.map(function(r,i){return L.fromRow(r,i)}):DEF[k];L.arr.length=0;src.forEach(function(x){L.arr.push(x)})});applyStrands();
   if(typeof primeRun!=='undefined'&&!primeRun)primeLeft=primeTotal();
 }
-function tagTexts(){var n=0;[].forEach.call(document.querySelectorAll('main h1, main h2, main h3, main .eyebrow, main .lede, main a.step.link p, main a.step.link .go, main .hero .btn, main .gate .btn, footer span'),function(el){
+function tagTexts(){var n=0;[].forEach.call(document.querySelectorAll('[data-cms]'),function(el){if(el._def===undefined)el._def=el.textContent});[].forEach.call(document.querySelectorAll('main h1, main h2, main h3, main .eyebrow, main .lede, main a.step.link p, main a.step.link .go, main .hero .btn, main .gate .btn, footer span'),function(el){
   if(el.children.length||!el.textContent.trim()||el.hasAttribute('data-cms')||el.closest('[id$=Grid],[id$=Out],[id$=Steps],#tip,#tiles,#homeDims,#heroStage,#sheet'))return;
   var v=el.closest('.view,footer,section');el.setAttribute('data-cms',(v&&v.id?v.id:'x')+'_'+(n++));el._def=el.textContent})}
 function applyTexts(){[].forEach.call(document.querySelectorAll('[data-cms]'),function(el){var k=el.getAttribute('data-cms');var has=Object.prototype.hasOwnProperty.call(TXT,k);

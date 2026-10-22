@@ -16,5 +16,14 @@ window.TPE_CONFIG = {
   // This account is always an admin, even before the roles list exists.
   // It must match the email written in firestore.rules.
   ADMIN_EMAIL: "saikhanjargal.j@tomujin.edu.mn",
-  ACADEMIC_YEAR: "2026-27"
+  ACADEMIC_YEAR: "2026-27",
+  // Home page: coach photo and contact footer. Leave "" to hide an item.
+  COACH_PHOTO: "",   // full https link to a photo, e.g. "https://.../jack.jpg"
+  CONTACT: {
+    email: "saikhanjargal.j@tomujin.edu.mn",
+    phone: "",       // e.g. "+976 9911 2233"
+    facebook: "",    // e.g. "https://facebook.com/..."
+    instagram: "",   // e.g. "https://instagram.com/..."
+    youtube: ""      // e.g. "https://youtube.com/@..."
+  }
 };
