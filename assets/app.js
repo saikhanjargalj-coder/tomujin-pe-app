@@ -128,7 +128,7 @@ function loginErrorText(desc) {
 async function render(loginMsg = null) {
   if (typeof loginMsg !== "string") loginMsg = null;
   try {
-    if (!session) return loginMsg || location.hash.startsWith("#/login") ? renderLogin(loginMsg) : renderHome();
+    if (!session) return renderLogin(loginMsg);
     if (!profile) {
       profile = await must(sb.from("profiles").select("*").eq("id", session.user.id).maybeSingle());
       if (!profile) return renderNoAccess();
@@ -165,62 +165,6 @@ function shell(content, active = "") {
   $("#signout").onclick = async () => { await sb.auth.signOut(); session = null; profile = null; go("#/"); };
 }
 
-// ---------------------------------------------------------------- public home page
-const HOME_UI = {
-  mn: { login: "Нэвтрэх", tag: "TOMUJIN ALTERNATIVE SCHOOL · БИЕИЙН ТАМИР", hero: "Just show up<br>for yourself.",
-    lead: "Хөдөлгөөн, эрүүл зуршил, хувийн ахиц — 1-ээс 12-р анги хүртэл. Сурагчид сургуулийн хаягаараа нэвтэрч өөрийн хуудсаа үзнэ.",
-    coach: "Багш", faq: "Эцэг эхийн түгээмэл асуулт", privacy: "Сурагчийн мэдээллийн нууцлал", contact: "Холбоо барих",
-    email: "Имэйл", phone: "Утас" },
-  en: { login: "Log in", tag: "TOMUJIN ALTERNATIVE SCHOOL · PHYSICAL EDUCATION", hero: "Just show up<br>for yourself.",
-    lead: "Movement, healthy habits and personal progress — Grade 1 to 12. Students log in with their school account to see their own page.",
-    coach: "Your coach", faq: "Parent FAQ", privacy: "Student data privacy", contact: "Contact",
-    email: "Email", phone: "Phone" },
-};
-function homeLang() { try { return localStorage.getItem("tpe-lang") === "en" ? "en" : "mn"; } catch { return "mn"; } }
-const safeUrl = (u) => (/^https:\/\//i.test(u || "") ? u : "");
-function renderHome() {
-  const H = window.TOMUJIN_HOME || {};
-  const lang = homeLang(), t = HOME_UI[lang];
-  const coach = H.coach || {}, cc = coach[lang] || { paragraphs: [] };
-  const ct = H.contact || {};
-  const photo = safeUrl(coach.photo)
-    ? `<img class="coach-photo" src="${esc(coach.photo)}" alt="${esc(cc.title)}">`
-    : `<div class="coach-photo ph" aria-hidden="true">JC</div>`;
-  const links = [
-    ct.email && [t.email, `mailto:${ct.email}`, ct.email],
-    ct.phone && [t.phone, `tel:${ct.phone.replace(/[^\d+]/g, "")}`, ct.phone],
-    safeUrl(ct.facebook) && ["Facebook", ct.facebook, "Facebook"],
-    safeUrl(ct.instagram) && ["Instagram", ct.instagram, "Instagram"],
-    safeUrl(ct.youtube) && ["YouTube", ct.youtube, "YouTube"],
-  ].filter(Boolean);
-  app.innerHTML = `<div class="home">
-    <header class="home-top">
-      <div class="brand"><div class="mark">T</div><div><strong>Tomujin PE</strong><small>#JUSTSHOWUP</small></div></div>
-      <div class="row">
-        <button class="btn sm lang" id="lang" aria-label="Language">${lang === "mn" ? "EN" : "МН"}</button>
-        <a class="btn accent" href="#/login">${t.login}</a>
-      </div>
-    </header>
-    <section class="home-hero"><div class="tag">${t.tag}</div><h1>${t.hero}</h1><p>${t.lead}</p></section>
-    <main class="home-main">
-      <section class="card coach" id="coach">
-        ${photo}
-        <div><div class="eyebrow">${t.coach}</div><h2>${esc(cc.title)}</h2><p class="sub">${esc(cc.role)}</p>
-          ${(cc.paragraphs || []).map((p) => `<p>${esc(p)}</p>`).join("")}</div>
-      </section>
-      <section class="card" id="faq"><h2>${t.faq}</h2>
-        ${((H.faq || {})[lang] || []).map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}
-      </section>
-      <section class="card" id="privacy"><h2>${t.privacy}</h2><p>${esc((H.privacy || {})[lang] || "")}</p></section>
-    </main>
-    <footer class="home-foot" id="contact">
-      <div><strong>${t.contact}</strong><p class="muted">${esc(coach.name || "")} · Tomujin Alternative School</p></div>
-      <nav class="foot-links">${links.map(([l, href, text]) => `<a href="${esc(href)}" ${href.startsWith("https") ? 'target="_blank" rel="noopener"' : ""}><span>${esc(l)}</span>${esc(text === l ? "" : text)}</a>`).join("")}</nav>
-    </footer>
-  </div>`;
-  $("#lang").onclick = () => { try { localStorage.setItem("tpe-lang", lang === "mn" ? "en" : "mn"); } catch {} renderHome(); };
-}
-
 // ---------------------------------------------------------------- auth screens
 function renderLogin(msg, mode = "login", prefill = "") {
   const isReg = mode === "register";
@@ -229,7 +173,6 @@ function renderLogin(msg, mode = "login", prefill = "") {
       <div><h1>Just show up<br>for yourself.</h1><p>Биеийн тамирын хичээл, фитнес тест, дасгалын бүртгэл, хувийн ахиц — нэг дор.</p></div>
       <div class="tag">#JUSTSHOWUP</div></section>
     <section class="panel"><div class="box">
-      <a href="#/" class="muted back">← Нүүр хуудас</a>
       <div class="tabs"><a href="#" data-mode="login" class="${isReg ? "" : "on"}">Нэвтрэх</a><a href="#" data-mode="register" class="${isReg ? "on" : ""}">Анх удаа бүртгүүлэх</a></div>
       <div><h1 style="font-size:26px">${isReg ? "Бүртгүүлэх" : "Нэвтрэх"}</h1><p class="sub">${isReg ? "PE багшаас авсан 6 оронтой кодоо ашиглана." : "Сургуулийн @" + esc(DOMAIN) + " хаяг, нууц үгээрээ."}</p></div>
       ${msg ? `<div class="msg err">${esc(msg)}</div>` : ""}
