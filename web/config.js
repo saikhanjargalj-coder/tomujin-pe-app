@@ -22,8 +22,8 @@ window.TPE_CONFIG = {
   CONTACT: {
     email: "saikhanjargal.j@tomujin.edu.mn",
     phone: "",       // e.g. "+976 9911 2233"
-    facebook: "",    // e.g. "https://facebook.com/..."
-    instagram: "",   // e.g. "https://instagram.com/..."
-    youtube: ""      // e.g. "https://youtube.com/@..."
+    facebook: "https://www.facebook.com/share/1Lfghqh6Nn/",    // e.g. "https://facebook.com/..."
+    instagram: "https://www.instagram.com/jacks.journey1",   // e.g. "https://instagram.com/..."
+    youtube: "https://youtube.com/@saikhanjargal1"      // e.g. "https://youtube.com/@..."
   }
 };
