@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#5c1090">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tomujin PE">
 <meta name="description" content="Tomujin PE — хөдөлгөөн, 4 талт wellbeing, дасгалын сан, хоол тэжээлийн тооцоолуур">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpolygon points='1.4,0 24.6,0 11.8,9.6' fill='%2300bcd4'/%3E%3Cpolygon points='0,3.4 17.2,19.9 0,29.2' fill='%235c1090'/%3E%3Cpolygon points='29,0 30,0 30,30 11.9,11.5' fill='%23f2cd30'/%3E%3Cpolygon points='3.6,30 26.4,30 17.9,21.4' fill='%23f97316'/%3E%3C/svg%3E">
 <title>Tomujin PE</title>
@@ -303,6 +308,20 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
 .lrow{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
 .lrow .ctl{display:flex;gap:6px;justify-content:flex-end}
 .pic .saved{position:absolute;right:8px;top:8px;background:var(--gold);color:#1c1c1c;border-radius:999px;font-size:12px;font-weight:900;padding:2px 7px}
+.acard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--brand);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.acard.done{border-left-color:#15803d;opacity:.92}.acard.home{border-left-color:var(--gold)}
+.aexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.aex{display:flex;gap:8px;align-items:center;background:var(--tint);border:0;border-radius:10px;padding:6px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.aex .pic{width:52px;height:48px;flex:none;border-radius:8px;overflow:hidden;background:var(--surface)}.aex .pic svg{width:100%;height:100%}
+.aex b{display:block;font-size:13px;line-height:1.2}.aex small{font-size:12px;color:var(--muted)}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.wday{background:var(--tint);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}.wday.now{outline:2px solid var(--brand)}
+.wday .wh{display:flex;justify-content:space-between;font-size:13px}.wday .acard{padding:10px;font-size:13px}.wday .acard h3{font-size:14px}
+@media (max-width:900px){.week{grid-template-columns:1fr}}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:12px}
+.badge{border:1px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;opacity:.45;filter:grayscale(1)}
+.badge.on{opacity:1;filter:none;border-style:solid;background:var(--gold-soft)}.badge .i{font-size:26px}.badge small{font-size:11.5px;color:var(--muted)}
+table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
 .imgprev{display:flex;flex-direction:column;gap:8px;align-items:flex-start}.imgprev img{max-width:260px;max-height:180px;border-radius:12px;border:1px solid var(--line);object-fit:cover}
 .ex .pic img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px 8px 0 0}
 .rm{background:none;border:0;color:var(--orange);font:inherit;font-weight:800;cursor:pointer;padding:4px 8px}
@@ -340,10 +359,12 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
         <a href="#calc" data-go="calc"><b>Хоол тооцоолуур</b><small>Өдөрт хэдэн ккал хэрэгтэй вэ</small></a>
       </div></div>
       <div class="mg"><button type="button" class="mt" aria-haspopup="true">Миний хэсэг</button><div class="dd">
+        <a href="#today" data-go="today"><b>Өнөөдрийн даалгавар</b><small>Ангид оноосон дасгал</small></a>
         <a href="#classes" data-go="classes"><b>Ангиуд</b><small>Мэдэгдэл, оноосон дасгал, файл</small></a>
         <a href="#lessons" data-go="lessons"><b>Хичээлүүд</b><small>Хичээлийн төлөвлөгөө</small></a>
         <a href="#plan" data-go="plan"><b>Миний бэлтгэл</b><small>Бэлтгэлээ төлөвлөх, хадгалсан дасгал</small></a>
         <a href="#log" data-go="log"><b>Бэлтгэлийн тэмдэглэл</b><small>Хичээлийн дараа 1 минутад бөглөнө</small></a>
+        <a href="#tests" data-go="tests"><b>Үнэлгээ</b><small>Тестийн дүн, ахиц</small></a>
         <a href="#coach" data-go="coach" hidden><b>Багшийн самбар</b><small>Сурагчдын тэмдэглэл, ахиц</small></a>
       </div></div>
     </nav>
@@ -372,6 +393,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <div class="chips" id="topAdd"></div>
     <div class="storygrid" id="topGrid"></div>
   </section>
+  <div class="members" id="homeToday"></div>
   <div class="dims members" id="homeDims"></div>
   <div class="tip members" id="tip"></div>
 
@@ -553,6 +575,24 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
     <div class="storygrid" id="storyGrid"></div>
   </section>
 
+
+<section class="view" id="v-today" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Багшийн оноосон дасгал</span>
+    <h1>Өнөөдрийн даалгавар</h1>
+    <p class="lede">Багшийн ангид чинь оноосон дасгалууд энд гарна. Хийж дуусаад "Хийж дууслаа" дараад, бэлтгэлийн тэмдэглэлээ бөглөөрэй.</p>
+  </div>
+  <div id="todayOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+<section class="view" id="v-tests" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Эхлэл · Улирлын дунд · Улирлын төгсгөл · Жилийн эцэс</span>
+    <h1>Үнэлгээ</h1>
+    <p class="lede">Биеийн чадварын тестийн дүн. Бусадтай биш, өмнөх өөртэйгөө харьцуулж хэр ахиснаа хараарай.</p>
+  </div>
+  <div id="testsOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
 
 <section class="view" id="v-log" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
@@ -1514,7 +1554,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();renderToday();renderTests();renderHomeToday();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -1944,12 +1984,16 @@ function stopSubs(){unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
 function startSubs(){
   stopSubs();if(!ME||!db)return;
   unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
+  unsubs.push(db.collection('users/'+ME.uid+'/done').onSnapshot(function(s){MYDONE={};s.docs.forEach(function(d){MYDONE[d.id]=d.data().at||1});renderToday();renderHomeToday();renderLog()}));
+  unsubs.push(db.collection('users/'+ME.uid+'/results').onSnapshot(function(s){MYRES={};s.docs.forEach(function(d){MYRES[d.id]=d.data()});renderTests()}));
   unsubs.push(db.collection('users/'+ME.uid+'/saved').onSnapshot(function(s){SAVED={};s.docs.forEach(function(d){SAVED[d.id]=d.data().at||1});renderLib();renderSaved()}));
   unsubs.push(db.collection('users/'+ME.uid+'/wellbeing').onSnapshot(function(s){MYWB={};s.docs.forEach(function(d){MYWB[d.id]=d.data()})}));
   unsubs.push(db.collection('users/'+ME.uid+'/plans').onSnapshot(function(s){var cloud=s.docs.map(function(d){return d.data().plan}).filter(Boolean);var ids={};cloud.forEach(function(p){ids[p.id]=1});MYPLANS=cloud.concat(MYPLANS.filter(function(p){return !ids[p.id]}));renderMyPlans()}));
   if(MYROLE==='teacher'||MYROLE==='admin'){
     unsubs.push(db.collection('users').onSnapshot(function(s){USERS={};s.docs.forEach(function(d){USERS[d.id]=d.data()});renderCoach()}));
     unsubs.push(db.group('loading',{orderBy:['at','desc'],limit:600},function(s){LOADS=s.docs.map(function(d){return d.data()});renderCoach()}));
+    unsubs.push(db.group('done',{},function(s){DONEALL=s.docs.map(function(d){var p=String(d.ref).split('/');return {uid:p[1],aid:p[3]}});renderToday()}));
+    unsubs.push(db.group('results',{},function(s){RESALL=s.docs.map(function(d){var p=String(d.ref).split('/');var x=d.data();return {uid:p[1],per:p[3],v:x.v||{}}});renderTests()}));
     unsubs.push(db.group('wellbeing',{},function(s){WBALL=s.docs.map(function(d){var x=d.data();x.sid=d.id;return x});renderCoach()}));
   }
 }
@@ -1979,6 +2023,7 @@ function renderLog(){
     var doc={uid:ME.uid,rpe:rpe,min:min,load:rpe*min,feel:+val('lf-feel'),sore:+val('lf-sore'),note:val('lf-note').slice(0,500),classId:(MYPROFILE&&MYPROFILE.classId)||'',name:(MYPROFILE&&MYPROFILE.name)||ME.name||'',at:Date.now()};
     st.className='status';st.textContent='Илгээж байна…';db.collection('users/'+ME.uid+'/loading').add(doc).then(function(){st.textContent='Хадгалагдлаа. Ачаалал: '+doc.load},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})});
   W.appendChild(f);
+  if(!isStaff())W.appendChild(streakBox());
   var wk=MYLOADS.filter(function(x){return weekKey(x.at)===weekKey(Date.now())}).reduce(function(a,x){return a+x.load},0);
   W.appendChild(h('div',{cls:'big3'},[kpi(String(wk),'Энэ долоо хоногийн ачаалал','хүндийн оноо × минут',true),kpi(String(MYLOADS.length),'Нийт бүртгэл',''),kpi(MYLOADS.length?(MYLOADS.slice(0,5).reduce(function(a,x){return a+x.rpe},0)/Math.min(5,MYLOADS.length)).toFixed(1):'—','Сүүлийн 5 удаагийн дундаж оноо','')]));
   W.appendChild(h('div',{cls:'box'},[h('h3',{text:'8 долоо хоногийн ачаалал'}),weeklyBars(MYLOADS,8),h('p',{cls:'muted',style:'font-size:13px',text:'Ачаалал долоо хоногт огцом (≈ 1.5 дахин илүү) нэмэгдвэл гэмтэх, ядрах эрсдэл өсдөг. Аажмаар нэм.'})]));
@@ -1989,6 +2034,7 @@ function renderLog(){
 var coachClass='all';
 function renderCoach(){
   var W=$('coachOut');if(!W)return;W.innerHTML='';
+  if(MYROLE==='teacher'||MYROLE==='admin')W.appendChild(h('div',{cls:'chips'},[h('span',{cls:'muted',style:'font-size:13px',text:'Excel-ээр татах:'}),h('button',{type:'button',cls:'btn line small',text:'⬇ Бэлтгэлийн тэмдэглэл',onclick:exportLoads}),h('button',{type:'button',cls:'btn line small',text:'⬇ Даалгаврын гүйцэтгэл',onclick:exportAssign}),h('button',{type:'button',cls:'btn line small',text:'⬇ Бүх үнэлгээ',onclick:function(){exportResults('')}})]));
   if(!(MYROLE==='teacher'||MYROLE==='admin')){W.appendChild(h('p',{cls:'muted',text:'Энэ хэсэг зөвхөн багш нарт харагдана.'}));return}
   var users=Object.keys(USERS).map(function(id){var u=USERS[id];u.uid=id;return u});
   var opts=[['all','Бүх анги']].concat(CLASSES.map(function(c){return [c.id,c.name]})).concat([['','Ангигүй']]);
@@ -2038,7 +2084,7 @@ async function fbInit(){
   db.collection('site').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});SITE=m;applySite();rerenderAll()},function(){});
   PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
-    ME=u;MYROLE=role;MYPROFILE=null;SAVED={};fSaved=false;canEdit=role==='admin';if(!canEdit)editMode=false;
+    ME=u;MYROLE=role;MYPROFILE=null;SAVED={};fSaved=false;MYDONE={};MYRES={};DONEALL=[];RESALL=[];canEdit=role==='admin';if(!canEdit)editMode=false;
     setAuthed(!!(u&&u.emailVerified&&role));
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
     await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
@@ -2342,6 +2388,145 @@ primeLeft=primeTotal();
 /* smooth scroll for landing anchors */
 [].forEach.call(document.querySelectorAll('[data-scroll]'),function(a){a.addEventListener('click',function(ev){ev.preventDefault();if($('v-home').hidden)show('home');var t=$(a.dataset.scroll);if(t)t.scrollIntoView({behavior:'smooth',block:'start'})})});
 
+/* ---------- daily assignments, assessments, streaks, export ---------- */
+var ASSIGN={},MYDONE={},DONEALL=[],MYRES={},RESALL=[],todayWeek=0,testCls='',testPer='p1';
+var TESTS=[{id:'t50',n:'50 м гүйлт',u:'сек',b:'low'},{id:'tlj',n:'Урт харайлт',u:'см',b:'high'},{id:'tsr',n:'Суугаад урагш тонгойх',u:'см',b:'high'},{id:'tmile',n:'1 миль гүйлт',u:'мин',b:'low'},{id:'truler',n:'Шугам барих (хариу үйлдэл)',u:'см',b:'low'},{id:'twall',n:'1 минут хананд бөмбөг шидэх',u:'удаа',b:'high'},{id:'tpush',n:'Суниалт',u:'удаа',b:'high'}];
+var PERIODS=[['p1','Эхлэл'],['p2','Улирлын дунд'],['p3','Улирлын төгсгөл'],['p4','Жилийн эцэс']];
+function pad2(n){return (n<10?'0':'')+n}
+function ymd(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())}
+function mondayOf(d){d=new Date(d);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d}
+var WD=['Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба','Ням'];
+function assignList(){return Object.keys(ASSIGN).map(function(k){var a=ASSIGN[k];a.id=k;return a}).sort(function(a,b){return (a.date||'').localeCompare(b.date||'')})}
+function forMyClass(a){return (a.cls||[]).indexOf(myClass())>=0}
+function doneCount(a){var by={};DONEALL.forEach(function(d){if(d.aid===a.id)by[d.uid]=1});var stu=Object.keys(USERS).filter(function(u){return (a.cls||[]).indexOf(USERS[u].classId)>=0});return [stu.filter(function(u){return by[u]}).length,stu.length,by,stu]}
+function exChip(it){var e=byId(it.id);if(!e)return null;var ds=typeof e.ds==='string'?DOSE[e.ds]:e.ds;var dose=it.dose||(ds?(ds[Math.min(2,Math.max(0,Math.ceil(e.lv/2)-1))]||ds[1]||ds[0]):'');
+  return h('button',{type:'button',cls:'aex',onclick:function(){openEx(e.id)}},[h('div',{cls:'pic'},[makeVis(e,{still:0.6}).svg]),h('div',{},[h('b',{text:e.n}),h('small',{text:dose&&dose!=='—'?dose:lvl(e)})])])}
+function toggleDone(a){if(!ME||!db)return;var ref=db.doc('users/'+ME.uid+'/done/'+a.id);if(MYDONE[a.id]){delete MYDONE[a.id];ref.delete().catch(function(){})}else{MYDONE[a.id]=Date.now();ref.set({at:MYDONE[a.id]}).catch(function(){})}renderToday();renderHomeToday()}
+function assignCard(a,big){
+  var done=!!MYDONE[a.id],staff=isStaff();
+  var head=h('div',{cls:'chips',style:'justify-content:space-between'},[h('div',{},[h('span',{cls:'tag t',text:WD[(new Date(a.date+'T00:00').getDay()+6)%7]+' · '+a.date.slice(5).replace('-','/')}),a.min?h('span',{cls:'tag g',text:a.min+' мин'}):null]),
+    staff?h('span',{cls:'tag',text:(function(){var c=doneCount(a);return c[0]+'/'+c[1]+' хийсэн'})()}):(done?h('span',{cls:'tag',style:'background:#15803d;color:#fff',text:'✓ Хийсэн'}):null)]);
+  var kids=[head,h('h3',{style:'margin:0',text:a.title||'Даалгавар'})];
+  if(staff)kids.push(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:(a.cls||[]).map(className).filter(Boolean).join(', ')}));
+  if(a.note)kids.push(h('p',{style:'margin:0',text:a.note}));
+  if(big||staff){var g=h('div',{cls:'aexgrid'});(a.items||[]).forEach(function(it){var c=exChip(it);if(c)g.appendChild(c)});kids.push(g)}
+  if(!staff)kids.push(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn '+(done?'line':'gold'),text:done?'↺ Буцаах':'✓ Хийж дууслаа',onclick:function(){toggleDone(a)}}),done?h('button',{type:'button',cls:'btn line',text:'Бэлтгэлийн тэмдэглэл бөглөх',onclick:function(){show('log')}}):null]));
+  else kids.push(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'Хэн хийсэн бэ',onclick:function(){openAssignStats(a)}}),canEdit?h('button',{type:'button',cls:'btn line small',text:'✎ Засах',onclick:function(){openAssignEditor(a)}}):null,canEdit?h('button',{type:'button',cls:'btn line small danger',text:'🗑',onclick:function(ev){var b=ev.currentTarget;if(b.dataset.sure){db.doc('assign/'+a.id).delete().then(function(){delete ASSIGN[a.id];renderToday()})}else{b.dataset.sure=1;b.textContent='Устгах уу?'}}}):null]));
+  return h('div',{cls:'acard'+(done?' done':'')},kids);
+}
+function renderToday(){
+  var W=$('todayOut');if(!W)return;W.innerHTML='';
+  if(!ME){W.appendChild(h('p',{cls:'muted',text:'Нэвтэрч орно уу.'}));return}
+  var staff=isStaff(),today=ymd(new Date()),list=assignList();
+  if(!staff){
+    if(!myClass()){W.appendChild(classPicker());return}
+    W.appendChild(streakBox());
+    var mine=list.filter(forMyClass),td=mine.filter(function(a){return a.date===today});
+    W.appendChild(h('h2',{text:'Өнөөдөр'}));
+    if(td.length)td.forEach(function(a){W.appendChild(assignCard(a,true))});
+    else W.appendChild(h('p',{cls:'muted',text:'Өнөөдөр даалгавар алга. Дасгалын сангаас дуртай дасгалаа хийгээд бэлтгэлийн тэмдэглэлээ бөглөөрэй.'}));
+    var m=mondayOf(new Date()),end=new Date(m);end.setDate(end.getDate()+6);var wk=mine.filter(function(a){return a.date!==today&&a.date>=ymd(m)&&a.date<=ymd(end)});
+    if(wk.length){W.appendChild(h('h2',{text:'Энэ долоо хоног'}));wk.forEach(function(a){W.appendChild(assignCard(a,false))})}
+    var past=mine.filter(function(a){return a.date<ymd(m)&&!MYDONE[a.id]}).slice(-5);
+    if(past.length){W.appendChild(h('h2',{text:'Хийгээгүй үлдсэн'}));past.forEach(function(a){W.appendChild(assignCard(a,false))})}
+    return;
+  }
+  var m0=mondayOf(new Date());m0.setDate(m0.getDate()+7*todayWeek);var e0=new Date(m0);e0.setDate(e0.getDate()+6);
+  W.appendChild(h('div',{cls:'chips',style:'align-items:center'},[h('button',{type:'button',cls:'btn line small',text:'← Өмнөх',onclick:function(){todayWeek--;renderToday()}}),h('b',{text:ymd(m0).slice(5).replace('-','/')+' – '+ymd(e0).slice(5).replace('-','/')}),h('button',{type:'button',cls:'btn line small',text:'Дараах →',onclick:function(){todayWeek++;renderToday()}}),todayWeek?h('button',{type:'button',cls:'btn line small',text:'Энэ долоо хоног',onclick:function(){todayWeek=0;renderToday()}}):null]));
+  var grid=h('div',{cls:'week'});
+  for(var i=0;i<7;i++){(function(i){var d=new Date(m0);d.setDate(d.getDate()+i);var ds=ymd(d);var col=h('div',{cls:'wday'+(ds===today?' now':'')},[h('div',{cls:'wh'},[h('b',{text:WD[i]}),h('span',{text:ds.slice(5).replace('-','/')})])]);
+    list.filter(function(a){return a.date===ds}).forEach(function(a){col.appendChild(assignCard(a,false))});
+    if(canEdit)col.appendChild(h('button',{type:'button',cls:'btn line small',text:'+ Даалгавар',onclick:function(){openAssignEditor({date:ds})}}));
+    grid.appendChild(col)})(i)}
+  W.appendChild(grid);
+  if(!canEdit)W.appendChild(h('p',{cls:'muted',text:'Даалгавар нэмэх, засах эрх зөвхөн админд байна.'}));
+}
+function openAssignEditor(a){
+  a=a||{};var isNew=!a.id;var id=a.id||slug();var items=(a.items||[]).map(function(x){return {id:x.id,dose:x.dose||''}});var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=isNew?'Шинэ даалгавар':'Даалгавар засах';p.appendChild(h('h2',{id:'sheetTitle',text:a.title||'Даалгавар'}));
+    var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
+    f.appendChild(h('div',{cls:'fgrid'},[fText('as-date','Огноо',a.date||ymd(new Date()),{type:'date'}),fText('as-title','Гарчиг',a.title,{ph:'жишээ: Хүч + авхаалж'}),fText('as-min','Хугацаа (мин)',a.min,{type:'number',min:1,max:180})]));
+    f.appendChild(fChecks('as-cls','Аль ангид',classOpts(),a.cls||[]));
+    f.appendChild(fText('as-note','Заавар, тайлбар',a.note,{area:1,rows:3}));
+    var chosen=h('div',{cls:'sub'}),res=h('div',{cls:'chips'}),q=h('input',{type:'search',placeholder:'Дасгал хайх (нэрээр)…'});
+    function drawChosen(){chosen.innerHTML='';items.forEach(function(it,i){var e=byId(it.id);if(!e)return;var dz=h('input',{type:'text',value:it.dose,placeholder:'хэмжээ (жишээ 3 × 10)',style:'max-width:180px'});dz.addEventListener('input',function(){it.dose=dz.value});
+      chosen.appendChild(h('div',{cls:'athrow'},[h('b',{text:(i+1)+'. '+e.n,style:'flex:1 1 200px'}),dz,h('button',{type:'button',cls:'rm',text:'×',onclick:function(){items.splice(i,1);drawChosen()}})]))});if(!items.length)chosen.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Дасгал нэмээгүй байна.'}))}
+    function search(){res.innerHTML='';var v=q.value.trim().toLowerCase();if(!v)return;EX.filter(function(e){return (e.n+' '+e.en).toLowerCase().indexOf(v)>=0}).slice(0,10).forEach(function(e){res.appendChild(h('button',{type:'button',cls:'tag t',text:'+ '+e.n,onclick:function(){items.push({id:e.id,dose:''});drawChosen()}}))})}
+    q.addEventListener('input',search);
+    f.appendChild(h('div',{cls:'box'},[h('h3',{text:'Дасгалууд'}),q,res,chosen]));drawChosen();
+    f.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
+      var d={date:val('as-date'),title:val('as-title')||'Даалгавар',min:+val('as-min')||null,cls:checked('as-cls'),note:val('as-note'),items:items.filter(function(x){return x.id}),updatedAt:new Date().toISOString()};
+      if(!/^\d{4}-\d\d-\d\d$/.test(d.date)){st.className='status err';st.textContent='Огноогоо сонгоно уу.';return}
+      if(!d.cls.length){st.className='status err';st.textContent='Ядаж нэг анги сонгоно уу.';return}
+      st.className='status';st.textContent='Хадгалж байна…';db.doc('assign/'+id).set(d).then(function(){ASSIGN[id]=d;closeSheet();renderToday()},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+    p.appendChild(f);
+  });
+}
+function openAssignStats(a){var c=doneCount(a);openSheet(function(p){$('sheetEyebrow').textContent='Даалгаврын гүйцэтгэл';p.appendChild(h('h2',{id:'sheetTitle',text:(a.title||'Даалгавар')+' · '+c[0]+'/'+c[1]}));
+  (a.cls||[]).forEach(function(cid){var st=c[3].filter(function(u){return USERS[u].classId===cid});if(!st.length)return;
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:className(cid)+' · '+st.filter(function(u){return c[2][u]}).length+'/'+st.length}),h('div',{cls:'chips'},st.map(function(u){return h('span',{cls:'tag'+(c[2][u]?'':' g'),style:c[2][u]?'background:#15803d;color:#fff':'',text:(c[2][u]?'✓ ':'')+(USERS[u].name||USERS[u].email)})}))]))});
+  if(!c[1])p.appendChild(h('p',{cls:'muted',text:'Эдгээр ангид бүртгүүлсэн сурагч алга.'}))})}
+function renderHomeToday(){var W=$('homeToday');if(!W)return;W.innerHTML='';if(!ME||isStaff()||!myClass())return;var today=ymd(new Date());var td=assignList().filter(function(a){return forMyClass(a)&&a.date===today});
+  W.appendChild(h('div',{cls:'acard home'},[h('span',{cls:'eyebrow',text:'Өнөөдрийн даалгавар'}),h('h3',{style:'margin:0',text:td.length?td.map(function(a){return a.title}).join(', '):'Өнөөдөр даалгавар алга'}),h('p',{cls:'muted',style:'margin:0',text:td.length?(td.every(function(a){return MYDONE[a.id]})?'Бүгдийг хийж дууссан. Сайн байна!':'Дасгалуудаа хийгээд "Хийж дууслаа" дараарай.'):'Дасгалын сангаас дуртай дасгалаа хийгээрэй.'}),h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Нээх',onclick:function(){show('today')}})])]))}
+
+/* streaks & badges */
+function streakInfo(){var wk={};MYLOADS.forEach(function(x){wk[weekKey(x.at)]=1});var n=0,t=Date.now();if(!wk[weekKey(t)])t-=7*864e5;while(wk[weekKey(t)]){n++;t-=7*864e5}
+  var tot=MYLOADS.reduce(function(a,x){return a+(x.load||0)},0),nd=Object.keys(MYDONE).length;
+  var B=[['🌱','Анхны алхам','Анхны тэмдэглэлээ бөглөсөн',MYLOADS.length>=1],['📒','10 тэмдэглэл','10 удаа тэмдэглэл бөглөсөн',MYLOADS.length>=10],['🔥','4 долоо хоног','4 долоо хоног дараалан',n>=4],['🏅','8 долоо хоног','8 долоо хоног дараалан',n>=8],['✅','10 даалгавар','10 даалгавар дуусгасан',nd>=10],['💪','1000 ачаалал','Нийт ачаалал 1000 давсан',tot>=1000],['⭐','30 тэмдэглэл','30 удаа тэмдэглэл бөглөсөн',MYLOADS.length>=30]];
+  return {weeks:n,total:tot,done:nd,badges:B}}
+function streakBox(){var s=streakInfo();return h('div',{cls:'box'},[h('div',{cls:'big3'},[kpi(String(s.weeks),'Дараалсан долоо хоног','Долоо хоног бүр ядаж 1 тэмдэглэл',true),kpi(String(s.done),'Дуусгасан даалгавар',''),kpi(String(s.total),'Нийт ачаалал','хүндийн оноо × минут')]),
+  h('div',{cls:'badges'},s.badges.map(function(b){return h('div',{cls:'badge'+(b[3]?' on':''),title:b[2]},[h('span',{cls:'i',text:b[0]}),h('b',{text:b[1]}),h('small',{text:b[2]})])}))])}
+
+/* assessments */
+function testById(id){return TESTS.filter(function(t){return t.id===id})[0]}
+function fmtV(v){return v==null||v===''?'—':String(v)}
+function renderTests(){
+  var W=$('testsOut');if(!W)return;W.innerHTML='';
+  if(!ME){W.appendChild(h('p',{cls:'muted',text:'Нэвтэрч орно уу.'}));return}
+  if(!isStaff()){
+    var has=PERIODS.some(function(p){return MYRES[p[0]]});
+    if(!has){W.appendChild(h('p',{cls:'muted',text:'Таны үнэлгээний дүн хараахан ороогүй байна. Багш оруулсны дараа энд харагдана.'}));return}
+    var rows=TESTS.map(function(t){var vals=PERIODS.map(function(p){var r=MYRES[p[0]];return r&&r.v?r.v[t.id]:null});var first=null,last=null;vals.forEach(function(v){if(v!=null&&v!==''){if(first==null)first=+v;last=+v}});
+      var diff=(first!=null&&last!=null&&first!==last)?(last-first):null;var good=diff!=null&&((t.b==='high'&&diff>0)||(t.b==='low'&&diff<0));
+      return h('tr',{},[h('td',{},[h('b',{text:t.n}),h('small',{cls:'muted',text:' '+t.u})])].concat(vals.map(function(v){return h('td',{cls:'num',text:fmtV(v)})})).concat([h('td',{cls:'num',style:diff==null?'':(good?'color:#15803d;font-weight:800':'color:#c2410c;font-weight:800'),text:diff==null?'—':((diff>0?'+':'')+Math.round(diff*100)/100+(good?' ↑':' ↓'))})]))});
+    W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Миний үнэлгээ'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('thead',{},[h('tr',{},[h('th',{text:'Тест'})].concat(PERIODS.map(function(p){return h('th',{text:p[1]})})).concat([h('th',{text:'Ахиц'})]))]),h('tbody',{},rows)])]),
+      h('p',{cls:'muted',style:'font-size:13px',text:'Ногоон = ахисан, улбар = буурсан. Бусадтай биш, өмнөх өөртэйгөө харьцуул.'})]));
+    return;
+  }
+  if(!testCls)testCls=(CLASSES.filter(function(c){return !c.deleted})[0]||{}).id||'';
+  W.appendChild(h('div',{cls:'chips'},CLASSES.filter(function(c){return !c.deleted}).map(function(c){return h('button',{type:'button',cls:'chip','aria-pressed':String(testCls===c.id),text:c.name,onclick:function(){testCls=c.id;renderTests()}})})));
+  W.appendChild(h('div',{cls:'chips'},PERIODS.map(function(p){return h('button',{type:'button',cls:'chip','aria-pressed':String(testPer===p[0]),text:p[1],onclick:function(){testPer=p[0];renderTests()}})})));
+  var studs=Object.keys(USERS).filter(function(u){return USERS[u].classId===testCls}).sort(function(a,b){return (USERS[a].name||'').localeCompare(USERS[b].name||'')});
+  var cur={};RESALL.forEach(function(r){if(r.per===testPer)cur[r.uid]=r.v||{}});
+  var tools=[h('button',{type:'button',cls:'btn line small',text:'⬇ Энэ ангийн бүх үнэлгээ (Excel)',onclick:function(){exportResults(testCls)}})];
+  if(canEdit)tools.unshift(h('button',{type:'button',cls:'btn line small',text:'✎ Тестүүдийг засах',onclick:function(){editList('tests')}}));
+  W.appendChild(h('div',{cls:'chips'},tools));
+  if(!studs.length){W.appendChild(h('p',{cls:'muted',text:'Энэ ангид бүртгүүлсэн сурагч алга.'}));return}
+  var st=h('p',{cls:'status',role:'status'});
+  var head=h('tr',{},[h('th',{text:'Сурагч'})].concat(TESTS.map(function(t){return h('th',{text:t.n+' ('+t.u+')'})})));
+  var avg=TESTS.map(function(t){var xs=studs.map(function(u){return cur[u]&&cur[u][t.id]}).filter(function(v){return v!=null&&v!==''}).map(Number);return xs.length?Math.round(xs.reduce(function(a,b){return a+b},0)/xs.length*10)/10:'—'});
+  var body=studs.map(function(u){return h('tr',{},[h('td',{text:USERS[u].name||USERS[u].email})].concat(TESTS.map(function(t){var v=cur[u]&&cur[u][t.id];return h('td',{},[canEdit?h('input',{type:'number',step:'any',cls:'tin','data-u':u,'data-t':t.id,value:v==null?'':v}):h('span',{text:fmtV(v)})])})))});
+  body.push(h('tr',{style:'font-weight:800'},[h('td',{text:'Ангийн дундаж'})].concat(avg.map(function(a){return h('td',{cls:'num',text:String(a)})}))));
+  W.appendChild(h('div',{cls:'box'},[h('div',{cls:'scroll'},[h('table',{cls:'dose tests'},[h('thead',{},[head]),h('tbody',{},body)])]),
+    canEdit?h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){saveTests(studs,st)}}),st]):null,
+    canEdit?h('p',{cls:'muted',style:'font-size:13px',text:'Хоосон нүд = тест өгөөгүй. 1 миль гүйлтийг минутаар (жишээ 8.5) оруулна. Сурагч бүр зөвхөн өөрийн дүнг харна.'}):null]));
+}
+function saveTests(studs,st){var by={};[].forEach.call(document.querySelectorAll('#testsOut input.tin'),function(i){var v=i.value.trim();(by[i.dataset.u]=by[i.dataset.u]||{});if(v!=='')by[i.dataset.u][i.dataset.t]=+v});
+  st.className='status';st.textContent='Хадгалж байна…';
+  Promise.all(studs.map(function(u){var v=by[u]||{};if(!Object.keys(v).length)return Promise.resolve();return db.doc('users/'+u+'/results/'+testPer).set({v:v,at:Date.now()})})).then(function(){st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Зарим нь хадгалагдсангүй. Дахин оролдоно уу.'})}
+
+/* CSV export (opens in Excel / Google Sheets) */
+function csvCell(v){v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+function downloadCSV(name,rows){var s='﻿'+rows.map(function(r){return r.map(csvCell).join(',')}).join('\n');var b=new Blob([s],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+function exportResults(cid){var studs=Object.keys(USERS).filter(function(u){return !cid||USERS[u].classId===cid});var head=['Сурагч','Имэйл','Анги','Үе'].concat(TESTS.map(function(t){return t.n+' ('+t.u+')'}));var rows=[head];
+  studs.forEach(function(u){PERIODS.forEach(function(p){var r=RESALL.filter(function(x){return x.uid===u&&x.per===p[0]})[0];if(!r)return;rows.push([USERS[u].name,USERS[u].email,className(USERS[u].classId),p[1]].concat(TESTS.map(function(t){return r.v?r.v[t.id]:''})))})});
+  downloadCSV('unelgee-'+(className(cid)||'buh')+'.csv',rows)}
+function exportLoads(){var rows=[['Огноо','Сурагч','Анги','Хүндийн оноо','Минут','Ачаалал','Мэдрэмж','Булчин өвдөлт','Тэмдэглэл']];
+  LOADS.slice().sort(function(a,b){return a.at-b.at}).forEach(function(x){rows.push([ymd(new Date(x.at)),x.name,className(x.classId),x.rpe,x.min,x.load,x.feel,x.sore,x.note])});downloadCSV('beltgeliin-temdeglel.csv',rows)}
+function exportAssign(){var rows=[['Огноо','Даалгавар','Анги','Сурагч','Хийсэн']];assignList().forEach(function(a){var c=doneCount(a);c[3].forEach(function(u){rows.push([a.date,a.title,className(USERS[u].classId),USERS[u].name||USERS[u].email,c[2][u]?'Тийм':'Үгүй'])})});downloadCSV('daalgavar-guitsetgel.csv',rows)}
+
 /* ---------- site CMS: every static text + lists, owner edits ---------- */
 var SITE={},TXT={};
 var DEF={how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice(),foods:FOODS.slice(),pals:PALS.slice(),wbdim:WBDIM.slice(),wblv:WBLV.slice()};
@@ -2382,6 +2567,9 @@ function editStrand(sid){
     p.appendChild(f);
   });
 }
+LISTS.tests={title:'Үнэлгээний тестүүд',keepId:true,note:'Тестийг хасвал өмнө оруулсан дүн нь хадгалагдсан хэвээр үлдэнэ, зөвхөн харагдахгүй болно.',fields:[['n','Тестийн нэр'],['u','Нэгж (сек, см, удаа, мин)'],['b','Сайн дүн гэдэг нь',[['high','Их байх тусам сайн'],['low','Бага байх тусам сайн']]]],
+  toRow:function(x){return {id:x.id,n:x.n,u:x.u,b:x.b}},fromRow:function(r){return {id:r.id||slug(),n:r.n||'',u:r.u||'',b:r.b==='low'?'low':'high'}},arr:TESTS};
+DEF.tests=TESTS.slice();
 var COLORS=[['var(--teal)','Цэнхэр'],['var(--orange)','Улбар шар'],['#15803d','Ногоон'],['var(--brand)','Нил ягаан'],['#be185d','Ягаан'],['var(--gold)','Шар']];
 function applySite(){
   TXT=(SITE.texts&&SITE.texts.t)||{};
@@ -2426,6 +2614,7 @@ function editList(name){
       var card=h('div',{cls:'lrow'});
       L.fields.forEach(function(f){var inp;
         if(f[2]==='color'){inp=h('select',{},COLORS.map(function(c){return h('option',{value:c[0],text:c[1]})}));inp.value=r[f[0]]||COLORS[0][0]}
+        else if(Array.isArray(f[2])){inp=h('select',{},f[2].map(function(c){return h('option',{value:c[0],text:c[1]})}));inp.value=r[f[0]]||f[2][0][0];r[f[0]]=inp.value}
         else if(f[2]===1||f[2]===2){inp=h('textarea',{rows:f[2]===2?'6':'3'});inp.value=r[f[0]]||''}
         else{inp=h('input',{type:f[2]==='num'?'number':'text',step:'0.5'});inp.value=r[f[0]]==null?'':r[f[0]]}
         inp.addEventListener('input',function(){r[f[0]]=inp.value});inp.addEventListener('change',function(){r[f[0]]=inp.value});
@@ -2438,7 +2627,7 @@ function editList(name){
     draw();p.appendChild(box);
     if(!L.fixed)p.appendChild(h('button',{type:'button',cls:'btn line',text:'+ Шинээр нэмэх',onclick:function(){rows.push({});draw()}}));
     p.appendChild(h('div',{cls:'editrow'},[
-      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var items=rows.map(function(r){var o={};L.fields.forEach(function(f){o[f[0]]=r[f[0]]==null?'':String(r[f[0]])});return o});saveSite(name,{items:items},st).then(function(){closeSheet()},function(){})}}),
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var items=rows.map(function(r){var o={};L.fields.forEach(function(f){o[f[0]]=r[f[0]]==null?'':String(r[f[0]])});if(L.keepId)o.id=r.id||slug();return o});saveSite(name,{items:items},st).then(function(){closeSheet()},function(){})}}),
       SITE[name]?h('button',{type:'button',cls:'btn line',text:'↺ Анхны хувилбар',onclick:function(){if(!db)return;db.doc('site/'+name).delete().then(function(){delete SITE[name];applySite();rerenderAll();closeSheet()})}}):null,
       h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
   });
@@ -2449,6 +2638,7 @@ var AUTHED=false,PENDING=null,contentSubs=[];
 function startContentSubs(){
   stopContentSubs();if(!db)return;
   Object.keys(COLL).filter(function(k){return PUBLIC_KINDS.indexOf(k)<0}).forEach(function(kind){contentSubs.push(db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){}))});
+  contentSubs.push(db.collection('assign').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});ASSIGN=m;renderToday();renderHomeToday()},function(){}));
   contentSubs.push(db.collection('plans').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){var x=d.data();if(GOALS[x.goal])m[d.id]=x});PUBPLANS=m;renderMyPlans()},function(){}));
 }
 function stopContentSubs(){contentSubs.forEach(function(f){try{f()}catch(e){}});contentSubs=[]}
@@ -2460,7 +2650,7 @@ function setAuthed(on){
 [].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
 
 /* ---------- routing ---------- */
-var VIEWS=['home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
+var VIEWS=['today','tests','home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
 var PUBVIEWS=['home','how','clubs','stories','priming'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
@@ -2478,6 +2668,7 @@ $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
 var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
+if('serviceWorker' in navigator&&location.protocol==='https:')try{navigator.serviceWorker.register('/sw.js').catch(function(){})}catch(e){}
 show((location.hash||'').slice(1));show.ready=true;
 
 })();
