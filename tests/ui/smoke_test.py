@@ -44,6 +44,13 @@ with sync_playwright() as p:
     # ---------------- signed out
     page, errs = new_page(browser, "none")
     page.goto(BASE + "/")
+    check("public home page renders", lambda: expect(page.locator("#coach h2")).to_have_text("Жак багш"))
+    def home_lang():
+        page.click("#lang"); expect(page.locator("#coach h2")).to_have_text("Coach Jack")
+        page.click("#lang"); expect(page.locator("#coach h2")).to_have_text("Жак багш")
+    check("home language switch", home_lang)
+    check("home footer has email", lambda: expect(page.locator("#contact a[href^=mailto]")).to_have_count(1))
+    page.click(".home-top a[href='#/login']")
     check("login screen renders", lambda: expect(page.locator("h1").nth(1)).to_have_text("Нэвтрэх"))
     def outside_email():
         page.fill("input[name=email]", "someone@gmail.com"); page.fill("input[name=password]", "x"); page.click("#authform button")
@@ -65,19 +72,20 @@ with sync_playwright() as p:
     check("registration checks password repeat", reg_mismatch)
     def reg_ok():
         page.fill("input[name=password2]", "secret123"); page.click("#authform button")
-        expect(page.locator("h1")).to_have_text("Сайн уу, Anu!")
+        expect(page.locator("main h1")).to_have_text("Сайн уу, Anu!")
     check("registration with code (lower-case) logs student in", reg_ok)
     def logout_login():
-        page.click("#signout"); expect(page.locator("#authform")).to_be_visible()
+        page.click("#signout"); expect(page.locator("#coach")).to_be_visible()
+        page.click(".home-top a[href='#/login']"); expect(page.locator("#authform")).to_be_visible()
         page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=password]", "secret123"); page.click("#authform button")
-        expect(page.locator("h1")).to_have_text("Сайн уу, Anu!")
+        expect(page.locator("main h1")).to_have_text("Сайн уу, Anu!")
     check("sign out, then sign in with password", logout_login)
     def change_pw():
         page.click("text=Нууц үг солих"); page.fill("input[name=p1]", "newpass123"); page.fill("input[name=p2]", "newpass123")
         page.click("#pwform button"); toast(page, "шинэчлэгдлээ")
     check("change password", change_pw)
     def reg_again():
-        page.click("#signout"); page.click("text=Анх удаа бүртгүүлэх")
+        page.click("#signout"); page.click(".home-top a[href='#/login']"); page.click("text=Анх удаа бүртгүүлэх")
         page.fill("input[name=email]", "anu@tomujin.edu.mn"); page.fill("input[name=code]", "ABC123")
         page.fill("input[name=password]", "secret123"); page.fill("input[name=password2]", "secret123"); page.click("#authform button")
         expect(page.locator("#authmsg")).to_contain_text("аль хэдийн бүртгэлтэй")
