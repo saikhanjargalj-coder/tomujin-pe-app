@@ -122,6 +122,13 @@ service cloud.firestore {
       }
     }
 
+    // Fitness results imported for students who have not signed up yet (doc id = school email).
+    // Only the owner writes; the student reads their own once signed in; teachers read.
+    match /pending/{email} {
+      allow read: if isTeacher() || (school() && myEmail() == email);
+      allow write: if isOwner();
+    }
+
     // Teacher dashboard reads across all students at once (read only).
     match /{path=**}/loading/{id}   { allow read: if isTeacher(); }
     match /{path=**}/done/{id}      { allow read: if isTeacher(); }
