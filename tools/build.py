@@ -25,6 +25,7 @@ head, rest = body[:head_end], body[head_end:]
 page = (
     '<!doctype html>\n<html lang="mn">\n<head>\n<meta charset="utf-8">\n'
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
+    '<link rel="manifest" href="/manifest.webmanifest">\n<meta name="theme-color" content="#5c1090">\n<link rel="apple-touch-icon" href="/icon-192.png">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-title" content="Tomujin PE">\n'
     '<meta name="description" content="Tomujin PE — хөдөлгөөн, 4 талт wellbeing, дасгалын сан, хоол тэжээлийн тооцоолуур">\n'
     '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 30 30\'%3E%3Cpolygon points=\'1.4,0 24.6,0 11.8,9.6\' fill=\'%2300bcd4\'/%3E%3Cpolygon points=\'0,3.4 17.2,19.9 0,29.2\' fill=\'%235c1090\'/%3E%3Cpolygon points=\'29,0 30,0 30,30 11.9,11.5\' fill=\'%23f2cd30\'/%3E%3Cpolygon points=\'3.6,30 26.4,30 17.9,21.4\' fill=\'%23f97316\'/%3E%3C/svg%3E">\n'
     + head.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', "")
