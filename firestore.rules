@@ -32,6 +32,8 @@ service cloud.firestore {
     match /classes/{id} { allow read: if true; allow write: if isOwner(); }
     match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
     match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    // Daily assignments for classes: signed-in school users read, only the owner writes.
+    match /assign/{id}  { allow read: if school(); allow write: if isOwner(); }
     // Site texts and lists (page headings, how-it-works, morning routine, daily tips).
     match /site/{id}    { allow read: if true; allow write: if isOwner(); }
     // Team rosters per season (team photo + athletes): public only with parent consent.
@@ -75,6 +77,17 @@ service cloud.firestore {
         || isOwner();
       allow delete: if isOwner();
 
+      // Assignments a student marked as done (their own ticks only).
+      match /done/{aid} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && request.resource.data.keys().hasOnly(['at']);
+        allow delete: if (school() && isMe(uid)) || isOwner();
+      }
+      // Fitness test results: the student reads their own, only the owner enters them.
+      match /results/{period} {
+        allow read: if isMe(uid) || isTeacher();
+        allow write: if isOwner();
+      }
       // Exercises a student saved from the library (their own list only).
       match /saved/{exId} {
         allow read: if isMe(uid) || isTeacher();
@@ -111,6 +124,8 @@ service cloud.firestore {
 
     // Teacher dashboard reads across all students at once (read only).
     match /{path=**}/loading/{id}   { allow read: if isTeacher(); }
+    match /{path=**}/done/{id}      { allow read: if isTeacher(); }
+    match /{path=**}/results/{id}   { allow read: if isTeacher(); }
     match /{path=**}/wellbeing/{id} { allow read: if isTeacher(); }
   }
 }
