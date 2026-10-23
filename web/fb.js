@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
-  query, where, orderBy, limit
+  query, where, orderBy, limit, writeBatch, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const C = window.TPE_CONFIG || {};
@@ -44,7 +44,8 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
         set: (data) => setDoc(r, data),
         update: (data) => setDoc(r, data, { merge: true }),
         get: () => getDoc(r).then((s) => ({ id: s.id, exists: s.exists(), data: () => s.data() })),
-        delete: () => deleteDoc(r)
+        delete: () => deleteDoc(r),
+        onSnapshot: (next, err) => onSnapshot(r, (s) => next({ id: s.id, exists: s.exists(), data: () => s.data() }), err || (() => {}))
       };
     },
     collection(path) {
@@ -53,6 +54,26 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
         onSnapshot: (next, err, o) => onSnapshot(build(c, o), (qs) => next(snapWrap(qs)), err || (() => {})),
         add: (data) => addDoc(c, data)
       };
+    },
+    // Several writes that succeed or fail together. ops: [{op:"set"|"merge"|"delete", path, data}]
+    // In data, {__sv:"time"} becomes the server time and {__inc:n} adds n on the server.
+    batch(ops) {
+      const fix = (v) => {
+        if (v && typeof v === "object" && !Array.isArray(v)) {
+          if (v.__sv === "time") return serverTimestamp();
+          if (typeof v.__inc === "number") return increment(v.__inc);
+          const o = {}; Object.keys(v).forEach((k) => { o[k] = fix(v[k]); }); return o;
+        }
+        return v;
+      };
+      const b = writeBatch(fs);
+      ops.forEach((o) => {
+        const r = doc(fs, o.path);
+        if (o.op === "delete") b.delete(r);
+        else if (o.op === "merge") b.set(r, fix(o.data), { merge: true });
+        else b.set(r, fix(o.data));
+      });
+      return b.commit();
     },
     group(name, o, next, err) {
       return onSnapshot(build(collectionGroup(fs, name), o), (qs) => next(snapWrap(qs)), err || (() => {}));

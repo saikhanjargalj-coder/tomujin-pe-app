@@ -50,6 +50,103 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+
+    // ---------- club registration (дугуйлан) ----------
+    // Times live in site/clubreg as milliseconds: open, p1 (until then only 1 club), close.
+    // offers/{oid}: seat counter {n, cap}. Everyone sees how many seats are left.
+    // offers/{oid}/seats/{uid}: a student's own seat. offers/{oid}/wait/{uid}: waitlist ticket.
+    // regs/{uid}: the student's picks (max 1 before p1, max 2 after). The server checks
+    // that every pick is backed by a seat or waitlist ticket, so nobody can take extra seats.
+    function regDoc() { return get(/databases/$(database)/documents/site/clubreg).data; }
+    function nowMs() { return request.time.toMillis(); }
+    function regOpen() {
+      return exists(/databases/$(database)/documents/site/clubreg)
+        && nowMs() >= regDoc().open && nowMs() < regDoc().close;
+    }
+    function maxPicks() { return nowMs() < regDoc().p1 ? 1 : 2; }
+    function offerP(o) { return /databases/$(database)/documents/offers/$(o); }
+    function seatP(o, u) { return /databases/$(database)/documents/offers/$(o)/seats/$(u); }
+    function waitP(o, u) { return /databases/$(database)/documents/offers/$(o)/wait/$(u); }
+    function regP(u) { return /databases/$(database)/documents/regs/$(u); }
+    function backed(o, u) { return existsAfter(seatP(o, u)) || existsAfter(waitP(o, u)); }
+
+    match /offers/{oid} {
+      allow read: if true;
+      allow write: if isOwner();
+      // A student moves the counter by exactly one, together with their own seat.
+      allow update: if school() && regOpen()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['n'])
+        && ((request.resource.data.n == resource.data.n + 1
+              && request.resource.data.n <= resource.data.cap
+              && !exists(seatP(oid, request.auth.uid)) && existsAfter(seatP(oid, request.auth.uid)))
+          || (request.resource.data.n == resource.data.n - 1
+              && exists(seatP(oid, request.auth.uid)) && !existsAfter(seatP(oid, request.auth.uid))));
+
+      match /seats/{uid} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['at', 'status'])
+          && request.resource.data.status == 'seat' && request.resource.data.at == request.time
+          && getAfter(offerP(oid)).data.n == get(offerP(oid)).data.n + 1
+          && !exists(waitP(oid, uid))
+          && oid in getAfter(regP(uid)).data.picks;
+        allow delete: if (school() && isMe(uid) && regOpen() && resource.data.status == 'seat'
+            && getAfter(offerP(oid)).data.n == get(offerP(oid)).data.n - 1
+            && !(oid in getAfter(regP(uid)).data.picks))
+          || isOwner();
+        allow create, update: if isOwner();
+        // "I can't come" notes from the student; only the owner removes them.
+        match /abs/{day} {
+          allow read: if isMe(uid) || isTeacher();
+          allow create: if school() && isMe(uid)
+            && request.resource.data.keys().hasOnly(['reason', 'at'])
+            && request.resource.data.reason is string && request.resource.data.reason.size() <= 300
+            && request.resource.data.at == request.time;
+          allow delete: if isOwner();
+        }
+      }
+      // Waitlist: only a server time, no names, so any signed-in student may read the order.
+      match /wait/{uid} {
+        allow read: if school();
+        allow create: if school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['at']) && request.resource.data.at == request.time
+          && get(offerP(oid)).data.n >= get(offerP(oid)).data.cap
+          && !exists(seatP(oid, uid))
+          && oid in getAfter(regP(uid)).data.picks;
+        allow delete: if (school() && isMe(uid) && regOpen() && !(oid in getAfter(regP(uid)).data.picks))
+          || isOwner();
+        allow update: if isOwner();
+      }
+      // Session notes ("what we did"): signed-in school users read, only the owner writes.
+      match /log/{id} { allow read: if school(); allow write: if isOwner(); }
+    }
+
+    match /regs/{uid} {
+      allow read: if isMe(uid) || isTeacher();
+      allow create: if school() && isMe(uid) && regOpen()
+        && request.resource.data.keys().hasOnly(['picks'])
+        && request.resource.data.picks is list && request.resource.data.picks.size() == 1
+        && backed(request.resource.data.picks[0], uid);
+      allow update: if (school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['picks', 'rm'])
+          && request.resource.data.picks is list
+          && (
+            // add one club at the end
+            (request.resource.data.picks.size() == resource.data.picks.size() + 1
+              && request.resource.data.picks.size() <= maxPicks()
+              && request.resource.data.picks.hasAll(resource.data.picks)
+              && !(request.resource.data.picks[request.resource.data.picks.size() - 1] in resource.data.picks)
+              && backed(request.resource.data.picks[request.resource.data.picks.size() - 1], uid))
+            // or remove one club ("rm") whose seat/ticket is removed in the same write
+            || (request.resource.data.rm is string
+              && request.resource.data.rm in resource.data.picks
+              && request.resource.data.picks == resource.data.picks.removeAll([request.resource.data.rm])
+              && !backed(request.resource.data.rm, uid))
+          ))
+        || isOwner();
+      allow create, delete: if isOwner();
+    }
+
     // ---------- roles: only the owner manages the read-only teacher list ----------
     match /config/roles {
       allow read: if school();
@@ -134,5 +231,6 @@ service cloud.firestore {
     match /{path=**}/done/{id}      { allow read: if isTeacher(); }
     match /{path=**}/results/{id}   { allow read: if isTeacher(); }
     match /{path=**}/wellbeing/{id} { allow read: if isTeacher(); }
+    match /{path=**}/abs/{id}       { allow read: if isTeacher(); }
   }
 }

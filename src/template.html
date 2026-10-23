@@ -327,6 +327,19 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 @media (max-width:860px){ .calcgrid{grid-template-columns:1fr} }
 @media (max-width:760px){ .hero{grid-template-columns:1fr} .filters .lab{width:100%} .lvscale{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;scroll-behavior:auto!important} }
+.crbanner.live{border:2px solid var(--brand)}
+.crrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:10px}
+.crrow>div:first-child{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1}
+.crbar{height:6px;border-radius:9999px;background:var(--tint);overflow:hidden}.crbar>i{display:block;height:100%}
+.tag.ok{background:#15803d;color:#fff}.tag.x{opacity:.55;text-decoration:line-through}
+.crcoach{flex-direction:row;align-items:center;gap:14px}.crcoach img,.crava{width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none}
+.crava{display:grid;place-items:center;background:var(--tint);font-weight:900;font-size:26px;color:var(--brand)}
+.crmine{border-left:6px solid var(--cc,var(--brand))}
+.crhead{display:flex;gap:14px;align-items:center}.crhead .pic{width:96px;flex:none;background:var(--tint);border-radius:12px;aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden}.crhead .pic>svg{width:100%;height:100%}
+.crstep{background:var(--teal-soft);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.crdet{border:1px solid var(--line);border-radius:12px;padding:10px 14px}.crdet>summary{cursor:pointer;font-weight:800}.crdet[open]>summary{margin-bottom:10px}
+.crcal{display:flex;flex-direction:column;gap:10px}
+.crtable{border-collapse:collapse;width:100%;font-size:13.5px}.crtable th,.crtable td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
 </style>
 
 <header class="bar">
@@ -341,9 +354,9 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
         <a href="#how" data-go="how" data-pub><b>Хэрхэн явагддаг</b><small>Tomujin PE-ийн 6 алхам</small></a>
         <a href="#priming" data-go="priming" data-pub><b>Өглөөний 20 минут</b><small>Бие, оюунаа сэрээх дасгал</small></a>
       </div></div>
-      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Спорт ба амжилт</button><div class="dd">
-        <a href="#clubs" data-go="clubs" data-pub><b>Дугуйлан</b><small>13 дугуйлан</small></a>
-        <a href="#stories" data-go="stories" data-pub><b>Шигшээ баг ба амжилт</b><small>Сагс, волейбол, хөл бөмбөг, UBAC</small></a>
+      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Дугуйлан ба баг</button><div class="dd">
+        <a href="#clubs" data-go="clubs" data-pub><b>Дугуйлан</b><small>Өглөөний дугуйлан · суудал бүртгэл</small></a>
+        <a href="#stories" data-go="stories" data-pub><b>Шигшээ баг</b><small>Сагс, волейбол, хөл бөмбөг, UBAC</small></a>
       </div></div>
       <div class="mg"><button type="button" class="mt" aria-haspopup="true">Суралцах</button><div class="dd">
         <a href="#wellbeing" data-go="wellbeing"><b>Сайн сайхан байдал</b><small>4 хэмжээс, 14 чиглэл, өөрийгөө үнэлэх</small></a>
@@ -352,6 +365,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
         <a href="#calc" data-go="calc"><b>Хоол тооцоолуур</b><small>Өдөрт хэдэн ккал хэрэгтэй вэ</small></a>
       </div></div>
       <div class="mg"><button type="button" class="mt" aria-haspopup="true">Миний хэсэг</button><div class="dd">
+        <a href="#myclubs" data-go="myclubs"><b>Миний дугуйлан</b><small>Суудал, хуваарь, ирц, хийсэн зүйл</small></a>
         <a href="#today" data-go="today"><b>Өнөөдрийн даалгавар</b><small>Ангид оноосон дасгал</small></a>
         <a href="#classes" data-go="classes"><b>Ангиуд</b><small>Мэдэгдэл, оноосон дасгал, файл</small></a>
         <a href="#lessons" data-go="lessons"><b>Хичээлүүд</b><small>Хичээлийн төлөвлөгөө</small></a>
@@ -381,7 +395,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
   </div>
   <section class="topath" aria-labelledby="topT">
     <span class="eyebrow">Tomujin Top Student Athletes</span>
-    <h2 id="topT">Томүжингийн шилдэг тамирчид</h2>
+    <h2 id="topT">Tomujin-ий шилдэг тамирчид</h2>
     <p class="lede">Хичээлдээ ч, талбай дээр ч тогтмол хичээж, бусдадаа үлгэр жишээ болж буй сурагч тамирчид.</p>
     <div class="chips" id="topAdd"></div>
     <div class="storygrid" id="topGrid"></div>
@@ -392,9 +406,9 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
       <span class="eyebrow" data-cms="cj_eb">Танай хүүхэдтэй хэн ажилладаг вэ</span>
       <h2 id="coachT" data-cms="cj_h">Жак багш</h2>
       <p class="role" data-cms="cj_role">Биеийн тамирын багш, амьдралын хэв маягийн дасгалжуулагч</p>
-      <p class="lede" data-cms="cj_p1">Сайн байна уу! Би Жак багш — Жаргалсайханы Сайханжаргал. Тэмүжин Альтернатив Сургуулийн биеийн тамирын багш, амьдралын хэв маягийн дасгалжуулагч.</p>
+      <p class="lede" data-cms="cj_p1">Сайн байна уу! Би Жак багш — Жаргалсайханы Сайханжаргал. Tomujin Alternative School-ийн биеийн тамирын багш, амьдралын хэв маягийн дасгалжуулагч.</p>
       <p class="lede" data-cms="cj_p2">Би 20 гаруй жил спортоор хичээллэсэн. Хөлбөмбөгийн мэргэжлийн хаалгач байсан бөгөөд одоо ч идэвхтэй тоглосоор байна. Мөн тамирчдын бие бялдрын дасгалжуулагч, хувийн дасгалжуулагчаар ажилладаг. Надад AFC D лиценз, AFC хаалгачийн 2-р түвшний дасгалжуулагчийн лиценз бий. Одоо NSCA-ийн гэрчилгээ авахаар бэлдэж байна.</p>
-      <p class="lede" data-cms="cj_p3">Тэмүжинд би 1–12-р ангийн биеийн тамирын хичээлийг удирдаж, UBAC-ийн сургуулийн багуудыг дасгалжуулдаг. Сурагчид, багш ажилтнууд, гэр бүлүүдэд эрүүл зуршил төлөвшүүлэхэд тусалдаг.</p>
+      <p class="lede" data-cms="cj_p3">Tomujin-д би 1–12-р ангийн биеийн тамирын хичээлийг удирдаж, UBAC-ийн сургуулийн багуудыг дасгалжуулдаг. Сурагчид, багш ажилтнууд, гэр бүлүүдэд эрүүл зуршил төлөвшүүлэхэд тусалдаг.</p>
       <p class="lede" data-cms="cj_p4">Миний итгэл үнэмшил энгийн: зүгээр л ирээрэй. Хамгийн шилдэг нь байх шаардлагагүй — ирж, оролдоод, өөрийнхөө хурдаар өсөж хөгжөөрэй. Миний заадаг бүхнийг би өөр дээрээ туршиж, амьдарч үзсэн.</p>
     </div>
   </section>
@@ -404,7 +418,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 
 
   <div class="gate guest" id="gate">
-    <span class="eyebrow">Зөвхөн Томүжингийн сурагч, багш нарт</span>
+    <span class="eyebrow">Зөвхөн Tomujin-ий сурагч, багш нарт</span>
     <h2>Сургуулийн имэйлээрээ нэвтэрч бүх хэсгийг үзнэ</h2>
     <p class="lede">Сайн сайхан байдлын хүрээ, дасгалын сан, мэдлэгийн сан, хоол тооцоолуур, бэлтгэлийн план, хичээлүүд, бэлтгэлийн тэмдэглэл нь зөвхөн @tomujin.edu.mn хаягаар нэвтэрч, имэйлээ баталгаажуулсан хэрэглэгчдэд нээгдэнэ.</p>
     <div class="chips"><button type="button" class="btn gold" data-login="in">Нэвтрэх</button><button type="button" class="btn line" data-login="up">Анх удаа бүртгүүлэх</button></div>
@@ -423,7 +437,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
   <section class="privacy" id="privacy" aria-labelledby="privT">
     <span class="eyebrow" data-cms="pv_eb">Нууцлал</span>
     <h2 id="privT" data-cms="pv_h">Сурагчийн мэдээллийг бид хэрхэн хамгаалдаг вэ</h2>
-    <p class="lede" data-cms="pv_p">Бид сурагч бүрийг хөгжүүлэхэд хэрэгтэй мэдээллийг л цуглуулдаг: анги, бие бялдрын сорилын дүн, InBody дүн, дасгалын бүртгэл. Сурагч бүр зөвхөн өөрийн мэдээллийг хардаг, засах болон устгах эрх зөвхөн Жак багшид байна. Мэдээллийг Тэмүжингээс гадна хэнд ч өгөхгүй, зар сурталчилгаанд ашиглахгүй. Эцэг эхчүүд хүүхдийнхээ мэдээллийг хүссэн үедээ харж, засуулж болно.</p>
+    <p class="lede" data-cms="pv_p">Бид сурагч бүрийг хөгжүүлэхэд хэрэгтэй мэдээллийг л цуглуулдаг: анги, бие бялдрын сорилын дүн, InBody дүн, дасгалын бүртгэл. Сурагч бүр зөвхөн өөрийн мэдээллийг хардаг, засах болон устгах эрх зөвхөн Жак багшид байна. Мэдээллийг Tomujin-оос гадна хэнд ч өгөхгүй, зар сурталчилгаанд ашиглахгүй. Эцэг эхчүүд хүүхдийнхээ мэдээллийг хүссэн үедээ харж, засуулж болно.</p>
   </section>
 </section>
 
@@ -568,9 +582,14 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 
 <section class="view" id="v-clubs" hidden aria-labelledby="clubsT">
     <div class="head">
-      <span class="eyebrow">Хичээлээс гадуурх хөдөлгөөн</span>
+      <span class="eyebrow">2-р улирлаас · 11/9–4/30 · өглөө</span>
       <h2 id="clubsT">Дугуйлангууд</h2>
-      <p class="lede">Спорт, шатар, тулааны урлаг, бүжиг, фитнесс. Өөрт таалагдах хөдөлгөөнөө олоод, тогтмол ирээрэй. Карт дээр дарж дэлгэрэнгүйг үзээрэй.</p>
+      <p class="lede">Өглөөний 5 дугуйлан. Хүүхэд бүр 2 хүртэл дугуйлан сонгож, 7 хоногт 4 өдөр хөдөлж болно. Суудал хязгаартай тул бүртгэлийн цагт эрт сонгоорой.</p>
+    </div>
+    <div id="crOut" style="display:flex;flex-direction:column;gap:14px"></div>
+    <div class="head" style="margin-top:18px">
+      <span class="eyebrow">Танилцуулга</span>
+      <h2 id="clubsAllT">Бүх дугуйлан, сонирхлын бүлэг</h2>
     </div>
     <div class="chips" id="clubFilter"></div>
     <div class="chips" id="clubAdd"></div>
@@ -581,7 +600,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
     <div class="head">
       <span class="eyebrow">UBAC · Сургуулийг төлөөлөгчид</span>
       <h2 id="teamsT">Шигшээ багууд</h2>
-      <p class="lede">Томүжингийн сагсан бөмбөг, волейбол, хөл бөмбөгийн шигшээ багууд UBAC хувийн сургуулиудын спортын холбооны тэмцээнд сургуулиа төлөөлдөг. Карт дээр дарж баг, дасгалжуулагч, бэлтгэлийн хуваарь, амжилтыг үзнэ.</p>
+      <p class="lede">Tomujin-ий сагсан бөмбөг, волейбол, хөл бөмбөгийн шигшээ багууд UBAC хувийн сургуулиудын спортын холбооны тэмцээнд сургуулиа төлөөлдөг. Карт дээр дарж баг, дасгалжуулагч, бэлтгэлийн хуваарь, амжилтыг үзнэ.</p>
     </div>
     <div class="chips" id="teamAdd"></div>
     <div class="teamgrid" id="teamGrid"></div>
@@ -596,6 +615,15 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
     <div class="storygrid" id="storyGrid"></div>
   </section>
 
+
+<section class="view" id="v-myclubs" hidden>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Суудал · Хуваарь · Ирц · Хийсэн зүйл</span>
+    <h1>Миний дугуйлан</h1>
+    <p class="lede">Таны сонгосон дугуйлангийн бүх мэдээлэл энд байна: багш, хаана, хэзээ, юу хийх, юу хийсэн, ирц, төлбөр.</p>
+  </div>
+  <div id="myClubsOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
 
 <section class="view" id="v-today" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
@@ -646,7 +674,7 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 </main>
 
 <footer id="contact"><div class="wrap footgrid">
-  <div class="fcol"><strong data-cms="ft_h">Холбоо барих</strong><span>Tomujin PE · Томүжин Алтернатив сургууль · Coach Jack</span></div>
+  <div class="fcol"><strong data-cms="ft_h">Холбоо барих</strong><span>Tomujin PE · Tomujin Alternative School · Coach Jack</span></div>
   <nav class="flinks" id="footLinks" aria-label="Холбоо барих"></nav>
 </div></footer>
 
@@ -1107,7 +1135,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderStories();renderTeams();renderTop();renderToday();renderTests();renderHomeToday();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderTop();renderToday();renderTests();renderHomeToday();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -1533,13 +1561,14 @@ async function ensureProfile(){
   var prof={email:ME.email.toLowerCase(),name:pend.name||ME.name||ME.email.split('@')[0],classId:pend.classId||'',createdAt:Date.now()};
   await ref.set(prof).then(function(){MYPROFILE=prof;try{localStorage.removeItem('tpe-pending')}catch(e){}},function(){});
 }
-function stopSubs(){unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
+function stopSubs(){if(typeof crStop==='function')crStop();unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
 function startSubs(){
   stopSubs();if(!ME||!db)return;
   unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
   unsubs.push(db.collection('users/'+ME.uid+'/done').onSnapshot(function(s){MYDONE={};s.docs.forEach(function(d){MYDONE[d.id]=d.data().at||1});renderToday();renderHomeToday();renderLog()}));
   MYPEND=null;if(ME.email)db.doc('pending/'+String(ME.email).toLowerCase()).get().then(function(d){if(d.exists){MYPEND=d.data();renderTests()}},function(){});
   unsubs.push(db.collection('users/'+ME.uid+'/results').onSnapshot(function(s){MYRES={};s.docs.forEach(function(d){MYRES[d.id]=d.data()});renderTests()}));
+  crSubMine();
   unsubs.push(db.collection('users/'+ME.uid+'/saved').onSnapshot(function(s){SAVED={};s.docs.forEach(function(d){SAVED[d.id]=d.data().at||1});renderLib();renderSaved()}));
   unsubs.push(db.collection('users/'+ME.uid+'/wellbeing').onSnapshot(function(s){MYWB={};s.docs.forEach(function(d){MYWB[d.id]=d.data()})}));
   unsubs.push(db.collection('users/'+ME.uid+'/plans').onSnapshot(function(s){var cloud=s.docs.map(function(d){return d.data().plan}).filter(Boolean);var ids={};cloud.forEach(function(p){ids[p.id]=1});MYPLANS=cloud.concat(MYPLANS.filter(function(p){return !ids[p.id]}));renderMyPlans()}));
@@ -1637,6 +1666,7 @@ async function fbInit(){
   if(!TPE.configured){renderAccount();renderLog();return}
   db=TPE.db;
   db.collection('site').onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});SITE=m;applySite();rerenderAll()},function(){});
+  crSubPublic();
   PUBLIC_KINDS.forEach(function(kind){db.collection(COLL[kind]).onSnapshot(function(snap){var m={};snap.docs.forEach(function(d){m[d.id]=d.data()});OV[kind]=m;rerenderAll()},function(){})});
   TPE.onAuth(async function(u,role){
     ME=u;MYROLE=role;MYPROFILE=null;SAVED={};fSaved=false;MYDONE={};MYRES={};MYPEND=null;PENDRES={};DONEALL=[];RESALL=[];canEdit=role==='admin';if(!canEdit)editMode=false;
@@ -2265,7 +2295,7 @@ function setAuthed(on){
 [].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
 
 /* ---------- routing ---------- */
-var VIEWS=['today','tests','home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
+var VIEWS=['myclubs','today','tests','home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
 var PUBVIEWS=['home','how','clubs','stories','priming'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
@@ -2280,7 +2310,8 @@ bindGo(document.querySelector('header'));
 document.addEventListener('click',function(){[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
-var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
+var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderClubReg();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
+setInterval(function(){if(!$('v-clubs').hidden&&$('sheet').hidden)renderClubReg();if(!$('v-myclubs').hidden&&$('sheet').hidden)renderMyClubs()},30000);
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
 if('serviceWorker' in navigator&&location.protocol==='https:')try{navigator.serviceWorker.register('/sw.js').catch(function(){})}catch(e){}
