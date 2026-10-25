@@ -50,4 +50,4 @@ var WBS=[
   pe:'Биеийн тамирт: тоног хэрэгсэл бэлдэх, хураах, бие халаалт удирдах, бага ангийнханд заах.'}
 ];
 /* which strands each exercise category, article and lesson feeds */
-var WBCAT={fms:['move','body'],str:['move','body','load'],fun:['move','load'],agi:['move','cope'],mob:['body','restore'],flx:['restore','body'],bb:['move','connect','trust'],vb:['move','connect','trust'],fb:['move','connect','repair'],tn:['move','cope'],tt:['move','cope']};
+var WBCAT={fms:['move','body'],str:['move','body','load'],fun:['move','load'],agi:['move','cope'],mob:['body','restore'],flx:['restore','body'],bb:['move','connect','trust'],vb:['move','connect','trust'],fb:['move','connect','repair'],tn:['move','cope'],tt:['move','cope'],pb:['move','cope','connect']};

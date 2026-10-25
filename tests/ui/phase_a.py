@@ -90,14 +90,14 @@ async def main():
         # last seat taken by someone else between screen and click
         await as_role(pg, "student", phase="p2", hash="clubs", reset=True)
         await pg.evaluate("window.__tpeRace='tn-a'")
-        await pg.locator("#crOut .club", has_text="Мини теннис").locator(".crrow", has_text="А ээлж").locator("button", has_text="Суудал авах").click()
+        await pg.locator("#crOut .club", has_text="Пиклбол").locator(".crrow", has_text="А ээлж").locator("button", has_text="Суудал авах").click()
         await pg.wait_for_timeout(600)
-        tn = await pg.locator("#crOut .club", has_text="Мини теннис").text_content()
+        tn = await pg.locator("#crOut .club", has_text="Пиклбол").text_content()
         check("4 race: clear 'just taken' message with waitlist button", "дөнгөж өөр хүүхдэд оногдлоо" in tn, tn[:300])
         await pg.screenshot(path=SHOT + "a4_race_message.png")
-        await pg.locator("#crOut .club", has_text="Мини теннис").locator("button", has_text="Хүлээлгэнд орох").first.click()
+        await pg.locator("#crOut .club", has_text="Пиклбол").locator("button", has_text="Хүлээлгэнд орох").first.click()
         await pg.wait_for_timeout(600)
-        tn = await pg.locator("#crOut .club", has_text="Мини теннис").text_content()
+        tn = await pg.locator("#crOut .club", has_text="Пиклбол").text_content()
         check("4 race: joining the waitlist works", "Хүлээлгийн" in tn, tn[:300])
 
         # network: answer lost after the server saved -> verify says seat exists

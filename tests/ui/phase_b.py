@@ -187,7 +187,7 @@ async def attendance(pg):
     await pg.clock.set_fixed_time("2026-11-19T10:00:00+08:00")
     await as_role(pg, "admin", hash="clubs", reset=True)
     await pg.click("button:has-text('Ирц бүртгэх')"); await pg.wait_for_timeout(300)
-    await pg.locator("#sheet button", has_text="Мини теннис · Б ээлж").click(); await pg.wait_for_timeout(300)
+    await pg.locator("#sheet button", has_text="Пиклбол · Б ээлж").click(); await pg.wait_for_timeout(300)
     check("6 sheet opens on the latest past session", await pg.input_value("#att-day") == "2026-11-19")
     rows = await pg.locator("#sheet .crrow").count()
     check("6 four children listed for tennis B", rows == 4, rows)
@@ -227,7 +227,7 @@ async def attendance(pg):
     await pg.clock.set_fixed_time("2026-11-19T10:00:00+08:00")
     await as_role(pg, "admin", hash="clubs")
     await pg.click("button:has-text('Ирц бүртгэх')"); await pg.wait_for_timeout(300)
-    await pg.locator("#sheet button", has_text="Мини теннис · Б ээлж").click(); await pg.wait_for_timeout(300)
+    await pg.locator("#sheet button", has_text="Пиклбол · Б ээлж").click(); await pg.wait_for_timeout(300)
     await pg.select_option("#att-day", "2026-11-12"); await pg.wait_for_timeout(300)
     await pg.click("#sheet button:has-text('Цуцлалтыг буцаах')"); await pg.wait_for_timeout(400)
     off = (await store_get(pg, "offers/tn-b")).get("off", {})
@@ -261,6 +261,23 @@ async def home_header(pg):
     check("5.4 desktop header stays fixed at the top", await pg.evaluate("()=>getComputedStyle(document.querySelector('header.bar')).position") == "sticky")
 
 
+async def pickleball(pg):
+    """Pickleball replaces mini tennis: same seats, new name and picture; drills in the library."""
+    await as_role(pg, "guest", hash="clubs", reset=True)
+    cr = await pg.text_content("#crOut")
+    check("PB clubs page shows Пиклбол, no mini tennis", "Пиклбол" in cr and "теннис" not in cr.lower(), cr[:200])
+    card = pg.locator("#crOut .club", has_text="Пиклбол")
+    t = await card.text_content()
+    check("PB keeps the tennis time, place and two shifts", "07:00–08:20" in t and "А ээлж" in t and "Б ээлж" in t, t[:300])
+    check("PB card has a paddle picture", await card.locator(".pic svg").count() == 1)
+    await card.screenshot(path=SHOT + "pb_club_card.png")
+    await as_role(pg, "student", hash="library")
+    await pg.locator("#fCat button", has_text="Пиклбол").click(); await pg.wait_for_timeout(300)
+    n = await pg.locator("#exList .ex").count()
+    check("PB 5 pickleball drills in the exercise library", n == 5, n)
+    await pg.screenshot(path=SHOT + "pb_library.png")
+
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
@@ -282,7 +299,7 @@ async def main():
     sys.exit(1 if bad else 0)
 
 
-EXTRA = [feedback, attendance, home_header]
+EXTRA = [feedback, attendance, home_header, pickleball]
 
 if __name__ == "__main__":
     asyncio.run(main())

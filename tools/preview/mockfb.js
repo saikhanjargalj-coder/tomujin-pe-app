@@ -45,7 +45,7 @@
     s["feedback/f4"] = { type: "idea", text: "Тэмдэглэлд усны хэмжээ бичдэг болгоорой.", page: "log", dev: "Android Chrome · 390px", status: "skip", reply: "Одоохондоо хийхгүй: эхлээд нойр, ачааллын бүртгэлийг тогтворжуулъя.", seen: false, at: { _ms: now - 3 * 864e5 }, who: "student", uid: "s1", email: "bat.temuulen@tomujin.edu.mn", name: "Бат Тэмүүлэн", classId: "11b" };
     s["feedback/f5"] = { type: "bug", text: "Хоол тооцоолуурт тоо оруулахад гар утсан дээр гацаад байна.", page: "calc", dev: "iPhone/iPad Safari · 390px", status: "doing", at: { _ms: now - 2 * 864e5 }, who: "student", uid: "s1", email: "bat.temuulen@tomujin.edu.mn", name: "Бат Тэмүүлэн", classId: "11b" };
     s["fbnotes/f2"] = { text: "Нүүрний шинэчлэлд оруулна.", at: now - 3600e3 };
-    /* tennis B (Tue, Thu): four children with seats, for the attendance tools */
+    /* pickleball B (offer id tn-b; Tue, Thu): four children with seats, for the attendance tools */
     s["users/s4"] = { email: "nomin.b@tomujin.edu.mn", name: "Номин Бат", classId: "9a", createdAt: now - 864e5 * 12 };
     s["users/s5"] = { email: "khulan.e@tomujin.edu.mn", name: "Хулан Энх", classId: "12a", createdAt: now - 864e5 * 10 };
     ["s2", "s3", "s4", "s5"].forEach(function (u) { s["offers/tn-b/seats/" + u] = { status: "ok", at: { _ms: now - 864e5 * 5 } }; });
