@@ -36,7 +36,7 @@ function paKeys(){return ((PATT.sum&&PATT.sum.classes)||[]).map(function(c){retu
 function paCls(key){key=key||PATT.key;return ((PATT.sum&&PATT.sum.classes)||[]).filter(function(c){return c.tab+'|'+c.cls===key})[0]||null}
 function paTab(key){return String(key||PATT.key).split('|')[0]}
 /* "12B" stays; a grade-only class on its own tab (PE 6 → 6) shows as 6A like the school system; other grades as "5-р анги". */
-function paLabel(c){if(!c)return '';var g=String(c.cls),t=String(c.tab||'').replace(/\D/g,'');return /^\d+$/.test(g)?(g===t?g+'A':g+'-р анги'):g}
+function paLabel(c){if(!c)return '';var g=String(c.cls),t=String(c.tab||'').replace(/\D/g,'');return /^\d+$/.test(g)?(g===t?g+'A':g+'-р анги ('+c.tab+')'):g}
 function paOpen(key){PATT.key=key;paKeep('key',key);PATT.bulk=false;PATT.msg=null;if(!PATT.data[paTab(key)])paLoadTab(paTab(key));else{paPickDate(PATT.data[paTab(key)]);renderPatt()}}
 function paPickDate(j){var td=ymd(new Date()),ds=j.dates||[];if(ds.indexOf(PATT.date)<0){var past=ds.filter(function(d){return d<=td});PATT.date=past.length?past[past.length-1]:(ds[0]||td)}}
 function paLoadTab(tab,keepDate){

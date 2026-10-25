@@ -47,7 +47,7 @@ function syntheticPE12() {
   const head = ["ID", "Нэр", "Овог", "Анги", "Хаус", "И-Мэйл", "Утас", "Зураг", "Анги", "Elective 1", "Elective 2", "Ирц /цаг/"];
   const days = ["2026-09-07", "2026-09-08", "2026-09-09", "2026-10-26", "2026-10-30", "2026-11-09", "2025-09-02", "2025-09-03", "2026-11-16", "2027-01-18"];
   const rows = [Array(12).fill("").concat(["P1W1", "", "", "P1W8", "", "P2W1", "", "", "P2W2", "P3W1"]), Array(12).fill(""), head.concat(days.map(ub))];
-  const st = [["90001", "Туршилт", "Нэг", "12", "12A", "test1@tomujin.edu.mn"], ["90002", "#N/A", "", "", "", ""], ["90003", "Туршилт", "Хоёр", "12", "12B", "Test3@tomujin.edu.mn"]];
+  const st = [["90001", "Туршилт", "Нэг", "12", "12A", "test1@tomujin.edu.mn"], ["90002", "#N/A", "", "", "", ""], ["90003", "Туршилт", "Хоёр", "12", "12B", "Test3@tomujin.edu.mn"], ["90004", "Туршилт", "Дөрөв", "", "", "t4@tomujin.edu.mn"]];
   st.forEach((s, i) => rows.push([s[0], s[1], s[2], s[3], "H" + i, s[5], "99119911", "https://photo", s[4], "", "", 0, i === 0 ? I : "", "", "", i === 2 ? T : "", i === 2 ? T : "", "", "", "", "", ""]));
   return rows;
 }
@@ -57,9 +57,10 @@ let api = load([fakeSheet("Master", [["ID"]]), pe12, ls]);
 let r = api.call({ idToken: "good", action: "tabs" });
 check("only PE tabs are offered", r.ok && JSON.stringify(r.tabs) === '["PE 12"]', r);
 r = api.call({ idToken: "good", action: "read", tab: "PE 12" });
-check("reads students, skips #N/A placeholders", r.ok && r.students.length === 2 && r.students.map((s) => s.id).join() === "90001,90003", r);
+check("reads students, skips #N/A placeholders", r.ok && r.students.length === 3 && r.students.map((s) => s.id).join() === "90001,90003,90004", r);
 check("class (12A/12B) comes from the second 'Анги' column, grade from the first", r.students[0].cls === "12A" && r.students[0].grade === "12" && r.students[1].cls === "12B");
 check("no phone or photo in the answer", !JSON.stringify(r).includes("99119911") && !JSON.stringify(r).includes("photo"));
+check("a blank grade on PE 12 counts as grade 12", r.students.filter((s) => s.id === "90004")[0].grade === "12");
 check("email lower-cased", r.students[1].email === "test3@tomujin.edu.mn");
 check("existing mark read by date", r.students[0].m["2026-09-07"] === I);
 check("2025 dates after 9/Nov are reported, not used", r.odd.length === 2 && r.odd.every((o) => o.iso.startsWith("2025")) && !r.dates.includes("2025-09-02"), r.odd);

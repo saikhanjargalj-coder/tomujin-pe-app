@@ -107,7 +107,8 @@ function read_(sh, tz) {
       L.dates.forEach(function (d) { var x = String(r[d.col - 1]).trim(); if (x) m[d.iso] = x; });
       students.push({
         id: id, first: first, last: L.c.last ? String(r[L.c.last - 1]).trim() : '',
-        grade: L.c.grade ? String(r[L.c.grade - 1]).trim() : '', cls: L.c.cls ? String(r[L.c.cls - 1]).trim() : '',
+        // a blank grade on a 'PE n' tab means grade n (one row on PE 8 has none)
+        grade: (L.c.grade ? String(r[L.c.grade - 1]).trim() : '') || sh.getName().replace(/\D/g, ''), cls: L.c.cls ? String(r[L.c.cls - 1]).trim() : '',
         house: L.c.house ? String(r[L.c.house - 1]).trim() : '',
         email: L.c.mail ? String(r[L.c.mail - 1]).trim().toLowerCase() : '', m: m
       });
