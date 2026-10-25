@@ -219,6 +219,35 @@ service cloud.firestore {
       }
     }
 
+    // ---------- beta feedback ("Санал өгөх" button) ----------
+    // Anyone may send a note, even parents who are not signed in. Only the owner reads the inbox,
+    // changes status, replies or deletes. A signed-in sender can read their own notes (to see
+    // "your idea was done") and may only mark the reply as seen.
+    function fbShape() {
+      return request.resource.data.keys().hasOnly(['type', 'text', 'page', 'dev', 'status', 'at', 'who', 'contact', 'uid', 'email', 'name', 'classId'])
+        && request.resource.data.keys().hasAll(['type', 'text', 'page', 'status', 'at', 'who', 'uid'])
+        && request.resource.data.type in ['bug', 'idea', 'confusing', 'like']
+        && request.resource.data.text is string && request.resource.data.text.size() >= 3 && request.resource.data.text.size() <= 2000
+        && request.resource.data.page is string && request.resource.data.page.size() <= 40
+        && request.resource.data.who in ['parent', 'student', 'teacher', 'other']
+        && request.resource.data.status == 'new'
+        && request.resource.data.at == request.time
+        && shortStr('dev', 160) && shortStr('contact', 120) && shortStr('name', 80) && shortStr('classId', 40) && shortStr('email', 120);
+    }
+    match /feedback/{id} {
+      allow create: if fbShape() && (
+          // not signed in with a verified school account: no identity fields
+          (!school() && request.resource.data.uid == ''
+            && !('email' in request.resource.data) && !('name' in request.resource.data) && !('classId' in request.resource.data))
+          // verified school account: must be their own uid and email
+          || (school() && request.resource.data.uid == request.auth.uid && request.resource.data.email == myEmail()));
+      allow read: if isOwner() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if isOwner() || (school() && resource.data.uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+          && request.resource.data.seen == true);
+      allow delete: if isOwner();
+    }
+
     // Fitness results imported for students who have not signed up yet (doc id = school email).
     // Only the owner writes; the student reads their own once signed in; teachers read.
     match /pending/{email} {
