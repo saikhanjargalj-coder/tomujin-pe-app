@@ -93,6 +93,17 @@ cd tomujin-pe-app && git pull && npx -y firebase-tools@13 deploy --project ТӨ�
 - **Юу шинэчлэгдэв:** Нүүр → Юу шинэчлэгдэв. Засах горимд "✎ Шинэчлэл нэмэх / засах".
 - Санал хадгалах эрхийг `firestore.rules` доторх `feedback` хэсэг шийднэ: хэн ч илгээж болно, зөвхөн админ уншина.
 
+## Код хаана байдаг вэ, яаж нийтлэх вэ
+- **GitHub (`firebase-app` салбар) бол цорын ганц үндсэн эх.** Cloud Shell дээр шууд commit хийхгүй, зөвхөн татаж аваад нийтэлнэ:
+  `cd ~/tomujin-pe-app && git pull && npx -y firebase-tools@13 deploy --project tomujin-pe`
+- 2026-10-25-нд Cloud Shell дээр л байсан ажлыг (подкаст, тоглолтын төв, YouTube) GitHub-д нэгтгэсэн. Хуучин Cloud Shell түүх `cloudshell-backup-1025` салбарт хадгалагдаж байгаа.
+
+## Тест
+- **Серверийн дүрэм** (дугуйлангийн суудал, цаг, давхар дарах, сүүлийн суудлын төлөөх уралдаан, санал, сурагчийн мэдээлэл): Firestore emulator дээр ажиллана, жинхэнэ өгөгдөлд хүрэхгүй.
+  `npm --prefix tests/rules install && npx -y firebase-tools@13 emulators:exec --only firestore --project demo-tomujin-pe "node tests/rules/rules.test.mjs"`
+- **Preview** (зөвхөн тестийн өгөгдөл): `python3 tools/build.py && python3 tools/preview/build_preview.py preview.html` — дээд хар мөрөөр хэрэглэгчийн эрх, бүртгэлийн цагийг сольж үзнэ.
+- **Хөтчийн тест**: `python3 tests/ui/phase_a.py http://127.0.0.1:8790/` (preview-г локал серверээр ажиллуулсны дараа).
+
 ## Үнэ
 Firebase-ийн үнэгүй (Spark) багц хангалттай: өдөрт 50,000 уншилт, 20,000 бичилт, 10 GB хостинг. Сургуулийн хэмжээнд төлбөргүй.
 
