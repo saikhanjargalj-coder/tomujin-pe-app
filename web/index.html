@@ -2004,6 +2004,15 @@ function paSettings(){
       if(b&&!/^https:\/\/docs\.google\.com\/spreadsheets\//.test(b)){st.className='status err';st.textContent='Sheet-ийн холбоос https://docs.google.com/spreadsheets/… хэлбэртэй байна.';return}
       db.doc('private/peatt').set({url:a,sheet:b,at:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа.';PATT.tabs=null;PATT.data={}},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st])]);
 }
+/* Links to the school's own system (admin.tomujin.edu.mn). Only links for now: reading or writing its data
+   needs an access key from the people who run it. Class pages there are /t/class/<class>-pe, e.g. 12a-pe. */
+var PAADMIN='https://admin.tomujin.edu.mn';
+function paAdminLinks(j){
+  var cls=(PATT.cls!=='all'?[PATT.cls]:paClasses(j)).map(function(c){return /^\d+$/.test(c)?c+'A':c}).filter(function(c){return /^\d+[A-Z]$/.test(c)});
+  var a=function(href,t){return h('a',{cls:'btn line small',href:PAADMIN+href,target:'_blank',rel:'noopener',text:t})};
+  return h('div',{cls:'crstep',id:'pa-admin'},[h('b',{text:'Сургуулийн систем (admin.tomujin.edu.mn)'}),
+    h('div',{cls:'chips'},[a('/t/attendance','QR-ээр ирц ↗'),a('/t/attendance/manual','Гараар ирц ↗')].concat(cls.map(function(c){return a('/t/class/'+c.toLowerCase()+'-pe',c+' анги ↗')})))]);
+}
 function renderPatt(){
   var W=$('pattOut');if(!W)return;W.innerHTML='';
   if(MYROLE!=='admin'){W.appendChild(h('p',{cls:'muted',text:'Энэ хэсэг зөвхөн Жак багшид харагдана.'}));return}
@@ -2026,8 +2035,9 @@ function renderPatt(){
     var sel=h('select',{id:'pa-date'},j.dates.map(function(d){return h('option',{value:d,text:paMD(d)+(d===td?' · өнөөдөр':'')+(marked[d]?' · ✓':'')+(d>td?' · болоогүй':'')})}));sel.value=PATT.date;
     sel.addEventListener('change',function(){PATT.date=sel.value;PATT.bulk=false;PATT.msg=null;renderPatt()});
     W.appendChild(h('label',{cls:'ff',for:'pa-date'},['Хичээлийн өдөр',sel]));
+    W.appendChild(paAdminLinks(j));
     if(j.odd&&j.odd.length){var want=j.odd.map(function(o){return o.want?paMD(o.want):''}).filter(Boolean),ys={};j.odd.forEach(function(o){ys[o.iso]=1});
-      W.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Sheet-ийн толгойд '+j.odd.length+' огноо буруу байна'+(want.length?': '+want.join(', '):'')}),h('span',{text:'Эдгээр баганын 3-р мөрөнд '+Object.keys(ys).sort().map(function(x){return x.replace(/-/g,'/')}).join(', ')+' гэсэн өмнөх оны огноо бичигдсэн тул тэр өдрүүдийн ирцийг сайтаас бичихгүй. Sheet дээр огноог засвал автоматаар ажиллана.'})]))}
+      W.appendChild(h('div',{cls:'crstep',id:'pa-odd',style:'background:var(--gold-soft)'},[h('b',{text:'Sheet-ийн толгойд '+j.odd.length+' огноо буруу байна'+(want.length?': '+want.join(', '):'')}),h('span',{text:'Эдгээр баганын 3-р мөрөнд '+Object.keys(ys).sort().map(function(x){return x.replace(/-/g,'/')}).join(', ')+' гэсэн өмнөх оны огноо бичигдсэн тул тэр өдрүүдийн ирцийг сайтаас бичихгүй. Sheet дээр огноог засвал автоматаар ажиллана.'})]))}
     var list=j.students.filter(function(x){return PATT.cls==='all'||(x.cls||x.grade)===PATT.cls}).sort(function(a,b){return (a.cls||'').localeCompare(b.cls||'')||a.first.localeCompare(b.first)});
     var d=PATT.date,future=d>td,n={};PACODE.forEach(function(c){n[c[0]]=0});var none=0;list.forEach(function(x){var v=x.m[d];if(v)n[v]=(n[v]||0)+1;else none++});
     W.appendChild(h('p',{cls:'muted',style:'margin:0',text:PACODE.map(function(c){return c[1]+' '+n[c[0]]}).join(' · ')+' · Тэмдэглээгүй '+none+' · Нийт '+list.length}));
