@@ -166,7 +166,7 @@
     var g = +tab.split(" ")[1], secs = g >= 12 ? ["A", "B", "C"] : g >= 10 ? ["A", "B"] : [""], st = [], n = 0, td = ymd(Date.now());
     var dates = schoolDays().filter(function (d) { return !/^2026-11-1[0-3]$|^2027-01-(19|2[0-2])$/.test(d); });
     secs.forEach(function (sc, si) { var size = g >= 10 ? 8 : 6; for (var i = 0; i < size; i++) { n++; var id = String(30000 + g * 100 + n), m = {};
-      dates.forEach(function (d, di) { var w = new Date(d + "T00:00:00Z").getUTCDay(); if (d < td && w === ((g + si) % 5) + 1) m[d] = (i + di) % 11 === 0 ? "Т" : (i + di) % 13 === 0 ? "Ч" : (i + di) % 17 === 0 ? "Х" : "И"; });
+      dates.forEach(function (d, di) { var w = new Date(d + "T00:00:00Z").getUTCDay(); if (d < td && w === ((g + si) % 5) + 1) m[d] = (i + di) % 11 === 0 ? "Т" : (i + di) % 13 === 0 ? "Ч" : (i + di) % 17 === 0 ? "Х" : (i + di) % 19 === 0 ? "Ө" : "И"; });
       st.push({ id: id, first: FN[(n * 7 + g) % FN.length], last: LN[(n + g) % LN.length], grade: String(g), cls: sc ? g + sc : "", email: "student" + id + "@tomujin.edu.mn", m: m }); } });
     var odd = []; ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2027-01-19", "2027-01-20", "2027-01-21", "2027-01-22"].forEach(function (w, i) { odd.push({ col: 0, iso: "2025-09-0" + (2 + i % 4), want: w }); });
     store[k] = { dates: dates, odd: odd, students: st };

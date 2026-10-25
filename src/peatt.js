@@ -4,7 +4,7 @@
    Only the owner can use it: the script checks the sign-in with Google on every call.
    The script address lives in private/peatt (owner-only), not in the public site settings. */
 var PATT={url:'',sheet:'',loaded:false,tabs:null,tab:'',data:{},cls:'all',date:'',busy:{},bulk:false,msg:null,loading:false,err:''};
-var PACODE=[['И','Ирсэн','ok'],['Х','Хоцорсон','g'],['Т','Тасалсан','o'],['Ч','Чөлөөтэй','t']];
+var PACODE=[['И','Ирсэн','ok'],['Х','Хоцорсон','g'],['Т','Тасалсан','o'],['Ч','Чөлөөтэй','t'],['Ө','Өвчтэй','t']];
 var PAERR={'no-url':'Sheet-тэй холбоогүй байна. Доорх "Тохиргоо" хэсэгт холбоосоо оруулна уу.','not-allowed':'Энэ акаунтаар Sheet-ийг ашиглах эрхгүй.','bad-token':'Нэвтрэлт хүчингүй боллоо. Гараад дахин нэвтэрнэ үү.','no-date-column':'Sheet-д энэ өдрийн багана алга (толгойн огноо буруу байж магадгүй).','no-tab':'Sheet-д ийм хуудас алга.','bad-header':'Sheet-ийн толгой мөр (3-р мөр) өөрчлөгдсөн байна.','bad-code':'Зөвшөөрөгдөөгүй тэмдэг.'};
 function paErr(e){var c=String((e&&e.message)||e||'');var k=c.split(':')[0];if(k==='no-student')return 'Sheet-д энэ сурагч олдсонгүй (мөр устсан эсвэл ID өөрчлөгдсөн).';return PAERR[k]||('Sheet-тэй холбогдож чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.'+(c&&c.length<60?' ('+c+')':''))}
 function paCall(q){
@@ -37,7 +37,7 @@ function paLoadTab(tab,keepDate){
 function paClasses(j){var s={};(j.students||[]).forEach(function(x){var c=x.cls||x.grade;if(c)s[c]=1});return Object.keys(s).sort()}
 function paName(x){return x.first+(x.last?' '+x.last.charAt(0)+'.':'')}
 function paMD(iso){var d=new Date(iso+'T00:00:00Z');return (d.getUTCMonth()+1)+'/'+d.getUTCDate()+' ('+['Ня','Да','Мя','Лх','Пү','Ба','Бя'][d.getUTCDay()]+')'}
-function paTot(x){var r={p:0,a:0,e:0};Object.keys(x.m||{}).forEach(function(d){var v=x.m[d];if(v==='И'||v==='Х')r.p++;else if(v==='Т')r.a++;else if(v==='Ч')r.e++});r.h=r.p*2;return r}
+function paTot(x){var r={p:0,a:0,e:0,s:0};Object.keys(x.m||{}).forEach(function(d){var v=x.m[d];if(v==='И'||v==='Х')r.p++;else if(v==='Т')r.a++;else if(v==='Ч')r.e++;else if(v==='Ө')r.s++});r.h=r.p*2;return r}
 function paWrite(list,done){
   var j=PATT.data[PATT.tab],date=PATT.date,old={};
   list.forEach(function(w){var x=j.students.filter(function(s){return s.id===w.id})[0];if(x){old[w.id]=x.m[date]||'';if(w.code)x.m[date]=w.code;else delete x.m[date];PATT.busy[w.id]=1}});
@@ -87,7 +87,7 @@ function renderPatt(){
     var list=j.students.filter(function(x){return PATT.cls==='all'||(x.cls||x.grade)===PATT.cls}).sort(function(a,b){return (a.cls||'').localeCompare(b.cls||'')||a.first.localeCompare(b.first)});
     var d=PATT.date,future=d>td,n={};PACODE.forEach(function(c){n[c[0]]=0});var none=0;list.forEach(function(x){var v=x.m[d];if(v)n[v]=(n[v]||0)+1;else none++});
     W.appendChild(h('p',{cls:'muted',style:'margin:0',text:PACODE.map(function(c){return c[1]+' '+n[c[0]]}).join(' · ')+' · Тэмдэглээгүй '+none+' · Нийт '+list.length}));
-    if(future)W.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Энэ өдөр хараахан болоогүй. Урьдчилан мэдэгдсэн бол "Чөлөөтэй" тэмдэглэж болно.'}));
+    if(future)W.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Энэ өдөр хараахан болоогүй. Урьдчилан мэдэгдсэн бол "Чөлөөтэй" эсвэл "Өвчтэй" тэмдэглэж болно.'}));
     var todo=list.filter(function(x){return !x.m[d]});
     if(!future&&!PATT.bulk)W.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',id:'pa-bulk',disabled:todo.length?null:'',text:'Тэмдэглээгүй бүгдийг "Ирсэн" болгох…',onclick:function(){PATT.bulk=true;renderPatt()}})]));
     if(!future&&PATT.bulk)W.appendChild(h('div',{cls:'box',id:'pa-preview',style:'border:2px solid var(--gold)'},[h('h3',{text:'Sheet-д бичихийн өмнө шалгана уу · '+paMD(d)}),
@@ -98,11 +98,11 @@ function renderPatt(){
     if(PATT.msg)W.appendChild(h('p',{cls:'status'+(PATT.msg.err?' err':''),role:'status',id:'pa-msg',text:PATT.msg.t}));
     var box=h('div',{cls:'box',style:'padding:6px 14px'});
     list.forEach(function(x){var v=x.m[d]||'',busy=!!PATT.busy[x.id],t=paTot(x);
-      box.appendChild(h('div',{cls:'crrow pa-row','data-id':x.id},[h('div',{},[h('b',{text:paName(x)}),h('small',{cls:'muted',style:'display:block',text:[x.cls||x.grade,t.h+' цаг',t.a?'Тасалсан '+t.a:'',t.e?'Чөлөөтэй '+t.e:''].filter(Boolean).join(' · ')})]),
-        h('div',{cls:'chips'},PACODE.map(function(c){var no=future&&c[0]!=='Ч';return h('button',{type:'button',cls:'chip','aria-pressed':String(v===c[0]),disabled:(busy||no)?'':null,title:c[1],'aria-label':paName(x)+': '+c[1],onclick:function(){paWrite([{id:x.id,code:v===c[0]?'':c[0]}])}},[h('b',{text:c[0]}),h('span',{cls:'pl',text:' '+c[1]})])}))]))});
+      box.appendChild(h('div',{cls:'crrow pa-row','data-id':x.id},[h('div',{},[h('b',{text:paName(x)}),h('small',{cls:'muted',style:'display:block',text:[x.cls||x.grade,t.h+' цаг',t.a?'Тасалсан '+t.a:'',t.e?'Чөлөөтэй '+t.e:'',t.s?'Өвчтэй '+t.s:''].filter(Boolean).join(' · ')})]),
+        h('div',{cls:'chips'},PACODE.map(function(c){var no=future&&c[0]!=='Ч'&&c[0]!=='Ө';return h('button',{type:'button',cls:'chip','aria-pressed':String(v===c[0]),disabled:(busy||no)?'':null,title:c[1],'aria-label':paName(x)+': '+c[1],onclick:function(){paWrite([{id:x.id,code:v===c[0]?'':c[0]}])}},[h('b',{text:c[0]}),h('span',{cls:'pl',text:' '+c[1]})])}))]))});
     if(!list.length)box.appendChild(h('p',{cls:'muted',text:'Энэ хуудсанд сурагч алга.'}));
     W.appendChild(box);
-    W.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'И = Ирсэн, Х = Хоцорсон (ирцэд тооцно), Т = Тасалсан, Ч = Чөлөөтэй. "цаг" нь Sheet-ийн "Ирц /цаг/"-тай адил: (И + Х) × 2. Дахин дарвал тэмдэглэгээ арилна.'}));
+    W.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'И = Ирсэн, Х = Хоцорсон (ирцэд тооцно), Т = Тасалсан, Ч = Чөлөөтэй, Ө = Өвчтэй. "цаг" нь Sheet-ийн "Ирц /цаг/"-тай адил: (И + Х) × 2. Дахин дарвал тэмдэглэгээ арилна.'}));
   }
   W.appendChild(paSettings());
 }

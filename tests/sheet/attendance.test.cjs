@@ -4,7 +4,7 @@
 const fs = require("fs"), vm = require("vm"), path = require("path");
 const SRC = fs.readFileSync(path.join(__dirname, "..", "..", "tools", "sheet", "attendance.gs"), "utf8");
 const TZ = "Asia/Ulaanbaatar";
-const I = "И", KH = "Х", T = "Т", CH = "Ч";
+const I = "И", KH = "Х", T = "Т", CH = "Ч", OO = "Ө";
 const results = [];
 function check(name, cond, info) { results.push([!!cond, name]); console.log((cond ? "PASS " : "FAIL ") + name + (cond ? "" : "  -> " + JSON.stringify(info))); }
 const ub = (iso) => new Date(iso + "T00:00:00+08:00");
@@ -70,6 +70,8 @@ r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26"
 check("writes marks by student ID into the date column", r.ok && pe12.cell(4, 16) === I && pe12.cell(6, 16) === T, [r, pe12.cell(4, 16), pe12.cell(6, 16)]);
 r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26", marks: [{ id: "90003", code: "" }] });
 check("empty code clears the cell", r.ok && pe12.cell(6, 16) === "");
+r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26", marks: [{ id: "90003", code: OO }] });
+check("sick (Ө) is accepted", r.ok && pe12.cell(6, 16) === OO, r);
 const before = pe12.writes.length;
 r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26", marks: [{ id: "90001", code: CH }, { id: "90003", code: "P" }] });
 check("an unknown code refuses the whole request, nothing written", !r.ok && r.error === "bad-code" && pe12.writes.length === before, r);

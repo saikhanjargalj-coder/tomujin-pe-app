@@ -17,8 +17,8 @@ var OWNER = 'saikhanjargal.j@tomujin.edu.mn';
 var API_KEY = 'AIzaSyA60u_RFVZ5Z79NE7pMQxMxKosPkoAL4-E';   // public Firebase web key of tomujin-pe
 var TAB_RE = /^PE \d+$/;
 var HEAD_ROW = 3, FIRST_ROW = 4;
-// I (present), Kh (late, counts as present), T (absent), Ch (excused), in Cyrillic
-var CODES = ['\u0418', '\u0425', '\u0422', '\u0427'];
+// I (present), Kh (late, counts as present), T (absent), Ch (excused), O-bar (sick), in Cyrillic
+var CODES = ['\u0418', '\u0425', '\u0422', '\u0427', '\u04e8'];
 var H_ID = 'ID', H_FIRST = '\u041d\u044d\u0440', H_LAST = '\u041e\u0432\u043e\u0433', H_CLASS = '\u0410\u043d\u0433\u0438', H_MAIL = '\u0418-\u041c\u044d\u0439\u043b';
 
 function doPost(e) {
