@@ -6,6 +6,8 @@
   var now = Date.now();
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
   var role = ls(RKEY) || "guest";
+  /* The artifact viewer answers confirm() with "no" without showing it; in the preview every "are you sure?" is taken as yes. */
+  try { if (window.self !== window.top) window.confirm = function () { return true; }; } catch (e) {}
   var phase = ls(TKEY) || "p1";
   function regTimes(ph) {
     var t = Date.now(), m = 60e3;
@@ -151,9 +153,9 @@
     b.innerHTML = '<b>PREVIEW</b><span>Жинхэнэ сайт биш · өгөгдөл зөвхөн энэ хөтөч дээр</span>' +
       '<label>Хэн: <select id="pvRole"><option value="guest">Зочин / эцэг эх</option><option value="student">Сурагч (11B)</option><option value="teacher">Багш (зөвхөн харах)</option><option value="admin">Админ (Жак багш)</option></select></label>' +
       '<label>Дугуйлангийн бүртгэл: <select id="pvPhase"><option value="before">Нээгдэхээс өмнө</option><option value="p1">Нээлттэй · 1 сонголт</option><option value="p2">11:00-ээс хойш · 2 сонголт</option><option value="closed">Хаагдсан</option></select></label>' +
-      '<button type="button" id="pvReset">Өгөгдлийг шинэчлэх</button>';
+      '<button type="button" id="pvReset">Өгөгдлийг шинэчлэх</button><span>Баталгаажуулах асуулт энд автоматаар “Тийм” болно.</span>';
     var css = document.createElement("style");
-    css.textContent = "#previewBar{position:sticky;top:0;z-index:50;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 16px;background:#1c1c1c;color:#fff;font:13px/1.4 system-ui,sans-serif}#previewBar b{background:#f2cd30;color:#1c1c1c;padding:2px 8px;border-radius:6px;letter-spacing:.08em}#previewBar select,#previewBar button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#fff}#previewBar span{opacity:.8}";
+    css.textContent = "#previewBar{position:relative;z-index:50;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 16px;background:#1c1c1c;color:#fff;font:13px/1.4 system-ui,sans-serif}#previewBar b{background:#f2cd30;color:#1c1c1c;padding:2px 8px;border-radius:6px;letter-spacing:.08em}#previewBar select,#previewBar button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#fff}#previewBar span{opacity:.8}";
     document.head.appendChild(css);
     document.body.insertBefore(b, document.body.firstChild);
     var r = document.getElementById("pvRole"), p = document.getElementById("pvPhase");

@@ -138,7 +138,10 @@ service cloud.firestore {
               && request.resource.data.picks.size() <= maxPicks()
               && request.resource.data.picks.hasAll(resource.data.picks)
               && !(request.resource.data.picks[request.resource.data.picks.size() - 1] in resource.data.picks)
-              && backed(request.resource.data.picks[request.resource.data.picks.size() - 1], uid))
+              && backed(request.resource.data.picks[request.resource.data.picks.size() - 1], uid)
+              // not both shifts of the same club (jj-a + jj-b): the part before "-" names the club
+              && (request.resource.data.picks.size() < 2
+                || request.resource.data.picks[0].split('-')[0] != request.resource.data.picks[1].split('-')[0]))
             // or remove one club ("rm") whose seat/ticket is removed in the same write
             || (request.resource.data.rm is string
               && request.resource.data.rm in resource.data.picks

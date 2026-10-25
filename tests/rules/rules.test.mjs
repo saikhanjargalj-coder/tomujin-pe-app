@@ -172,6 +172,13 @@ await test("R16 no settings document: nobody can register", async () => {
   await assertFails(pick(stu(1), "s1", "bb"));
 });
 
+await test("R17 both shifts of the same club are refused by the server", async () => {
+  await setReg(); await offer("jj-a", 16); await offer("jj-b", 16); await offer("fn-a", 20);
+  await pick(stu(1), "s1", "jj-a");
+  await assertFails(pick(stu(1), "s1", "jj-b"));
+  ok(await pick(stu(1), "s1", "fn-a") === "seat", "different club still allowed");
+});
+
 /* ---------------- feedback ---------------- */
 const fbGuest = (x = {}) => Object.assign({ type: "idea", text: "Илүү том товч хэрэгтэй", page: "home", dev: "Android Chrome · 390px", status: "new", at: serverTimestamp(), who: "parent", uid: "" }, x);
 await test("F1 parent without login can send feedback", async () => {
