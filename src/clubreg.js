@@ -10,10 +10,10 @@ var CRCAL={start:'2026-11-09',end:'2027-04-30',
 };
 var CRDAY=['Ня','Да','Мя','Лх','Пү','Ба','Бя'];
 var CRCLUBS=[
- {k:'bb',n:'Сагсан бөмбөг',fig:'bb-set-shot',cc:'#f97316',place:'Family Sport Center',time:'06:30–07:50',pay:'fee',
+ {k:'bb',n:'Сагсан бөмбөг',fig:'bb-set-shot',cc:'#f97316',place:'Family Sport Center',time:'06:00–08:00',pay:'fee',
   d:'Дриблинг, дамжуулалт, шидэлт, хамгаалалт, багийн тоглолт. Хурд, авхаалж, хамтран ажиллах чадвар.',
   offers:[{id:'bb',sh:'',days:[1,3],cap:30}]},
- {k:'hb',n:'Гар бөмбөг',badge:'HB',cc:'#0e7490',place:'Naran Sport Center',time:'06:30–07:50',pay:'fee',
+ {k:'hb',n:'Гар бөмбөг',badge:'HB',cc:'#0e7490',place:'Naran Sport Center',time:'06:00–08:00',pay:'fee',
   d:'Дамжуулалт, шидэлт, хаалгачийн үндэс, довтолгоо, хамгаалалт, багийн тоглолт.',
   offers:[{id:'hb',sh:'',days:[2,4],cap:30}]},
  {k:'jj',n:'Жиу-жицу',badge:'JJ',cc:'#c2410c',place:'Сургууль · B1 заал (дэвсгэр)',time:'07:00–08:20',pay:'dep',fri:true,
@@ -121,7 +121,7 @@ function crBanner(){
 }
 function crOfferRow(c,o){
   var st=h('span',{cls:'status',role:'status'});var mine=crPicks().indexOf(o.id)>=0;var left=crLeft(o.id),cap=crCap(o.id);
-  var lab=(o.sh?o.sh+' ээлж · ':'')+crDaysTxt(o.days)+' · '+c.time;
+  var lab=(o.sh?o.sh+' ээлж · ':'')+crDaysTxt(o.days)+' · '+crTm(c);
   var seatTxt=OFFERS[o.id]?(left>0?left+'/'+cap+' суудал үлдсэн':'Дүүрсэн · хүлээлгийн жагсаалт'):cap+' суудал';
   var act;var can=crCanPick(o.id);
   if(mine){var ph=crPhase();act=h('div',{cls:'chips'},[h('span',{cls:'tag ok',text:MYSEAT[o.id]?'✓ Таны суудал':'Хүлээлгийн №'+(crRank(o.id)||'…')}),
@@ -140,7 +140,7 @@ function renderClubReg(){
     g.appendChild(h('div',{cls:'club',style:'--cc:'+c.cc+';cursor:default'},[
       h('div',{cls:'pic',role:'button',tabindex:'0',style:'cursor:pointer','aria-label':c.n+' дэлгэрэнгүй',onclick:function(){openCrClub(c.k)},onkeydown:function(e){if(e.key==='Enter'){openCrClub(c.k)}}},[crPic(c)]),
       h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+c.cc,text:c.pay==='fee'?'Төлбөртэй':'Үнэгүй · барьцаатай'}),h('span',{cls:'tag t',text:n+' хичээл'})]),
-      h('h3',{text:c.n}),h('p',{cls:'muted',text:c.place+(cf.coach?' · Багш: '+cf.coach:'')}),
+      h('h3',{text:c.n}),h('p',{cls:'muted',text:crPl(c)+(cf.coach?' · Багш: '+cf.coach:'')}),
       h('div',{cls:'sub',style:'gap:10px'},c.offers.map(function(o){return crOfferRow(c,o)})),
       c.fri?h('small',{cls:'muted',text:'Баасан: сургууль дээр нэмэлт / нөхөх хичээл (заавал биш)'}):null,
       h('button',{type:'button',cls:'btn line small',text:'Дэлгэрэнгүй',onclick:function(){openCrClub(c.k)}})]))});
@@ -167,14 +167,16 @@ function openCrClub(k){
     $('sheetEyebrow').textContent='Дугуйлан · 2-р улирал (11/9–4/30)';
     p.appendChild(h('h2',{id:'sheetTitle',text:c.n,style:'font-size:30px'}));
     p.appendChild(h('div',{cls:'club',style:'cursor:default;--cc:'+c.cc},[h('div',{cls:'pic',style:'aspect-ratio:16/8'},[crPic(c)])]));
-    p.appendChild(h('p',{cls:'lede',text:c.d}));
+    p.appendChild(h('p',{cls:'lede',text:crCfg(c.k).d||c.d}));
     if(cf.notice)p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Мэдэгдэл'}),h('p',{style:'margin:0',text:cf.notice})]));
     p.appendChild(crCoachBox(cf));
-    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хаана, хэзээ'}),h('div',{cls:'fgrid'},[crKV('Хаана',c.place),crKV('Цаг',c.time),crKV('Төлбөр',CRPAY[c.pay]),crKV('Нийт хичээл',crDates(c.offers[0].days).length+' (ээлж бүр)')]),
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хаана, хэзээ'}),h('div',{cls:'fgrid'},[crKV('Хаана',crPl(c)),crKV('Цаг',crTm(c)),crKV('Төлбөр',crCfg(c.k).payTxt||CRPAY[c.pay]),crKV('Нийт хичээл',crDates(c.offers[0].days).length+' (ээлж бүр)')]),
       h('div',{cls:'sub',style:'gap:10px'},c.offers.map(function(o){return crOfferRow(c,o)}))]));
     p.appendChild(crWhatBox(cf));
   });
 }
+function crTm(c){return crCfg(c.k).time||c.time}
+function crPl(c){return crCfg(c.k).place||c.place}
 function crKV(k,v){return h('div',{},[h('small',{cls:'muted',text:k}),h('p',{style:'margin:0;font-weight:700',text:v||'—'})])}
 function crCoachBox(cf){return h('div',{cls:'box crcoach'},[cf.coachImg?h('img',{src:imgSrc(cf.coachImg),alt:cf.coach||'Багш',loading:'lazy'}):h('span',{cls:'crava',text:(cf.coach||'?').slice(0,1)}),
   h('div',{},[h('small',{cls:'muted',text:'Багш'}),h('h3',{style:'margin:0',text:cf.coach||'Удахгүй зарлана'}),cf.coachBio?h('p',{style:'margin:4px 0 0',text:cf.coachBio}):null])])}
@@ -211,8 +213,8 @@ function crMyCard(oid,c,o){
     h('div',{cls:'crstep'},[h('b',{text:'Дараагийн алхам'}),h('p',{style:'margin:0',text:ns[2]})])]);
   if(cf.notice)card.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Мэдэгдэл'}),h('p',{style:'margin:0',text:cf.notice})]));
   var nx=crNext(o.days),all=crDates(o.days),td=ubToday();
-  var nTxt=nx?crMD(nx)+' · '+c.time+(nx===td?' · Өнөөдөр':' · '+Math.round((ymdD(nx)-ymdD(td))/864e5)+' хоногийн дараа'):'Улирал дууссан';
-  card.appendChild(h('div',{cls:'fgrid'},[crKV('Дараагийн хичээл',nTxt),crKV('Хаана',c.place),crKV('Өдөр, цаг',crDaysTxt(o.days)+' · '+c.time),crKV('Нийт хичээл',all.length+' (11/9–4/30)')]));
+  var nTxt=nx?crMD(nx)+' · '+crTm(c)+(nx===td?' · Өнөөдөр':' · '+Math.round((ymdD(nx)-ymdD(td))/864e5)+' хоногийн дараа'):'Улирал дууссан';
+  card.appendChild(h('div',{cls:'fgrid'},[crKV('Дараагийн хичээл',nTxt),crKV('Хаана',crPl(c)),crKV('Өдөр, цаг',crDaysTxt(o.days)+' · '+crTm(c)),crKV('Нийт хичээл',all.length+' (11/9–4/30)')]));
   card.appendChild(crCoachBox(cf));
   card.appendChild(crWhatBox(cf));
   if(cf.plan)card.appendChild(h('div',{cls:'box'},[h('h3',{text:'Юу хийгдэх вэ (төлөвлөгөө)'}),h('p',{style:'margin:0;white-space:pre-line',text:cf.plan})]));
@@ -293,6 +295,8 @@ function crAdminClub(k){
   openSheet(function(p){
     $('sheetEyebrow').textContent='Удирдлага · дугуйлангийн мэдээлэл';p.appendChild(h('h2',{id:'sheetTitle',text:c.n}));
     p.appendChild(h('div',{cls:'chips'},CRCLUBS.map(function(x){return h('button',{type:'button',cls:'chip','aria-pressed':String(x.k===k),text:x.n,onclick:function(){crAdminClub(x.k)}})})));
+    p.appendChild(h('div',{cls:'fgrid'},[fText('cc-time','Цаг',cf.time||c.time,{help:'Жишээ: 06:00–08:00'}),fText('cc-place','Хаана',cf.place||c.place),fText('cc-pay','Төлбөр',cf.payTxt||CRPAY[c.pay])]));
+    p.appendChild(fText('cc-d','Товч тайлбар',cf.d||c.d,{area:1,rows:2}));
     p.appendChild(h('div',{cls:'fgrid'},[fText('cc-coach','Багшийн нэр',cf.coach),fText('cc-img','Багшийн зураг (линк)',cf.coachImg,{ph:'https://… Google Drive линк'})]));
     p.appendChild(fText('cc-bio','Багшийн танилцуулга',cf.coachBio,{area:1,rows:3}));
     p.appendChild(fText('cc-what','Юу орох вэ (мөр бүрт нэг)',(cf.what||[]).join('\n'),{area:1,rows:5}));
@@ -301,7 +305,7 @@ function crAdminClub(k){
     p.appendChild(fText('cc-note','Мэдэгдэл (хичээл цуцлагдсан, цаг өөрчлөгдсөн…)',cf.notice,{area:1,rows:2,help:'Хоосон орхивол мэдэгдэл харагдахгүй.'}));
     var st=h('span',{cls:'status',role:'status'});
     p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
-      var d={coach:val('cc-coach'),coachImg:val('cc-img'),coachBio:val('cc-bio'),what:lines(val('cc-what')),levels:lines(val('cc-lv')),plan:val('cc-plan'),notice:val('cc-note')};var cl={};cl[k]=d;
+      var d={time:val('cc-time'),place:val('cc-place'),payTxt:val('cc-pay'),d:val('cc-d'),coach:val('cc-coach'),coachImg:val('cc-img'),coachBio:val('cc-bio'),what:lines(val('cc-what')),levels:lines(val('cc-lv')),plan:val('cc-plan'),notice:val('cc-note')};var cl={};cl[k]=d;
       st.className='status';st.textContent='Хадгалж байна…';
       db.batch([{op:'merge',path:'site/clubreg',data:{clubs:cl,updatedAt:new Date().toISOString()}}]).then(function(){st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st]));
   });
