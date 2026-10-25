@@ -329,6 +329,7 @@ legend{font-size:13px;font-weight:700;color:var(--brand-ink);padding:0;margin-bo
 .ff input,.ff select,.ff textarea{font:inherit;font-size:15px;font-weight:500;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%}
 .ff textarea{resize:vertical;line-height:1.5}
 .edform{display:flex;flex-direction:column;gap:14px}
+.ff [aria-invalid=true]{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-soft)}
 .checks .ck{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:9999px;font-size:13px;font-weight:600;background:var(--surface);cursor:pointer}
 .planrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px}
 .pthumb{width:84px;flex:none;background:var(--tint);border:0;border-radius:10px;padding:2px;cursor:pointer}
@@ -1945,21 +1946,50 @@ function weeklyBars(list,weeks){
   var max=Math.max.apply(null,out.map(function(x){return x.v}).concat([1]));
   return h('div',{cls:'wbars',role:'img','aria-label':'Сүүлийн '+weeks+' долоо хоногийн ачаалал'},out.map(function(x,i){var d=new Date(x.k);return h('div',{cls:'wb'},[h('span',{cls:'num',style:'font-size:11px',text:x.v?String(x.v):''}),h('i',{style:'height:'+Math.max(2,x.v/max*100)+'%;background:'+(i===out.length-1?'#f2cd30':'#a855f7')}),h('small',{text:ubDay(d.getTime())})])}));
 }
+var LOGFROM=null; // {aid,title,min} when the log is opened from an assignment
+var LOGFID='',LOGMSG=null,LOGBUSY=false; // form id kept until saved; last message kept across redraws
+var LOGF=['lf-rpe','lf-min','lf-feel','lf-sore','lf-sleep','lf-note'];
 function renderLog(){
-  var W=$('logOut');if(!W)return;W.innerHTML='';
+  var W=$('logOut');if(!W)return;
+  // live updates redraw this page; keep what the student has typed so far
+  var keep={};LOGF.forEach(function(id){var e=$(id);if(e)keep[id]=e.value});
+  W.innerHTML='';
   if(!window.TPE||!TPE.configured){W.appendChild(h('p',{cls:'muted',text:'Сайт тохируулагдаагүй байна.'}));return}
   if(!ME){W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Нэвтэрч орно уу'}),h('p',{cls:'muted',text:'бэлтгэлийн тэмдэглэлээ хадгалж, багштайгаа хуваалцахын тулд сургуулийн имэйлээрээ нэвтэрнэ.'}),h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:openLogin})])]));return}
   if(!ME.emailVerified){W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Имэйлээ баталгаажуулна уу'}),h('div',{},[h('button',{type:'button',cls:'btn gold small',text:'Баталгаажуулах',onclick:openVerify})])]));return}
-  var st=h('p',{cls:'status',role:'status'});
-  var f=h('form',{cls:'box edform'},[h('h3',{text:'Өнөөдрийн бэлтгэл'}),
-    h('div',{cls:'fgrid'},[fSelect('lf-rpe','Хэр хүнд байсан бэ? (1–10 оноо)',RPEL.slice(1).map(function(x,i){return [String(i+1),x]}),'6'),fText('lf-min','Идэвхтэй хугацаа (мин)','60',{type:'number',min:1,max:300}),fSelect('lf-feel','Биеийн мэдрэмж',FEELL.slice(1).map(function(x,i){return [String(i+1),x]}),'4'),fSelect('lf-sore','Булчингийн өвдөлт',SOREL.slice(1).map(function(x,i){return [String(i+1),x]}),'1')]),
+  /* Nothing is pre-filled: the student chooses every answer. Minutes from an assignment are shown as the
+     planned time, not written into "how long did you move". One id per form, so a double click saves once. */
+  if(!LOGFID)LOGFID='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  var st=h('p',{cls:'status'+(LOGMSG&&LOGMSG.err?' err':''),id:'lf-st',role:'status',text:LOGMSG?LOGMSG.t:''}),from=LOGFROM;
+  /* the page may have been redrawn while saving, so always write to the status line that is on screen now */
+  function say(t,err){LOGMSG={t:t,err:!!err};var e=$('lf-st')||st;e.className='status'+(err?' err':'');e.textContent=t}
+  var pick=[['','— Сонгоно уу —']];
+  var f=h('form',{cls:'box edform',novalidate:''},[h('h3',{text:'Өнөөдрийн бэлтгэл'}),
+    from?h('div',{cls:'crstep',id:'lf-from'},[h('b',{text:'Даалгавар: '+(from.title||'')}),h('span',{text:from.min?'Төлөвлөсөн хугацаа: '+from.min+' мин. Доор өөрийн бодитоор хөдөлсөн минутаа бичнэ.':'Доор өөрийн бодитоор хөдөлсөн минутаа бичнэ.'}),h('button',{type:'button',cls:'btn line small',style:'align-self:flex-start',text:'Даалгавартай холбохгүй',onclick:function(){LOGFROM=null;renderLog()}})]):null,
+    h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'* тэмдэгтэй асуултад заавал хариулна. Зөв буруу хариулт гэж байхгүй, өөрийн мэдрэмжээ бичээрэй.'}),
+    h('div',{cls:'fgrid'},[fSelect('lf-rpe','Хэр хүнд байсан бэ? (1–10 оноо) *',pick.concat(RPEL.slice(1).map(function(x,i){return [String(i+1),x]})),''),fText('lf-min','Бодитоор хөдөлсөн хугацаа (мин) *','',{type:'number',min:1,max:300,ph:'жишээ: 45'}),fSelect('lf-feel','Биеийн мэдрэмж *',pick.concat(FEELL.slice(1).map(function(x,i){return [String(i+1),x]})),''),fSelect('lf-sore','Булчингийн өвдөлт *',pick.concat(SOREL.slice(1).map(function(x,i){return [String(i+1),x]})),'')]),
     fSelect('lf-sleep','Өнгөрсөн шөнө хэдэн цаг унтсан бэ? (заавал биш)',[['','— Бичихгүй —']].concat([5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12].map(function(n){return [String(n),n+' цаг']})).concat([['4','5-аас бага'],['13','12-оос их']]),''),
-    fText('lf-note','Нэг өгүүлбэр: юу сурав, юу мэдрэв?','',{area:1,rows:2}),
-    h('div',{cls:'editrow'},[h('button',{type:'submit',cls:'btn gold',text:'Илгээх'}),st])]);
-  f.addEventListener('submit',function(ev){ev.preventDefault();var rpe=+val('lf-rpe'),min=Math.round(+val('lf-min'));if(!(min>=1&&min<=300)){st.className='status err';st.textContent='Хугацааг 1–300 минутаар оруулна уу.';return}
-    var doc={uid:ME.uid,rpe:rpe,min:min,load:rpe*min,feel:+val('lf-feel'),sore:+val('lf-sore'),note:val('lf-note').slice(0,500),classId:(MYPROFILE&&MYPROFILE.classId)||'',name:(MYPROFILE&&MYPROFILE.name)||ME.name||'',at:Date.now()};
+    fText('lf-note','Нэг өгүүлбэр: юу сурав, юу мэдрэв? (заавал биш)','',{area:1,rows:2}),
+    h('div',{cls:'editrow'},[h('button',{type:'submit',cls:'btn gold',id:'lf-send',text:'Илгээх',disabled:LOGBUSY?'':null}),st])]);
+  function bad(id,on){var e=$(id);if(e){if(on)e.setAttribute('aria-invalid','true');else e.removeAttribute('aria-invalid')}}
+  f.addEventListener('change',function(e){if(e.target&&e.target.id)bad(e.target.id,false)});
+  f.addEventListener('input',function(){if(LOGMSG&&!LOGMSG.err)LOGMSG=null});
+  f.addEventListener('submit',function(ev){ev.preventDefault();var btn=$('lf-send');if(LOGBUSY||btn.disabled)return;
+    var miss=[],rpe=+val('lf-rpe'),minRaw=val('lf-min'),min=Math.round(+minRaw),feel=+val('lf-feel'),sore=+val('lf-sore');
+    bad('lf-rpe',!rpe);bad('lf-min',!(min>=1&&min<=300));bad('lf-feel',!feel);bad('lf-sore',!sore);
+    if(!rpe)miss.push('хэр хүнд байсан');if(!minRaw)miss.push('хугацаа');if(!feel)miss.push('биеийн мэдрэмж');if(!sore)miss.push('булчингийн өвдөлт');
+    if(miss.length){say('Бөглөөгүй: '+miss.join(', ')+'.',true);var first=f.querySelector('[aria-invalid=true]');if(first)first.focus();return}
+    if(!(min>=1&&min<=300)){say('Хугацааг 1–300 минутаар бичнэ үү.',true);$('lf-min').focus();return}
+    var doc={uid:ME.uid,rpe:rpe,min:min,load:rpe*min,feel:feel,sore:sore,note:val('lf-note').slice(0,500),classId:(MYPROFILE&&MYPROFILE.classId)||'',name:(MYPROFILE&&MYPROFILE.name)||ME.name||'',at:Date.now()};
     var sl=val('lf-sleep');if(sl)doc.sleep=+sl;
-    st.className='status';st.textContent='Илгээж байна…';db.collection('users/'+ME.uid+'/loading').add(doc).then(function(){st.textContent='Хадгалагдлаа. Ачаалал: '+doc.load},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})});
+    if(from){doc.aid=from.aid;if(from.min)doc.planMin=+from.min}
+    btn.disabled=true;LOGBUSY=true;say('Илгээж байна…');var id=LOGFID;
+    var slow=setTimeout(function(){say('Сүлжээ удаан байна. Хуудсаа бүү хаагаарай, холболт сэргэмэгц илгээнэ.')},10000);
+    db.doc('users/'+ME.uid+'/loading/'+id).set(doc).then(function(){clearTimeout(slow);LOGBUSY=false;LOGFROM=null;LOGFID='';
+      LOGF.forEach(function(k){var e=$(k);if(e)e.value=''});
+      LOGMSG={t:'✓ Хадгалагдлаа. Ачаалал: '+doc.rpe+' × '+doc.min+' = '+doc.load+'.',err:false};renderLog()},
+      function(){clearTimeout(slow);LOGBUSY=false;var b=$('lf-send');if(b)b.disabled=false;say('Хадгалж чадсангүй. Бичсэн зүйл тань энд хэвээр байна, дахин "Илгээх" дарна уу.',true)})});
+  LOGF.forEach(function(id){var e=f.querySelector('#'+id);if(e&&keep[id]!=null)e.value=keep[id]});
   W.appendChild(f);
   if(!isStaff())W.appendChild(streakBox());
   var wk=MYLOADS.filter(function(x){return weekKey(x.at)===weekKey(Date.now())}).reduce(function(a,x){return a+x.load},0);
@@ -2611,7 +2641,7 @@ function assignCard(a,big){
   if(staff)kids.push(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:(a.cls||[]).map(className).filter(Boolean).join(', ')}));
   if(a.note)kids.push(h('p',{style:'margin:0',text:a.note}));
   if(big||staff){var g=h('div',{cls:'aexgrid'});(a.items||[]).forEach(function(it){var c=exChip(it);if(c)g.appendChild(c)});kids.push(g)}
-  if(!staff)kids.push(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn '+(done?'line':'gold'),text:done?'↺ Буцаах':'✓ Хийж дууслаа',onclick:function(){toggleDone(a)}}),done?h('button',{type:'button',cls:'btn line',text:'Бэлтгэлийн тэмдэглэл бөглөх',onclick:function(){show('log')}}):null]));
+  if(!staff)kids.push(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn '+(done?'line':'gold'),text:done?'↺ Буцаах':'✓ Хийж дууслаа',onclick:function(){toggleDone(a)}}),done?h('button',{type:'button',cls:'btn line',text:'Бэлтгэлийн тэмдэглэл бөглөх',onclick:function(){LOGFROM={aid:a.id,title:a.title||'',min:a.min||null};LOGMSG=null;renderLog();show('log')}}):null]));
   else kids.push(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'Хэн хийсэн бэ',onclick:function(){openAssignStats(a)}}),canEdit?h('button',{type:'button',cls:'btn line small',text:'✎ Засах',onclick:function(){openAssignEditor(a)}}):null,canEdit?h('button',{type:'button',cls:'btn line small danger',text:'🗑',onclick:function(ev){var b=ev.currentTarget;if(b.dataset.sure){db.doc('assign/'+a.id).delete().then(function(){delete ASSIGN[a.id];renderToday()})}else{b.dataset.sure=1;b.textContent='Устгах уу?'}}}):null]));
   return h('div',{cls:'acard'+(done?' done':'')},kids);
 }

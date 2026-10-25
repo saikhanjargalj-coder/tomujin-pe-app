@@ -102,7 +102,15 @@
   var db = {
     doc: function (path) {
       return {
-        set: function (d) { return regCheck([{ op: "set", path: path, data: d }], user && user.uid) ? wait(apply([{ op: "set", path: path, data: d }])) : deny(); },
+        set: function (d) {
+          /* like the real rules: a training log entry can be created once, never overwritten */
+          if (/\/loading\/[^/]+$/.test(path) && store[path]) return deny();
+          if (!regCheck([{ op: "set", path: path, data: d }], user && user.uid)) return deny();
+          /* test hooks: __tpeFailSet = the next write is refused; __tpeHold = writes wait until __tpeRelease() */
+          if (window.__tpeFailSet) { window.__tpeFailSet = false; return wait().then(deny); }
+          if (window.__tpeHold) return new Promise(function (res) { window.__tpeRelease = function () { window.__tpeHold = false; apply([{ op: "set", path: path, data: d }]); res(); }; });
+          return wait(apply([{ op: "set", path: path, data: d }]));
+        },
         update: function (d) { return wait(apply([{ op: "merge", path: path, data: d }])); },
         get: function () { return wait({ id: path.split("/").pop(), exists: !!store[path], data: function () { return revive(store[path]); } }); },
         getServer: function () { return window.__tpeOffline ? wait().then(function () { return Promise.reject({ code: "unavailable" }); }) : this.get(); },
@@ -136,6 +144,9 @@
       subs.push(f); setTimeout(f); return function () { var i = subs.indexOf(f); if (i >= 0) subs.splice(i, 1); };
     }
   };
+  /* test hooks: __tpeNotify() replays a live update to every open listener, __tpeStore() reads the test data */
+  window.__tpeNotify = function () { notify(); };
+  window.__tpeStore = function () { return store; };
   var listeners = [];
   window.TPE = {
     configured: true, user: null, role: null, domain: "tomujin.edu.mn", db: db, preview: true,
