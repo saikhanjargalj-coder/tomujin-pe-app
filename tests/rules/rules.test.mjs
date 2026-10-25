@@ -211,6 +211,43 @@ await test("F5 student may only mark the reply as seen", async () => {
   await assertFails(updateDoc(doc(stu(1), "feedback/d1"), { status: "new" }));
   await assertFails(updateDoc(doc(stu(1), "feedback/d1"), { reply: "fake" }));
 });
+await test("F6 private notes on feedback: owner only, never the sender or a teacher", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "feedback/e1"), { uid: "s1", text: "a", status: "new" }), setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] })]));
+  await assertSucceeds(setDoc(doc(owner(), "fbnotes/e1"), { text: "Ээж нь утсаар ярьсан", at: 1 }));
+  await assertSucceeds(getDoc(doc(owner(), "fbnotes/e1")));
+  await assertFails(getDoc(doc(stu(1), "fbnotes/e1")));
+  await assertFails(getDocs(collection(stu(1), "fbnotes")));
+  await assertFails(getDoc(doc(teacher(), "fbnotes/e1")));
+  await assertFails(getDoc(doc(guest(), "fbnotes/e1")));
+  await assertFails(setDoc(doc(stu(1), "fbnotes/e2"), { text: "x" }));
+  await assertFails(setDoc(doc(owner(), "fbnotes/e3"), { text: "x".repeat(2001) }));
+  await assertSucceeds(deleteDoc(doc(owner(), "fbnotes/e1")));
+});
+await test("F7 owner marks 'Хийхгүй' with a reason; the sender reads it and can only mark it seen", async () => {
+  await seed((db) => setDoc(doc(db, "feedback/e4"), { uid: "s1", text: "a", status: "new" }));
+  await assertSucceeds(updateDoc(doc(owner(), "feedback/e4"), { status: "skip", reply: "Дүрмээр шийдэгддэг", seen: false }));
+  await assertSucceeds(getDoc(doc(stu(1), "feedback/e4")));
+  await assertSucceeds(updateDoc(doc(stu(1), "feedback/e4"), { seen: true }));
+  await assertFails(updateDoc(doc(stu(1), "feedback/e4"), { status: "new", seen: true }));
+});
+
+/* ---------------- club attendance ---------------- */
+await test("A1 only the owner marks attendance (with history); student and teacher cannot", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }), setDoc(doc(db, "offers/tn-b"), { n: 1, cap: 16 }), setDoc(doc(db, "offers/tn-b/seats/s1"), { status: "ok", at: 1 })]));
+  const mark = { att: { "2026-11-19": "p" }, atth: { "2026-11-19": [{ v: "p", was: "", t: 1 }] } };
+  await assertSucceeds(setDoc(doc(owner(), "offers/tn-b/seats/s1"), mark, { merge: true }));
+  await assertFails(setDoc(doc(teacher(), "offers/tn-b/seats/s1"), mark, { merge: true }));
+  await assertFails(setDoc(doc(stu(1), "offers/tn-b/seats/s1"), { att: { "2026-11-19": "p" } }, { merge: true }));
+  await assertSucceeds(getDoc(doc(stu(1), "offers/tn-b/seats/s1")));
+  await assertSucceeds(getDoc(doc(teacher(), "offers/tn-b/seats/s1")));
+});
+await test("A2 only the owner cancels a session; it is public so children see why", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }), setDoc(doc(db, "offers/tn-b"), { n: 1, cap: 16 })]));
+  await assertSucceeds(setDoc(doc(owner(), "offers/tn-b"), { off: { "2026-11-12": "Заал засвартай" } }, { merge: true }));
+  await assertFails(setDoc(doc(teacher(), "offers/tn-b"), { off: { "2026-11-13": "x" } }, { merge: true }));
+  await assertFails(setDoc(doc(stu(1), "offers/tn-b"), { off: { "2026-11-13": "x" } }, { merge: true }));
+  await assertSucceeds(getDoc(doc(guest(), "offers/tn-b")));
+});
 
 /* ---------------- student data ---------------- */
 await test("U1 own profile only", async () => {

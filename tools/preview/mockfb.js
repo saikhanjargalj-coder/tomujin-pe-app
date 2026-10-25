@@ -2,7 +2,7 @@
    Nothing here talks to the real site or the real database. */
 (function () {
   "use strict";
-  var KEY = "tpe-preview-db-v3", RKEY = "tpe-preview-role", TKEY = "tpe-preview-phase";
+  var KEY = "tpe-preview-db-v4", RKEY = "tpe-preview-role", TKEY = "tpe-preview-phase";
   var now = Date.now();
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
   var role = ls(RKEY) || "guest";
@@ -42,6 +42,15 @@
     s["feedback/f1"] = { type: "bug", text: "Утсан дээр тэмдэглэлийн товч хэт жижиг байна.", page: "log", dev: "Android Chrome · 390px", status: "new", at: { _ms: now - 7200e3 }, who: "student", uid: "s2", email: "anu.bold@tomujin.edu.mn", name: "Ану Болд", classId: "11b" };
     s["feedback/f2"] = { type: "idea", text: "Нүүр хуудсанд дугуйлангийн хуваарь харагддаг болгоорой.", page: "home", dev: "iPhone/iPad Safari · 390px", status: "new", at: { _ms: now - 3600e3 }, who: "parent", uid: "", contact: "9911 2233" };
     s["feedback/f3"] = { type: "like", text: "Дасгалын хөдөлгөөнт зураг маш ойлгомжтой.", page: "library", dev: "Windows Chrome · 1440px", status: "done", reply: "Баярлалаа!", seen: true, at: { _ms: now - 864e5 }, who: "student", uid: "s3", email: "temuujin.g@tomujin.edu.mn", name: "Тэмүүжин Ганбат", classId: "10a" };
+    s["feedback/f4"] = { type: "idea", text: "Тэмдэглэлд усны хэмжээ бичдэг болгоорой.", page: "log", dev: "Android Chrome · 390px", status: "skip", reply: "Одоохондоо хийхгүй: эхлээд нойр, ачааллын бүртгэлийг тогтворжуулъя.", seen: false, at: { _ms: now - 3 * 864e5 }, who: "student", uid: "s1", email: "bat.temuulen@tomujin.edu.mn", name: "Бат Тэмүүлэн", classId: "11b" };
+    s["feedback/f5"] = { type: "bug", text: "Хоол тооцоолуурт тоо оруулахад гар утсан дээр гацаад байна.", page: "calc", dev: "iPhone/iPad Safari · 390px", status: "doing", at: { _ms: now - 2 * 864e5 }, who: "student", uid: "s1", email: "bat.temuulen@tomujin.edu.mn", name: "Бат Тэмүүлэн", classId: "11b" };
+    s["fbnotes/f2"] = { text: "Нүүрний шинэчлэлд оруулна.", at: now - 3600e3 };
+    /* tennis B (Tue, Thu): four children with seats, for the attendance tools */
+    s["users/s4"] = { email: "nomin.b@tomujin.edu.mn", name: "Номин Бат", classId: "9a", createdAt: now - 864e5 * 12 };
+    s["users/s5"] = { email: "khulan.e@tomujin.edu.mn", name: "Хулан Энх", classId: "12a", createdAt: now - 864e5 * 10 };
+    ["s2", "s3", "s4", "s5"].forEach(function (u) { s["offers/tn-b/seats/" + u] = { status: "ok", at: { _ms: now - 864e5 * 5 } }; });
+    s["offers/tn-b/seats/s3"].att = { "2026-11-10": "p", "2026-11-12": "a" };
+    s["offers/tn-b/seats/s4/abs/2026-11-19"] = { reason: "Шүдний эмчид очно", at: { _ms: now - 864e5 } };
     return s;
   }
   var store;
@@ -166,7 +175,7 @@
       '<label>Дугуйлангийн бүртгэл: <select id="pvPhase"><option value="before">Нээгдэхээс өмнө</option><option value="p1">Нээлттэй · 1 сонголт</option><option value="p2">11:00-ээс хойш · 2 сонголт</option><option value="closed">Хаагдсан</option></select></label>' +
       '<button type="button" id="pvReset">Өгөгдлийг шинэчлэх</button><span>Баталгаажуулах асуулт энд автоматаар “Тийм” болно.</span>';
     var css = document.createElement("style");
-    css.textContent = "#previewBar{position:relative;z-index:50;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 16px;background:#1c1c1c;color:#fff;font:13px/1.4 system-ui,sans-serif}#previewBar b{background:#f2cd30;color:#1c1c1c;padding:2px 8px;border-radius:6px;letter-spacing:.08em}#previewBar select,#previewBar button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#fff}#previewBar span{opacity:.8}";
+    css.textContent = "#previewBar{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 16px;background:#1c1c1c;color:#fff;font:13px/1.4 system-ui,sans-serif}#previewBar b{background:#f2cd30;color:#1c1c1c;padding:2px 8px;border-radius:6px;letter-spacing:.08em}#previewBar select,#previewBar button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #555;background:#2a2a2a;color:#fff}#previewBar span{opacity:.8}";
     document.head.appendChild(css);
     document.body.insertBefore(b, document.body.firstChild);
     var r = document.getElementById("pvRole"), p = document.getElementById("pvPhase");

@@ -255,6 +255,11 @@ service cloud.firestore {
           && request.resource.data.seen == true);
       allow delete: if isOwner();
     }
+    // The owner's private notes on feedback (who was called, what is planned). The sender never sees them.
+    match /fbnotes/{id} {
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner() && shortStr('text', 2000);
+    }
 
     // Fitness results imported for students who have not signed up yet (doc id = school email).
     // Only the owner writes; the student reads their own once signed in; teachers read.

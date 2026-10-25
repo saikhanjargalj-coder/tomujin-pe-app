@@ -70,6 +70,11 @@ a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14p
 .coachcard .cph img{width:100%;height:100%;object-fit:cover}.coachcard .cph .ini{font-size:56px;font-weight:900;color:var(--gold)}
 .coachcard .cbd{display:flex;flex-direction:column;gap:10px}.coachcard h2{margin:0}.coachcard .role{margin:0;font-weight:700;color:var(--brand)}.coachcard .lede{margin:0}
 .faq,.privacy{display:flex;flex-direction:column;gap:12px}.faq h2,.privacy h2{margin:0}.privacy .lede{margin:0}
+.hsum{display:flex;flex-direction:column;gap:12px}.hsum h2{margin:0}
+.hsteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.hsteps li{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.hsteps li small{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}.hsteps li b{font-size:15px;line-height:1.3}
+#homeReg .crbanner .eyebrow{display:block;margin-bottom:2px}
 .faqgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
 .faqi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:6px}.faqi h3{margin:0;font-size:16px}.faqi .lede{margin:0;font-size:15px}
 .footgrid{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}.fcol{display:flex;flex-direction:column;gap:4px}.fcol strong{color:var(--fg);font-size:15px}
@@ -178,10 +183,16 @@ nav.tabs{display:flex;gap:4px;flex-wrap:wrap;flex:1 1 360px;justify-content:cent
 @media (hover:hover){.mg:not(.picked):hover .dd{display:flex}.mg:not(.picked):hover .mt{background:var(--tint);color:var(--fg)}.mg::after{content:'';position:absolute;left:0;right:0;top:100%;height:8px}}
 .dd a{display:flex;flex-direction:column;gap:1px;padding:10px 12px;border-radius:10px;color:var(--fg);text-decoration:none}
 .dd a[hidden]{display:none}
+.ddcap{margin:0;padding:6px 12px 8px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:4px}
 .dd a b{font-size:14.5px;font-weight:700}.dd a small{font-size:12.5px;color:var(--muted)}
 .dd a:hover,.dd a:focus-visible{background:var(--tint)}
 .dd a[aria-current="page"]{background:var(--tint)}.dd a[aria-current="page"] b{color:var(--brand)}
 @media (max-width:640px){.dd{position:fixed;left:12px;right:12px;top:auto;min-width:0}nav.tabs{justify-content:flex-start}}
+/* Phone: the header scrolls away instead of covering a third of the screen, and fits in fewer rows. */
+@media (max-width:640px){header.bar{position:relative}.bar .wrap{gap:6px 10px;padding-block:8px}nav.tabs{gap:0;margin-inline:-6px}.mt{font-size:13.5px;padding:8px 7px;gap:5px}
+  #acctBar{min-width:0;max-width:max(110px,calc(100vw - 270px))}#acctBar .chip{max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}#editBar .chip{font-size:12.5px;padding:6px 10px}.ptimer{top:8px}
+  #heroStage>:nth-child(n+4){display:none}}
+@media (max-width:440px){#acctBar .acct-up{display:none}.logo small{letter-spacing:.1em}}
 a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 main{padding-block:28px 64px}
 .view{display:flex;flex-direction:column;gap:22px}
@@ -429,7 +440,7 @@ footer{padding-bottom:96px}
 .gcol h2{margin:0}
 .gsteps{margin:0;padding:0;list-style:none;counter-reset:g;display:flex;flex-direction:column;gap:12px}
 .gsteps li{counter-increment:g;display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start}
-.gsteps li::before{content:counter(g);width:28px;height:28px;border-radius:50%;background:var(--gc,var(--brand));color:var(--surface);display:grid;place-items:center;font-weight:900;font-size:14px}
+.gsteps li::before{content:counter(g);content:counter(g) / "";width:28px;height:28px;border-radius:50%;background:var(--gc,var(--brand));color:var(--surface);display:grid;place-items:center;font-weight:900;font-size:14px}
 .gsteps li>div{display:flex;flex-direction:column;gap:2px}.gsteps li span{font-size:14px}
 .updlist{display:flex;flex-direction:column;gap:14px}
 .upd{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
@@ -464,7 +475,8 @@ footer{padding-bottom:96px}
         <a href="#matches" data-go="matches" data-pub><b>Тоглолтууд</b><small>Хуваарь, шууд оноо, үр дүн</small></a>
         <a href="#table" data-go="table" data-pub><b>Онооны хүснэгт</b><small>UBAC ба дотоод тэмцээний байр</small></a>
       </div></div>
-      <div class="mg" data-pub><button type="button" class="mt" aria-expanded="false">Podcast &amp; Broadcast</button><div class="dd">
+      <div class="mg" data-pub><button type="button" class="mt" aria-expanded="false" aria-describedby="pbCap">Podcast &amp; Broadcast</button><div class="dd">
+        <p class="ddcap" id="pbCap" data-cms="nav_pb">Подкаст ба шууд дамжуулалт: сонсох, үзэх бүх зүйл нэг дор</p>
         <a href="#podcast" data-go="podcast" data-pub><b>Tomujin PE Podcast</b><small>Сонсох, үзэх ангиуд, асуулт хариулт</small></a>
         <a href="#youtube" data-go="youtube" data-pub><b>YouTube суваг</b><small>Сувгийн бүх бичлэг энд тоглоно</small></a>
         <a href="#live" data-go="live" data-pub><b>Шууд дамжуулалт</b><small>Тэмцээн, наадам, хуваарь, бичлэг</small></a>
@@ -515,6 +527,17 @@ footer{padding-bottom:96px}
     </div>
     <div class="stage" id="heroStage" aria-label="Дасгалын хөдөлгөөнт жишээ"></div>
   </div>
+  <div id="homeReg" hidden></div>
+  <div class="members" id="homeToday"></div>
+  <div class="dims members" id="homeDims"></div>
+  <div class="tip members" id="tip"></div>
+  <section class="hsum guest" id="homeHow" aria-labelledby="hsumT">
+    <div class="chips" style="justify-content:space-between;align-items:end">
+      <div><span class="eyebrow" data-cms="hs_eb">Бидний арга барил</span><h2 id="hsumT" data-cms="hs_h">Tomujin PE товчхон</h2></div>
+      <a class="btn line small" href="#how" data-go="how" data-cms="hs_more">Дэлгэрэнгүй</a>
+    </div>
+    <ol class="hsteps" id="homeHowList"></ol>
+  </section>
   <section class="topath" id="topSec" aria-labelledby="topT">
     <span class="eyebrow">Tomujin Top Student Athletes</span>
     <h2 id="topT">Tomujin-ий шилдэг тамирчид</h2>
@@ -534,9 +557,6 @@ footer{padding-bottom:96px}
       <p class="lede" data-cms="cj_p4">Миний итгэл үнэмшил энгийн: зүгээр л ирээрэй. Хамгийн шилдэг нь байх шаардлагагүй — ирж, оролдоод, өөрийнхөө хурдаар өсөж хөгжөөрэй. Миний заадаг бүхнийг би өөр дээрээ туршиж, амьдарч үзсэн.</p>
     </div>
   </section>
-  <div class="members" id="homeToday"></div>
-  <div class="dims members" id="homeDims"></div>
-  <div class="tip members" id="tip"></div>
 
 
   <div class="gate guest" id="gate">
@@ -919,7 +939,7 @@ footer{padding-bottom:96px}
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow" data-cms="fb_eb">Зөвхөн админд</span>
     <h1 id="fbT" data-cms="fb_h">Санал хүсэлт</h1>
-    <p class="lede" data-cms="fb_p">Хэрэглэгчдийн илгээсэн санал. Хийж дууссаныг "Хийсэн" болгоод хэрэглэгчид хэлэх үгээ бичвэл тэр хүн дараа нэвтрэхдээ харна.</p>
+    <p class="lede" data-cms="fb_p">Хэрэглэгчдийн илгээсэн санал. "Хийсэн" эсвэл "Хийхгүй" болгохдоо бичсэн хариу тань илгээсэн хүнд "Миний саналууд" хэсэгт харагдана. 🔒 Дотоод тэмдэглэл зөвхөн танд харагдана.</p>
   </div>
   <div id="fbOut" style="display:flex;flex-direction:column;gap:14px"></div>
 </section>
@@ -1475,7 +1495,8 @@ function crN(oid){var o=OFFERS[oid];return o&&typeof o.n==='number'?o.n:0}
 function crLeft(oid){return Math.max(0,crCap(oid)-crN(oid))}
 function crPicks(){return (REG&&REG.picks)||[]}
 function crRank(oid){var q=WAITQ[oid]||[];var i=ME?q.indexOf(ME.uid):-1;return i<0?0:i+1}
-function crNext(days){var t=ubToday();var all=crDates(days);for(var i=0;i<all.length;i++)if(all[i]>=t)return all[i];return ''}
+function crCancel(oid,s){var o=oid&&OFFERS[oid];return (o&&o.off&&o.off[s])||''}
+function crNext(days,oid){var t=ubToday();var all=crDates(days);for(var i=0;i<all.length;i++)if(all[i]>=t&&!crCancel(oid,all[i]))return all[i];return ''}
 function crOverlap(p){if(p.length<2)return false;var a=crFind(p[0]),b=crFind(p[1]);if(!a||!b)return false;return a.o.days.some(function(d){return b.o.days.indexOf(d)>=0})}
 function crPic(c){var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)})}
 
@@ -1599,7 +1620,16 @@ function crOfferRow(c,o){
   var pct=cap?Math.min(100,crN(o.id)/cap*100):0;
   return h('div',{cls:'crrow'},[h('div',{},[h('b',{text:lab}),h('div',{cls:'crbar'},[h('i',{style:'width:'+pct+'%;background:'+(left>0?c.cc:'var(--orange)')})]),h('small',{cls:'muted',text:seatTxt})]),act,st]);
 }
+/* Home page: the registration window, shown until the season starts (11/9), so parents see the dates first. */
+function crHomeReg(){
+  var W=$('homeReg');if(!W)return;W.innerHTML='';
+  var on=crPhase()!=='closed'||ubToday()<CRCAL.start;W.hidden=!on;if(!on)return;
+  var b=crBanner();b.insertBefore(h('span',{cls:'eyebrow',text:'Өглөөний дугуйлангийн бүртгэл'}),b.firstChild);
+  b.appendChild(h('div',{cls:'chips'},[h('a',{href:'#clubs','data-go':'clubs',cls:'btn line small',text:'Дугуйлан, суудал харах'})]));
+  W.appendChild(b);
+}
 function renderClubReg(){
+  crHomeReg();
   var W=$('crOut');if(!W)return;W.innerHTML='';
   W.appendChild(crBanner());
   var g=h('div',{cls:'clubgrid'});
@@ -1679,7 +1709,9 @@ function crMyCard(oid,c,o){
     h('div',{cls:'crhead'},[h('div',{cls:'pic'},[crPic(c)]),h('div',{},[h('small',{cls:'muted',text:o.sh?o.sh+' ээлж':'Дугуйлан'}),h('h2',{style:'margin:0',text:c.n}),h('span',{cls:'tag '+ns[1],text:ns[0]})])]),
     h('div',{cls:'crstep'},[h('b',{text:'Дараагийн алхам'}),h('p',{style:'margin:0',text:ns[2]})])]);
   if(cf.notice)card.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Мэдэгдэл'}),h('p',{style:'margin:0',text:cf.notice})]));
-  var nx=crNext(o.days),all=crDates(o.days),td=ubToday();
+  var nx=crNext(o.days,oid),td=ubToday(),all=crDates(o.days).filter(function(d){return !crCancel(oid,d)});
+  var offs=crDates(o.days).filter(function(d){return d>=td&&crCancel(oid,d)}).slice(0,3);
+  if(offs.length)card.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Цуцлагдсан хичээл'}),h('p',{style:'margin:0',text:offs.map(function(d){return crMD(d)+': '+crCancel(oid,d)}).join(' · ')+'. Ирцэд тооцохгүй.'})]));
   var nTxt=nx?crMD(nx)+' · '+crTm(c)+(nx===td?' · Өнөөдөр':' · '+Math.round((ymdD(nx)-ymdD(td))/864e5)+' хоногийн дараа'):'Улирал дууссан';
   card.appendChild(h('div',{cls:'fgrid'},[crKV('Дараагийн хичээл',nTxt),crKV('Хаана',crPl(c)),crKV('Өдөр, цаг',crDaysTxt(o.days)+' · '+crTm(c)),crKV('Нийт хичээл',all.length+' (11/9–4/30)')]));
   card.appendChild(crCoachBox(cf));
@@ -1690,12 +1722,12 @@ function crMyCard(oid,c,o){
   if(seat)card.appendChild(crAttBox(oid,c,o,seat));
   if(seat)card.appendChild(crPayBox(c,seat));
   if(seat&&seat.status!=='cancel')card.appendChild(crAbsBox(oid,o));
-  card.appendChild(h('details',{cls:'crdet'},[h('summary',{text:'Хуанли: бүх хичээлийн өдөр ('+all.length+')'}),crCalendar(o.days,seat)]));
+  card.appendChild(h('details',{cls:'crdet'},[h('summary',{text:'Хуанли: бүх хичээлийн өдөр ('+all.length+')'}),crCalendar(o.days,seat,oid)]));
   var ph=crPhase();if((ph==='p1'||ph==='p2')&&(!seat||seat.status==='seat')){var st=h('span',{cls:'status',role:'status','data-crmsg':oid});crMsgEl(oid,st);card.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:seat?'Суудлаасаа татгалзах':'Хүлээлгээс гарах',onclick:function(){crLeave(oid,st)}}),st]))}
   return card;
 }
-function crAttStats(o,seat){var att=(seat&&seat.att)||{},td=ubToday();var past=crDates(o.days).filter(function(d){return d<=td});var r={p:0,a:0,e:0,held:0};past.forEach(function(d){var v=att[d];if(v){r.held++;r[v]=(r[v]||0)+1}});r.pct=r.held?Math.round(r.p/r.held*100):null;return r}
-function crAttBox(oid,c,o,seat){var r=crAttStats(o,seat);
+function crAttStats(o,seat,oid){var att=(seat&&seat.att)||{},td=ubToday();oid=oid||o.id;var past=crDates(o.days).filter(function(d){return d<=td&&!crCancel(oid,d)});var r={p:0,a:0,e:0,held:0};past.forEach(function(d){var v=att[d];if(v){r.held++;r[v]=(r[v]||0)+1}});r.pct=r.held?Math.round(r.p/r.held*100):null;return r}
+function crAttBox(oid,c,o,seat){var r=crAttStats(o,seat,oid);
   return h('div',{cls:'box'},[h('h3',{text:'Миний ирц'}),r.held?h('div',{cls:'fgrid'},[crKV('Ирсэн',r.p+' / '+r.held),crKV('Ирц',r.pct+'%'),crKV('Шалтгаантай',String(r.e)),crKV('Шалтгаангүй тасалсан',r.a+' / 3')]):h('p',{cls:'muted',style:'margin:0',text:'Хичээл эхэлмэгц ирц энд харагдана.'}),
     r.held&&c.pay==='dep'?h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Барьцаа буцаан авах нөхцөл: улирлын эцэст ирц 80%-иас дээш.'}):null,
     r.a>=2?h('p',{style:'margin:0;color:var(--orange);font-weight:700',text:'Анхаар: шалтгаангүй 3 удаа тасалбал суудлаа алдана.'}):null]);
@@ -1705,7 +1737,7 @@ function crPayBox(c,seat){var pd=seat.paid||{};
     :[h('li',{},[h('b',{text:'Барьцаа 300,000₮'}),h('span',{cls:pd.dep?'':'muted',text:pd.dep?'✓ Төлсөн. 4/30-нд ирц 80%-иас дээш бол буцаана.':'Төлөх хугацаа '+crSet().confirmBy+' хүртэл'})])];
   return h('div',{cls:'box'},[h('h3',{text:c.pay==='fee'?'Төлбөр':'Барьцаа'}),h('ol',{cls:'tl'},rows)])}
 function crAbsBox(oid,o){
-  var td=ubToday(),up=crDates(o.days).filter(function(d){return d>=td}).slice(0,12),mine=MYABS[oid]||{};
+  var td=ubToday(),up=crDates(o.days).filter(function(d){return d>=td&&!crCancel(oid,d)}).slice(0,12),mine=MYABS[oid]||{};
   var sel=h('select',{id:'abs-'+oid},up.map(function(d){return h('option',{value:d,text:crMD(d)+(mine[d]?' · мэдэгдсэн':'')})}));
   var why=h('input',{type:'text',id:'absr-'+oid,placeholder:'Шалтгаан (өвчтэй, тэмцээн, гэр бүлийн…)'});var st=h('span',{cls:'status',role:'status'});
   var sent=Object.keys(mine).sort();
@@ -1715,12 +1747,12 @@ function crAbsBox(oid,o){
         db.batch([{op:'set',path:'offers/'+oid+'/seats/'+ME.uid+'/abs/'+d,data:{reason:r.slice(0,300),at:{__sv:'time'}}}]).then(function(){st.className='status';st.textContent='Багшид мэдэгдлээ. Шалтгаантай тасалсанд тооцогдоно.';why.value=''},function(){st.className='status err';st.textContent='Илгээж чадсангүй. Энэ өдрийн мэдэгдэл аль хэдийн илгээгдсэн байж магадгүй.'})}})])]):h('p',{cls:'muted',text:'Үлдсэн хичээл алга.'}),st,
     sent.length?h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Мэдэгдсэн: '+sent.map(crMD).join(', ')}):null]);
 }
-function crCalendar(days,seat){
+function crCalendar(days,seat,oid){
   var att=(seat&&seat.att)||{},td=ubToday(),by={};
   var d=ymdD(CRCAL.start),e=ymdD(CRCAL.end);while(d<=e){var s=d.toISOString().slice(0,10);if(days.indexOf(d.getUTCDay())>=0){var m=s.slice(0,7);(by[m]=by[m]||[]).push(s)}d=new Date(d.getTime()+864e5)}
   var MN=['','1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар','7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
-  return h('div',{cls:'crcal'},Object.keys(by).map(function(m){return h('div',{},[h('b',{text:m.slice(0,4)+' · '+MN[+m.slice(5)]}),h('div',{cls:'chips'},by[m].map(function(s){var br=crBreak(s),v=att[s];
-    return h('span',{cls:'tag'+(br?' x':v==='p'?' ok':v==='a'?' o':v==='e'?' g':s===td?' t':''),title:br||'',text:+s.slice(8)+(br?' · амралт':v==='p'?' ✓':v==='a'?' ✗':v==='e'?' ш':'')})}))])}));
+  return h('div',{cls:'crcal'},Object.keys(by).map(function(m){return h('div',{},[h('b',{text:m.slice(0,4)+' · '+MN[+m.slice(5)]}),h('div',{cls:'chips'},by[m].map(function(s){var cx=crCancel(oid,s),br=crBreak(s)||(cx?'Цуцалсан: '+cx:''),v=cx?'':att[s];
+    return h('span',{cls:'tag'+(br?' x':v==='p'?' ok':v==='a'?' o':v==='e'?' g':s===td?' t':''),title:br||'',text:+s.slice(8)+(cx?' · цуцалсан':br?' · амралт':v==='p'?' ✓':v==='a'?' ✗':v==='e'?' ш':'')})}))])}));
 }
 
 /* -- owner tools: times, seat counters, club info, lists, attendance, session notes -- */
@@ -1813,23 +1845,56 @@ function crAdminList(oid){
         db.batch([{op:'set',path:'offers/'+oid+'/seats/'+uid,data:{at:{__sv:'time'},status:'pay'}},{op:'merge',path:'offers/'+oid,data:{n:{__inc:1}}},{op:'delete',path:'offers/'+oid+'/wait/'+uid}]).catch(function(){alert('Хадгалж чадсангүй.')})}})])})):h('p',{cls:'muted',style:'margin:0',text:'Хүлээлгийн жагсаалт хоосон.'})]));
   });
 }
+/* Attendance. Every change is kept with its time (atth) so a corrected mark stays visible; a cancelled session
+   (offers/{oid}.off[day]) is not counted for anyone; nothing here removes a seat on its own - the teacher decides. */
+var CRATT={bulk:'',why:''},CRATTN={p:'✓ Ирсэн',e:'Шалтгаантай',a:'✗ Тасалсан','':'тэмдэглэгээгүй'};
+function crAttOp(oid,uid,day,code){var s=(CRSEATS[oid]||{})[uid]||{},was=(s.att||{})[day]||'';var hist=(((s.atth||{})[day])||[]).slice(-9);hist.push({v:code||'',was:was,t:Date.now()});
+  var a={},hh={};a[day]=code||null;hh[day]=hist;return {op:'merge',path:'offers/'+oid+'/seats/'+uid,data:{att:a,atth:hh}}}
+function crAttHist(s,day){var L=(((s||{}).atth||{})[day]||[]).filter(function(x){return x.was});if(!L.length)return '';
+  return 'Засвар: '+L.slice(-3).map(function(x){var d=new Date(x.t);return (CRATTN[x.was]||x.was)+' → '+(CRATTN[x.v]||x.v)+' ('+(d.getMonth()+1)+'/'+d.getDate()+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())+')'}).join('; ')}
 function crAdminAtt(oid,day){
   crAdminOpen=function(){crAdminAtt(oid,day)};
-  var f=crFind(oid),all=crDates(f.o.days),td=ubToday();if(!day){day=all.filter(function(d){return d<=td}).pop()||all[0]}
+  var f=crFind(oid),all=crDates(f.o.days),td=ubToday();if(!day){day=all.filter(function(d){return d<=td&&!crCancel(oid,d)}).pop()||all[0]}
   var seats=CRSEATS[oid]||{};var ids=Object.keys(seats).filter(function(u){return seats[u].status!=='cancel'}).sort(function(a,b){return crUname(a).localeCompare(crUname(b))});
+  var off=crCancel(oid,day),future=day>td,bk=CRATT.bulk===oid+'|'+day;
   openSheet(function(p){
     $('sheetEyebrow').textContent='Удирдлага · ирц';p.appendChild(h('h2',{id:'sheetTitle',text:crName(oid)}));
-    p.appendChild(crOfferTabs(oid,function(x){crAdminAtt(x,'')}));
-    var sel=h('select',{id:'att-day'},all.map(function(d){return h('option',{value:d,text:crMD(d)+(d===td?' · өнөөдөр':'')})}));sel.value=day;sel.addEventListener('change',function(){crAdminAtt(oid,sel.value)});
+    p.appendChild(crOfferTabs(oid,function(x){CRATT.bulk='';crAdminAtt(x,'')}));
+    var sel=h('select',{id:'att-day'},all.map(function(d){return h('option',{value:d,text:crMD(d)+(d===td?' · өнөөдөр':'')+(crCancel(oid,d)?' · цуцалсан':'')})}));sel.value=day;sel.addEventListener('change',function(){CRATT.bulk='';crAdminAtt(oid,sel.value)});
     p.appendChild(h('label',{cls:'ff',for:'att-day'},['Хичээлийн өдөр',sel]));
+    var st=h('p',{cls:'status',role:'status'});
+    function fail(){st.className='status err';st.textContent='Хадгалж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.'}
+    if(off){
+      p.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Энэ хичээл цуцлагдсан: '+off}),h('span',{text:'Хэнд ч ирцэд тооцохгүй. Хүүхдүүдийн "Миний дугуйлан" хэсэгт харагдана.'}),
+        h('button',{type:'button',cls:'btn line small',style:'align-self:flex-start',text:'Цуцлалтыг буцаах',onclick:function(){var o={};o[day]=null;db.batch([{op:'merge',path:'offers/'+oid,data:{off:o}}]).then(function(){crAdminAtt(oid,day)},fail)}})]));
+      p.appendChild(st);return;
+    }
     var abs={};CRABS.forEach(function(a){if(a.oid===oid&&a.day===day)abs[a.uid]=a.reason});
     var n={p:0,a:0,e:0};ids.forEach(function(u){var v=(seats[u].att||{})[day];if(v)n[v]++});
     p.appendChild(h('p',{cls:'muted',text:'Ирсэн '+n.p+' · Шалтгаантай '+n.e+' · Тасалсан '+n.a+' · Бүртгээгүй '+(ids.length-n.p-n.e-n.a)}));
-    p.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:'Бүгдийг "Ирсэн" болгох',onclick:function(){db.batch(ids.filter(function(u){return !(seats[u].att||{})[day]}).map(function(u){var a={};a[day]=abs[u]?'e':'p';return {op:'merge',path:'offers/'+oid+'/seats/'+u,data:{att:a}}})).catch(function(){})}})]));
-    ids.forEach(function(uid){var v=(seats[uid].att||{})[day]||'';
-      function b(code,lab){return h('button',{type:'button',cls:'chip','aria-pressed':String(v===code),text:lab,onclick:function(){var a={};a[day]=v===code?null:code;db.batch([{op:'merge',path:'offers/'+oid+'/seats/'+uid,data:{att:a}}]).catch(function(){})}})}
-      p.appendChild(h('div',{cls:'crrow'},[h('div',{},[h('b',{text:crUname(uid)}),h('small',{cls:'muted',text:crUclass(uid)+(abs[uid]?' · Мэдэгдсэн: '+abs[uid]:'')})]),h('div',{cls:'chips'},[b('p','✓ Ирсэн'),b('e','Шалтгаантай'),b('a','✗ Тасалсан')])]))});
+    var todo=ids.filter(function(u){return !(seats[u].att||{})[day]}),toE=todo.filter(function(u){return abs[u]}),toP=todo.filter(function(u){return !abs[u]});
+    if(future)p.appendChild(h('p',{cls:'muted',text:'Энэ хичээл хараахан болоогүй тул "Ирсэн", "Тасалсан" тэмдэглэхгүй. Урьдчилан мэдэгдсэн бол "Шалтгаантай" тэмдэглэж болно.'}));
+    else if(!bk)p.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',id:'att-bulk',text:'Тэмдэглээгүй бүгдийг "Ирсэн" болгох…',disabled:todo.length?null:'',onclick:function(){CRATT.bulk=oid+'|'+day;crAdminAtt(oid,day)}})]));
+    else{
+      var nm=function(L){return L.map(crUname).join(', ')};
+      p.appendChild(h('div',{cls:'box',id:'att-preview',style:'border:2px solid var(--gold)'},[h('h3',{text:'Хадгалахын өмнө шалгана уу · '+crMD(day)}),
+        h('ul',{cls:'cues'},[h('li',{},[h('b',{text:'"Ирсэн" болно: '+toP.length}),toP.length?h('div',{cls:'muted',text:nm(toP)}):null]),
+          toE.length?h('li',{},[h('b',{text:'"Шалтгаантай" болно (урьдчилан мэдэгдсэн): '+toE.length}),h('div',{cls:'muted',text:nm(toE)})]):null,
+          h('li',{},[h('b',{text:'Өөрчлөгдөхгүй (аль хэдийн тэмдэглэсэн): '+(ids.length-todo.length)})])]),
+        h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',id:'att-bulk-ok',text:'Батлах ('+todo.length+' хүүхэд)',onclick:function(ev){ev.currentTarget.disabled=true;db.batch(todo.map(function(u){return crAttOp(oid,u,day,abs[u]?'e':'p')})).then(function(){CRATT.bulk='';crAdminAtt(oid,day)},function(){CRATT.bulk='';fail()})}}),
+          h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){CRATT.bulk='';crAdminAtt(oid,day)}})])]));
+    }
+    ids.forEach(function(uid){var s=seats[uid],v=(s.att||{})[day]||'',r=crAttStats(f.o,s,oid),hist=crAttHist(s,day);
+      function b(code,lab){var no=future&&code!=='e';return h('button',{type:'button',cls:'chip','aria-pressed':String(v===code),text:lab,disabled:no?'':null,title:no?'Хичээл болоогүй байна':null,onclick:function(){db.batch([crAttOp(oid,uid,day,v===code?'':code)]).catch(fail)}})}
+      var info=[crUclass(uid),abs[uid]?'Мэдэгдсэн: '+abs[uid]:'',r.a>=2?'Шалтгаангүй '+r.a+' удаа'+(r.a>=3?' · шийдвэрийг багш гаргана, автоматаар хасагдахгүй':''):''].filter(Boolean).join(' · ');
+      p.appendChild(h('div',{cls:'crrow'},[h('div',{},[h('b',{text:crUname(uid)}),h('small',{cls:'muted',text:info}),hist?h('small',{cls:'muted',style:'display:block',text:hist}):null]),h('div',{cls:'chips'},[b('p','✓ Ирсэн'),b('e','Шалтгаантай'),b('a','✗ Тасалсан')])]))});
     if(!ids.length)p.appendChild(h('p',{cls:'muted',text:'Энэ ээлжид суудал авсан хүүхэд алга.'}));
+    var why=h('input',{type:'text',id:'att-why',maxlength:'120',placeholder:'Шалтгаан (жишээ: заал засвартай)'});why.value=CRATT.why;why.addEventListener('input',function(){CRATT.why=why.value});
+    p.appendChild(h('details',{cls:'crdet'},[h('summary',{text:'Энэ хичээл болохгүй бол цуцлах'}),
+      h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Цуцалсан хичээлийг хэнд ч ирцэд тооцохгүй, хүүхдүүдэд шалтгаантай нь харагдана. Дараа нь буцааж болно.'}),
+      h('div',{cls:'editrow'},[h('label',{cls:'ff',for:'att-why',style:'flex:1'},['Шалтгаан',why]),h('button',{type:'button',cls:'btn line small',text:'Цуцлах',onclick:function(){var w=why.value.trim();if(!w){st.className='status err';st.textContent='Цуцлах шалтгаанаа бичнэ үү.';why.focus();return}
+        var o={};o[day]=w.slice(0,120);db.batch([{op:'merge',path:'offers/'+oid,data:{off:o}}]).then(function(){CRATT.why='';crAdminAtt(oid,day)},fail)}})])]));
+    p.appendChild(st);
   });
 }
 function crAdminLog(oid){
@@ -2778,7 +2843,7 @@ function authErr(e){var c=e&&e.code||'';return c==='tpe/domain'?'Зөвхөн @'
 function renderAccount(){
   var b=$('acctBar');if(!b)return;b.innerHTML='';
   if(!window.TPE||!TPE.configured){return}
-  if(!ME){b.appendChild(h('button',{type:'button',cls:'btn line small',text:'Бүртгүүлэх',onclick:function(){openLogin('up')}}));b.appendChild(h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:function(){openLogin('in')}}));return}
+  if(!ME){b.appendChild(h('button',{type:'button',cls:'btn line small acct-up',text:'Бүртгүүлэх',onclick:function(){openLogin('up')}}));b.appendChild(h('button',{type:'button',cls:'btn gold small',text:'Нэвтрэх',onclick:function(){openLogin('in')}}));return}
   var label=(MYPROFILE&&MYPROFILE.name)||ME.name||ME.email.split('@')[0];
   b.appendChild(h('button',{type:'button',cls:'chip',text:(MYROLE==='admin'?'Админ · ':MYROLE==='teacher'?'Багш · ':'')+label,onclick:openAccount}));
 }
@@ -3005,7 +3070,8 @@ var HOW=[
  ['Хичээлээс гадуур','Дугуйлан ба сургуулийн баг','Энэ улиралд өглөөний 5 дугуйлан: сагсан бөмбөг, гар бөмбөг, жиу-жицу, мини теннис, Functional strength training. Бусад сонирхлын бүлгийн танилцуулгыг "Дугуйлан" хэсгээс үзнэ. Сургуулийн багууд UBAC-ын тэмцээнд оролцож, өрсөлдөх, хамтран ажиллах туршлага хуримтлуулна.'],
  ['Улирал бүр','Ахиц ба тусгал','Сайн сайхан байдлын 4 хэмжээс, L1–L6 түвшин. Бусадтай харьцуулахгүй, өөрийн ахицаа харна. Төсөлд суурилсан суралцахуйгаар (PBL) өөрийн системээ өөрөө бүтээнэ.']
 ];
-function renderHow(){var W=$('howSteps');if(!W)return;W.innerHTML='';var E=$('howEdit');if(E){E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Алхмуудыг засах / нэмэх / хасах',onclick:function(){editList('how')}}))}HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
+function renderHomeHow(){var L=$('homeHowList');if(!L)return;L.innerHTML='';HOW.forEach(function(x){L.appendChild(h('li',{},[h('small',{text:x[0]}),h('b',{text:x[1]})]))})}
+function renderHow(){renderHomeHow();var W=$('howSteps');if(!W)return;W.innerHTML='';var E=$('howEdit');if(E){E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Алхмуудыг засах / нэмэх / хасах',onclick:function(){editList('how')}}))}HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
 
 /* ---------- clubs ---------- */
 var CLUBCAT={sport:['Спорт','var(--brand)'],mind:['Оюун ухаан','var(--teal)'],fight:['Тулааны урлаг','var(--orange)'],art:['Урлаг ба хөдөлгөөн','#be185d'],fit:['Фитнесс','#15803d']};
@@ -3910,7 +3976,15 @@ function renderUpdates(){
 var FBTYPE={bug:['🐞','Алдаа','Ажиллахгүй эсвэл буруу харагдаж байна','var(--orange)'],idea:['💡','Санаа','Ийм зүйл нэмбэл гоё','var(--teal)'],confusing:['🤔','Ойлгомжгүй','Юу хийхээ мэдэхгүй байна','#a16207'],like:['❤️','Таалагдсан','Энэ хэсэг гоё байна','#15803d']};
 var FBWHO={parent:'Эцэг эх',student:'Сурагч',teacher:'Багш',other:'Бусад'};
 var FBST={'new':'Шинэ',doing:'Хийж байна',done:'Хийсэн',skip:'Хийхгүй'};
-var FB=[],MYFB=[],fbFilter='new',fbLast=0;
+var FB=[],MYFB=[],FBNOTE={},fbFilter='new',fbLast=0;
+var FBSTX={'new':'Хүлээн авсан. Жак багш долоо хоног бүр уншина.',doing:'Жак багш үүн дээр ажиллаж байна.',done:'Хийгдсэн.',skip:'Одоохондоо хийхгүй гэж шийдсэн.'};
+/* Unsent feedback is kept on this device for a day, per account, so a closed window or a lost connection does not
+   lose the text. Contact details are never kept. */
+var FBDK='tpe-fb-draft';
+function fbDraftKey(){return (ME&&ME.uid)||'guest'}
+function fbDraft(){try{var d=JSON.parse(localStorage.getItem(FBDK)||'null');if(d&&d.k===fbDraftKey()&&Date.now()-d.at<864e5)return d}catch(e){}return null}
+function fbKeep(d){try{if(d&&(d.text||d.type)){d.k=fbDraftKey();d.at=Date.now();localStorage.setItem(FBDK,JSON.stringify(d))}else localStorage.removeItem(FBDK)}catch(e){}}
+function fbReplied(x){return !!x&&((x.status==='done')||(x.status==='skip'&&!!x.reply))}
 function fbMs(t){return t&&t.toMillis?t.toMillis():typeof t==='number'?t:Date.now()}
 function fbDt(ms){var d=new Date(ms);return ymd(d)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())}
 function fbCut(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s}
@@ -3919,27 +3993,32 @@ function fbViewName(v){var a=document.querySelector('nav.tabs [data-go="'+v+'"]'
 function fbDev(){var ua=navigator.userAgent||'';var os=/iPhone|iPad|iPod/.test(ua)?'iPhone/iPad':/Android/.test(ua)?'Android':/Mac/.test(ua)?'Mac':/Windows/.test(ua)?'Windows':/CrOS/.test(ua)?'Chromebook':/Linux/.test(ua)?'Linux':'Бусад';
   var br=/Edg\//.test(ua)?'Edge':/CriOS|Chrome\//.test(ua)?'Chrome':/FxiOS|Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'';return (os+' '+br).trim()+' · '+window.innerWidth+'px'}
 function openFeedback(){
-  var type='',page=fbView(),guest=!(ME&&MYROLE&&ME.emailVerified);
+  var dr=fbDraft()||{},type=dr.type||'',page=fbView(),guest=!(ME&&MYROLE&&ME.emailVerified);
   openSheet(function(p){
     $('sheetEyebrow').textContent='Санал өгөх · Бета';
     p.appendChild(h('h2',{id:'sheetTitle',text:'Таны санал сайтыг сайжруулна'}));
     p.appendChild(h('p',{cls:'lede',text:'Юу ажиллахгүй байна, юу ойлгомжгүй байна, юу нэмбэл гоё вэ? Товчхон бичээрэй. Жак багш долоо хоног бүр уншиж, сайжруулна.'}));
     var st=h('p',{cls:'status',role:'status'});
     var tb=h('div',{cls:'fbtypes',role:'group','aria-labelledby':'fbq1'});
-    Object.keys(FBTYPE).forEach(function(k){var t=FBTYPE[k];var b=h('button',{type:'button',cls:'fbtype','aria-pressed':'false',onclick:function(){type=k;[].forEach.call(tb.children,function(x){x.setAttribute('aria-pressed',String(x===b))})}},[h('span',{cls:'e','aria-hidden':'true',text:t[0]}),h('b',{text:t[1]}),h('small',{text:t[2]})]);tb.appendChild(b)});
+    Object.keys(FBTYPE).forEach(function(k){var t=FBTYPE[k];var b=h('button',{type:'button',cls:'fbtype','aria-pressed':String(type===k),onclick:function(){type=k;[].forEach.call(tb.children,function(x){x.setAttribute('aria-pressed',String(x===b))});keep()}},[h('span',{cls:'e','aria-hidden':'true',text:t[0]}),h('b',{text:t[1]}),h('small',{text:t[2]})]);tb.appendChild(b)});
     p.appendChild(h('div',{cls:'ff'},[h('span',{id:'fbq1',text:'1. Ямар санал вэ?'}),tb]));
-    var ta=h('textarea',{id:'fb-text',rows:'5',maxlength:'2000',placeholder:'Жишээ: Утсан дээр "Бэлтгэлийн тэмдэглэл"-ийн товч хэт жижиг байна.'});
+    var ta=h('textarea',{id:'fb-text',rows:'5',maxlength:'2000',placeholder:'Жишээ: Утсан дээр "Бэлтгэлийн тэмдэглэл"-ийн товч хэт жижиг байна.'});ta.value=dr.text||'';
     p.appendChild(h('label',{for:'fb-text',cls:'ff'},['2. Санаагаа бичээрэй',ta]));
+    if(dr.text)p.appendChild(h('p',{cls:'muted',style:'font-size:12.5px;margin-top:-6px',text:'Өмнө бичиж эхэлсэн санал тань энд хадгалагдсан байна.'}));
     if(guest){
-      p.appendChild(fSelect('fb-who','3. Та хэн бэ?',[['','— Сонгоно уу —'],['parent','Эцэг эх'],['student','Сурагч'],['teacher','Багш'],['other','Бусад']],''));
-      p.appendChild(fText('fb-contact','Хариу авах бол утас эсвэл имэйл (заавал биш)','',{ph:'9911 2233 эсвэл нэр@gmail.com'}));
-    }else p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Таны нэр, анги автоматаар хавсарна. Санаа тань хэрэгжвэл дараа нэвтрэхэд танд мэдэгдэнэ.'}));
+      p.appendChild(fSelect('fb-who','3. Та хэн бэ?',[['','— Сонгоно уу —'],['parent','Эцэг эх'],['student','Сурагч'],['teacher','Багш'],['other','Бусад']],dr.who||''));
+      p.appendChild(fText('fb-contact','Утас эсвэл имэйл (заавал биш)','',{ph:'9911 2233 эсвэл нэр@gmail.com',help:'Сайт өөрөө хариу имэйл, мессеж илгээдэггүй. Үлдээвэл шаардлагатай үед Жак багш өөрөө холбогдоно. Үүнийг зөвхөн Жак багш харна.'}));
+    }else{
+      p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Таны нэр, анги автоматаар хавсарна. Саналынхаа явц, Жак багшийн хариуг "Миний саналууд" хэсгээс харна.'}));
+      if(MYFB.length)p.appendChild(h('div',{},[h('button',{type:'button',cls:'btn line small',text:'Миний саналууд ('+MYFB.length+')',onclick:openMyFb})]));
+    }
     var hp=h('input',{type:'text',id:'fb-web',tabindex:'-1',autocomplete:'off'});p.appendChild(h('div',{cls:'hp','aria-hidden':'true'},[hp]));
     p.appendChild(h('p',{cls:'muted',style:'font-size:12.5px',text:'Хуудас: '+fbViewName(page)+' · '+fbDev()}));
     var send=h('button',{type:'button',cls:'btn gold',text:'Илгээх',onclick:go});
     p.appendChild(h('div',{cls:'editrow'},[send,h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
     function err(t){st.className='status err';st.textContent=t}
-    p.addEventListener('input',function(){if(st.className==='status err')st.textContent=''});p.addEventListener('change',function(){if(st.className==='status err')st.textContent=''});
+    function keep(){fbKeep({type:type,text:ta.value,who:guest?val('fb-who'):''})}
+    p.addEventListener('input',function(){keep();if(st.className==='status err')st.textContent=''});p.addEventListener('change',function(){keep();if(st.className==='status err')st.textContent=''});
     tb.addEventListener('click',function(){if(st.className==='status err')st.textContent=''});
     function go(){
       var txt=ta.value.trim();
@@ -3953,14 +4032,15 @@ function openFeedback(){
       if(guest){d.uid='';d.who=val('fb-who');var c=val('fb-contact').slice(0,120);if(c)d.contact=c}
       else{d.uid=ME.uid;d.who=isStaff()?'teacher':'student';d.email=String(ME.email||'').toLowerCase();d.name=String((MYPROFILE&&MYPROFILE.name)||ME.name||'').slice(0,80);d.classId=myClass()}
       send.disabled=true;st.className='status';st.textContent='Илгээж байна…';
-      db.batch([{op:'set',path:'feedback/'+slug(),data:d}]).then(function(){fbLast=Date.now();thanks()},function(){send.disabled=false;err('Илгээж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.')});
+      db.batch([{op:'set',path:'feedback/'+slug(),data:d}]).then(function(){fbLast=Date.now();fbKeep(null);thanks(!!d.contact)},function(){send.disabled=false;err('Илгээж чадсангүй. Бичсэн зүйл тань энд хадгалагдсан, интернэтээ шалгаад дахин "Илгээх" дарна уу.')});
     }
-    function thanks(){
+    function thanks(contact){
       openSheet(function(q){
         $('sheetEyebrow').textContent='Санал өгөх · Бета';
         q.appendChild(h('h2',{id:'sheetTitle',text:'Баярлалаа! 🙌'}));
-        q.appendChild(h('p',{cls:'lede',text:'Таны санал Жак багшид очлоо. Долоо хоног бүр саналуудыг уншиж, сайтыг сайжруулна.'+(guest?'':' Таны санаа хэрэгжвэл нэвтрэхэд тань мэдэгдэл гарна.')}));
-        q.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Юу шинэчлэгдсэнийг харах',onclick:function(){closeSheet();show('updates')}}),h('button',{type:'button',cls:'btn line',text:'Хаах',onclick:closeSheet})]));
+        q.appendChild(h('p',{cls:'lede',text:'Таны санал Жак багшид очлоо. Долоо хоног бүр саналуудыг уншиж, сайтыг сайжруулна.'}));
+        q.appendChild(h('p',{text:guest?('Сайт хариу имэйл, мессеж автоматаар илгээдэггүй. '+(contact?'Шаардлагатай бол Жак багш таны үлдээсэн утас, имэйлээр өөрөө холбогдоно. ':'')+'Хийсэн өөрчлөлтүүд "Юу шинэчлэгдэв" хуудсанд гарна.'):'Явц, Жак багшийн хариуг "Миний саналууд" хэсгээс харна. Хариу ирэхэд нэвтэрсэн үед тань мэдэгдэл гарна.'}));
+        q.appendChild(h('div',{cls:'editrow'},[guest?null:h('button',{type:'button',cls:'btn gold',text:'Миний саналууд',onclick:openMyFb}),h('button',{type:'button',cls:guest?'btn gold':'btn line',text:'Юу шинэчлэгдсэнийг харах',onclick:function(){closeSheet();show('updates')}}),h('button',{type:'button',cls:'btn line',text:'Хаах',onclick:closeSheet})]));
       });
     }
   });
@@ -3968,18 +4048,38 @@ function openFeedback(){
 function startFbSubs(){
   MYFB=[];renderFbDone();if(!ME||!db||!ME.emailVerified||!MYROLE)return;
   unsubs.push(db.collection('feedback').onSnapshot(function(s){MYFB=s.docs.map(function(d){var x=d.data();x.id=d.id;return x});renderFbDone()},function(){},{where:[['uid','==',ME.uid]]}));
-  if(MYROLE==='admin')unsubs.push(db.collection('feedback').onSnapshot(function(s){FB=s.docs.map(function(d){var x=d.data();x.id=d.id;x.ms=fbMs(x.at);return x});renderFeedback();renderEditBar()},function(){},{orderBy:['at','desc'],limit:500}));
-  else FB=[];
+  if(MYROLE==='admin'){unsubs.push(db.collection('feedback').onSnapshot(function(s){FB=s.docs.map(function(d){var x=d.data();x.id=d.id;x.ms=fbMs(x.at);return x});renderFeedback();renderEditBar()},function(){},{orderBy:['at','desc'],limit:500}));
+    unsubs.push(db.collection('fbnotes').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data().text||''});FBNOTE=m;renderFeedback()},function(){}))}
+  else{FB=[];FBNOTE={}}
 }
+function fbSeen(x){if(x.seen)return;x.seen=true;if(db)db.doc('feedback/'+x.id).update({seen:true}).catch(function(){})}
 function renderFbDone(){
   var W=$('fbDone');if(!W)return;W.innerHTML='';
-  var x=(MYFB||[]).filter(function(f){return f.status==='done'&&!f.seen})[0];W.hidden=!x;if(!x)return;
-  W.appendChild(h('div',{cls:'wrap'},[h('span',{cls:'e','aria-hidden':'true',text:'🎉'}),
-    h('div',{cls:'bd'},[h('b',{text:'Таны санал хэрэгжлээ!'}),h('span',{text:'Таны бичсэн: "'+fbCut(x.text,90)+'"'}),h('span',{text:x.reply?'Жак багш: '+x.reply:'Таны саналын дагуу сайтыг сайжрууллаа. Баярлалаа!'})]),
-    h('button',{type:'button',cls:'btn gold small',text:'Баярлалаа ✓',onclick:function(){x.seen=true;renderFbDone();if(db)db.doc('feedback/'+x.id).update({seen:true}).catch(function(){})}})]));
+  var x=(MYFB||[]).filter(function(f){return fbReplied(f)&&!f.seen})[0];W.hidden=!x;if(!x)return;
+  var done=x.status==='done';
+  W.appendChild(h('div',{cls:'wrap'},[h('span',{cls:'e','aria-hidden':'true',text:done?'🎉':'💬'}),
+    h('div',{cls:'bd'},[h('b',{text:done?'Таны санал хэрэгжлээ!':'Таны саналд Жак багш хариу бичлээ'}),h('span',{text:'Таны бичсэн: "'+fbCut(x.text,90)+'"'}),h('span',{text:x.reply?'Жак багш: '+x.reply:'Таны саналын дагуу сайтыг сайжрууллаа. Баярлалаа!'})]),
+    h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn gold small',text:done?'Баярлалаа ✓':'Ойлголоо ✓',onclick:function(){fbSeen(x);renderFbDone()}}),h('button',{type:'button',cls:'btn line small',text:'Миний саналууд',onclick:openMyFb})])]));
+}
+function openMyFb(){
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Санал өгөх · Бета';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Миний саналууд'}));
+    var L=(MYFB||[]).slice().sort(function(a,b){return fbMs(b.at)-fbMs(a.at)});
+    p.appendChild(h('p',{cls:'muted',text:'Таны илгээсэн санал, түүний явц, Жак багшийн хариу. Зөвхөн та болон Жак багш харна.'}));
+    if(!L.length)p.appendChild(h('p',{cls:'muted',text:'Та одоогоор санал илгээгээгүй байна.'}));
+    L.forEach(function(x){var t=FBTYPE[x.type]||FBTYPE.idea;
+      p.appendChild(h('article',{cls:'fbcard',style:'--fc:'+t[3]},[
+        h('div',{cls:'meta'},[h('span',{cls:'tag',text:t[0]+' '+t[1]}),h('span',{cls:'tag '+(x.status==='done'?'ok':x.status==='new'?'g':''),text:FBST[x.status]||x.status}),h('span',{text:fbDt(fbMs(x.at))})]),
+        h('p',{cls:'txt',text:x.text}),
+        h('p',{cls:'muted',style:'margin:0;font-size:13px',text:FBSTX[x.status]||''}),
+        x.reply?h('p',{cls:'rep',text:'Жак багш: '+x.reply}):null]))});
+    p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Шинэ санал бичих',onclick:openFeedback}),h('button',{type:'button',cls:'btn line',text:'Хаах',onclick:closeSheet})]));
+    L.forEach(function(x){if(fbReplied(x))fbSeen(x)});renderFbDone();
+  });
 }
 function fbChip(){var n=(FB||[]).filter(function(x){return x.status==='new'}).length;
-  return h('button',{type:'button',cls:'chip','aria-pressed':String(n>0),text:'💬 Санал'+(n?' · '+n+' шинэ':''),onclick:function(){show('feedback')}})}
+  return h('button',{type:'button',cls:'chip','aria-pressed':String(n>0),text:'📥 Санал удирдах'+(n?' · '+n+' шинэ':''),onclick:function(){show('feedback')}})}
 function setFb(x,data,st){if(!db)return Promise.reject();return db.doc('feedback/'+x.id).update(data).then(function(){if(st){st.className='status';st.textContent='Хадгалагдлаа.'}},function(){if(st){st.className='status err';st.textContent='Хадгалж чадсангүй.'}throw 0})}
 function addUpdateLine(line){
   line=String(line||'').trim();if(!line)return Promise.resolve();
@@ -3996,7 +4096,7 @@ function fbDoneSheet(x){
     p.appendChild(h('div',{cls:'fbcard',style:'--fc:'+(FBTYPE[x.type]||FBTYPE.idea)[3]},[h('p',{cls:'txt',text:x.text})]));
     var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
     var help=x.uid?'Тэр хүн дараа нэвтрэхдээ "Таны санал хэрэгжлээ" гэсэн мэдэгдэлтэй хамт үүнийг харна.':'Энэ хүн нэвтрэлгүй илгээсэн тул сайт дээр мэдэгдэл очихгүй. '+(x.contact?'Холбоо барих: '+x.contact:'Холбоо барих мэдээлэл үлдээгээгүй.');
-    f.appendChild(fText('fd-reply','Хэрэглэгчид хэлэх үг',x.reply||'Таны саналаар ',{area:1,rows:3,help:help}));
+    f.appendChild(fText('fd-reply','Илгээсэн хүнд харагдах хариу',x.reply||'Таны саналаар ',{area:1,rows:3,help:help}));
     f.appendChild(fText('fd-upd','"Юу шинэчлэгдэв" хэсэгт бичих өгүүлбэр',x.type==='like'?'':(x.reply||''),{area:1,rows:2,help:'Хоосон орхивол нэмэхгүй. Нэг өдрийн өөрчлөлтүүд нэг дор цуглана.'}));
     var r=f.querySelector('#fd-reply'),u=f.querySelector('#fd-upd'),touched=false;
     u.addEventListener('input',function(){touched=true});r.addEventListener('input',function(){if(!touched&&x.type!=='like'){var t=r.value.replace(/^Таны саналаар\s*/,'');u.value=t.charAt(0).toUpperCase()+t.slice(1)}});
@@ -4007,8 +4107,31 @@ function fbDoneSheet(x){
     p.appendChild(f);
   });
 }
-function exportFb(){var rows=[['Огноо','Төрөл','Төлөв','Хэн','Нэр','Анги','Имэйл','Хуудас','Санал','Хариу','Холбоо барих','Төхөөрөмж']];
-  FB.slice().sort(function(a,b){return a.ms-b.ms}).forEach(function(x){rows.push([fbDt(x.ms),(FBTYPE[x.type]||['',''])[1],FBST[x.status]||x.status,FBWHO[x.who]||'',x.name||'',className(x.classId)||'',x.email||'',fbViewName(x.page),x.text,x.reply||'',x.contact||'',x.dev||''])});
+function fbSkipSheet(x){
+  var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Санал хүсэлт';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Хийхгүй гэж тэмдэглэх'}));
+    p.appendChild(h('div',{cls:'fbcard',style:'--fc:'+(FBTYPE[x.type]||FBTYPE.idea)[3]},[h('p',{cls:'txt',text:x.text})]));
+    var help=x.uid?'Илгээсэн хүн "Миний саналууд" хэсэгт болон нэвтрэхдээ үүнийг харна. Дотоод тэмдэглэлийг харахгүй.':'Энэ хүн нэвтрэлгүй илгээсэн тул сайт дээр хариу очихгүй. '+(x.contact?'Хариу өгөх бол өөрөө холбогдоно уу: '+x.contact:'Холбоо барих мэдээлэл үлдээгээгүй.');
+    p.appendChild(fText('fs-why','Товч шалтгаан (илгээсэн хүнд харагдана)',x.status==='skip'?(x.reply||''):'',{area:1,rows:3,ph:'Жишээ: Энэ нь сургуулийн дүрэмтэй холбоотой тул сайтаар шийдэх боломжгүй.',help:help}));
+    p.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var why=val('fs-why').trim();
+        if(why.length<3){st.className='status err';st.textContent='Шалтгаанаа товч бичнэ үү.';$('fs-why').focus();return}
+        setFb(x,{status:'skip',reply:why.slice(0,500),doneAt:Date.now(),seen:false},st).then(function(){closeSheet()},function(){})}}),
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+  });
+}
+function fbNoteBox(x){
+  var cur=FBNOTE[x.id]||'',id='fn-'+x.id,st=h('span',{cls:'status',role:'status'});
+  var ta=h('textarea',{id:id,rows:'2',maxlength:'2000',placeholder:'Жишээ: 11/3-нд утсаар ярьсан. Дараагийн шинэчлэлд оруулна.'});ta.value=cur;
+  return h('details',{cls:'crdet fbnote'},[h('summary',{text:'🔒 Дотоод тэмдэглэл'+(cur?': '+fbCut(cur,50):'')}),
+    h('label',{cls:'ff',for:id},['Зөвхөн танд харагдана. Илгээсэн хүн хэзээ ч харахгүй.',ta]),
+    h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'Хадгалах',onclick:function(){var v=ta.value.trim().slice(0,2000);
+      (v?db.doc('fbnotes/'+x.id).set({text:v,at:Date.now()}):db.doc('fbnotes/'+x.id).delete()).then(function(){st.className='status';st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st])]);
+}
+function exportFb(){var rows=[['Огноо','Төрөл','Төлөв','Хэн','Нэр','Анги','Имэйл','Хуудас','Санал','Хариу','Холбоо барих','Төхөөрөмж','Дотоод тэмдэглэл']];
+  FB.slice().sort(function(a,b){return a.ms-b.ms}).forEach(function(x){rows.push([fbDt(x.ms),(FBTYPE[x.type]||['',''])[1],FBST[x.status]||x.status,FBWHO[x.who]||'',x.name||'',className(x.classId)||'',x.email||'',fbViewName(x.page),x.text,x.reply||'',x.contact||'',x.dev||'',FBNOTE[x.id]||''])});
   downloadCSV('sanal-huselt.csv',rows)}
 function renderFeedback(){
   var W=$('fbOut');if(!W||!FB)return;W.innerHTML='';
@@ -4026,15 +4149,15 @@ function renderFeedback(){
     var acts=h('div',{cls:'editrow'});
     [['new','Шинэ'],['doing','Хийж байна']].forEach(function(s){acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status===s[0]),text:s[1],onclick:function(){setFb(x,{status:s[0]},st).catch(function(){})}}))});
     acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status==='done'),text:'✓ Хийсэн',onclick:function(){fbDoneSheet(x)}}));
-    acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status==='skip'),text:'Хийхгүй',onclick:function(){setFb(x,{status:'skip'},st).catch(function(){})}}));
-    acts.appendChild(h('button',{type:'button',cls:'btn line small danger',text:'🗑',title:'Устгах','aria-label':'Устгах',onclick:function(){if(confirm('Энэ саналыг устгах уу?'))db.doc('feedback/'+x.id).delete().catch(function(){st.className='status err';st.textContent='Устгаж чадсангүй.'})}}));
+    acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status==='skip'),text:'Хийхгүй…',onclick:function(){fbSkipSheet(x)}}));
+    acts.appendChild(h('button',{type:'button',cls:'btn line small danger',text:'🗑',title:'Устгах','aria-label':'Устгах',onclick:function(){if(confirm('Энэ саналыг устгах уу?'))db.batch([{op:'delete',path:'feedback/'+x.id},{op:'delete',path:'fbnotes/'+x.id}]).catch(function(){st.className='status err';st.textContent='Устгаж чадсангүй.'})}}));
     acts.appendChild(st);
     W.appendChild(h('article',{cls:'fbcard',style:'--fc:'+t[3]},[
       h('div',{cls:'meta'},[h('span',{cls:'tag',text:t[0]+' '+t[1]}),h('span',{cls:'tag '+(x.status==='done'?'ok':x.status==='new'?'g':''),text:FBST[x.status]||x.status}),h('span',{text:fbDt(x.ms)}),who?h('span',{text:'· '+who}):null,h('span',{text:'· '+fbViewName(x.page)})]),
       h('p',{cls:'txt',text:x.text}),
       x.contact?h('p',{cls:'muted',style:'font-size:13px',text:'Холбоо барих: '+x.contact}):null,
-      x.reply?h('p',{cls:'rep',text:'Таны хариу: '+x.reply+(x.uid?(x.seen?' · уншсан ✓':' · хараахан уншаагүй'):'')}):null,
-      h('p',{cls:'muted',style:'font-size:12px',text:x.dev||''}),acts]))});
+      x.reply?h('p',{cls:'rep',text:(x.status==='skip'?'Хийхгүй шалтгаан: ':'Таны хариу: ')+x.reply+(x.uid?(x.seen?' · уншсан ✓':' · хараахан уншаагүй'):' · нэвтрэлгүй илгээсэн тул сайт дээр очихгүй')}):null,
+      h('p',{cls:'muted',style:'font-size:12px',text:x.dev||''}),fbNoteBox(x),acts]))});
 }
 function initBeta(){
   var n=$('betaNote'),seen=false;try{seen=localStorage.getItem('tpe-beta-ok')==='1'}catch(e){}
@@ -4084,7 +4207,7 @@ document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;var g
 bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
 var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderPrimeTeaser();renderPriming();renderUpdates();applyTexts();initCalc();initPlan();initBeta();
-setInterval(function(){if(!$('v-clubs').hidden&&$('sheet').hidden)renderClubReg();if(!$('v-myclubs').hidden&&$('sheet').hidden)renderMyClubs()},30000);
+setInterval(function(){if(!$('v-home').hidden&&typeof crHomeReg==='function')crHomeReg();if(!$('v-clubs').hidden&&$('sheet').hidden)renderClubReg();if(!$('v-myclubs').hidden&&$('sheet').hidden)renderMyClubs()},30000);
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
 if('serviceWorker' in navigator&&location.protocol==='https:')try{navigator.serviceWorker.register('/sw.js').catch(function(){})}catch(e){}
