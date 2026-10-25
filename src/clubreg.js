@@ -89,21 +89,65 @@ function crCanPick(oid){
   return [true,''];
 }
 function crPick(oid,st){
-  if(crBusy||!ME||!db)return;var full=crLeft(oid)<=0;var uid=ME.uid,p=crPicks();
-  if(!confirm(crName(oid)+(full?'\n\nСуудал дүүрсэн тул хүлээлгийн жагсаалтад орох уу?':'\n\nЭнэ дугуйланд суудал авах уу?')))return;
-  var ops=full?[{op:'set',path:'offers/'+oid+'/wait/'+uid,data:{at:{__sv:'time'}}}]
-    :[{op:'set',path:'offers/'+oid+'/seats/'+uid,data:{at:{__sv:'time'},status:'seat'}},{op:'merge',path:'offers/'+oid,data:{n:{__inc:1}}}];
-  ops.push({op:'set',path:'regs/'+uid,data:REG?{picks:p.concat([oid])}:{picks:[oid]}});
-  crBusy=true;if(st){st.className='status';st.textContent='Хадгалж байна…'}
-  db.batch(ops).then(function(){crBusy=false;if(st)st.textContent=full?'Хүлээлгийн жагсаалтад орлоо.':'Суудал авлаа! "Миний дугуйлан" хэсгээс дэлгэрэнгүйг харна уу.'},
-    function(e){crBusy=false;if(st){st.className='status err';st.textContent=crErr(e,!full)}});
+  if(crBusy||!ME||!db)return;var wantWait=crLeft(oid)<=0;
+  if(!confirm(crName(oid)+(wantWait?'\n\nСуудал дүүрсэн тул хүлээлгийн жагсаалтад орох уу?':'\n\nЭнэ дугуйланд суудал авах уу?')))return;
+  crRun(oid,wantWait,st);
+}
+/* Messages are kept per offer, so they survive the frequent re-renders while seat counts change. */
+var CRMSG={};
+function crMsgEl(oid,st){var m=CRMSG[oid];st.className='status'+(m&&m.err?' err':'');st.textContent=m?m.t:'';
+  if(m&&m.wait)st.appendChild(h('button',{type:'button',cls:'btn line small',text:'Хүлээлгэнд орох',onclick:function(ev){ev.stopPropagation();crRun(oid,true)}}))}
+function crSay(oid,err,t,wait){CRMSG[oid]={err:!!err,t:t,wait:!!wait};[].forEach.call(document.querySelectorAll('[data-crmsg="'+oid+'"]'),function(st){crMsgEl(oid,st)})}
+/* Seat or waitlist in one server transaction: the server's count decides, never an old number on the screen.
+   Nothing is queued offline, so a seat is shown only after the server has given it. */
+function crRun(oid,wantWait,st){
+  if(crBusy||!ME||!db)return;var uid=ME.uid,P={o:'offers/'+oid,s:'offers/'+oid+'/seats/'+uid,w:'offers/'+oid+'/wait/'+uid,r:'regs/'+uid},got='';
+  crBusy=true;crSay(oid,false,'Илгээж байна… Хуудсаа бүү хаагаарай.');
+  var slow=setTimeout(function(){crSay(oid,false,'Сервер удаан хариулж байна. Хүлээнэ үү, дахин бүү дараарай.')},8000);
+  db.tx([P.o,P.s,P.w,P.r],function(x){
+    if(x[P.s].exists){got='had-seat';return []}
+    if(x[P.w].exists){got='had-wait';return []}
+    if(!x[P.o].exists)throw {code:'tpe/no-offer'};
+    var o=x[P.o].data()||{},n=+o.n||0,cap=+o.cap||0;
+    var picks=x[P.r].exists?((x[P.r].data()||{}).picks||[]):[];
+    var ops=[];
+    if(n<cap){got='seat';ops.push({op:'set',path:P.s,data:{at:{__sv:'time'},status:'seat'}},{op:'merge',path:P.o,data:{n:n+1}})}
+    else if(wantWait){got='wait';ops.push({op:'set',path:P.w,data:{at:{__sv:'time'}}})}
+    else throw {code:'tpe/full'};
+    if(picks.indexOf(oid)<0)ops.push({op:'set',path:P.r,data:{picks:picks.concat([oid])}});
+    return ops;
+  }).then(function(){clearTimeout(slow);crBusy=false;
+    var fin=' Энэ нь эцсийн баталгаажуулалт биш: багш '+crSet().confirm+'-нд ярилцаж, төлбөр/барьцаагаар баталгаажуулна.';
+    crSay(oid,false,got==='seat'&&wantWait?'✓ Суудал чөлөөлөгдсөн байсан тул суудал авлаа.'+fin:got==='seat'||got==='had-seat'?'✓ Суудал авлаа.'+fin:'✓ Хүлээлгийн жагсаалтад орлоо. Дугаараа "Миний дугуйлан" хэсгээс харна уу.')},
+  function(e){clearTimeout(slow);crBusy=false;var c=e&&e.code||'';
+    if(c==='tpe/full'){crSay(oid,true,'Сүүлийн суудал дөнгөж өөр хүүхдэд оногдлоо.',true);return}
+    if(c==='tpe/no-offer'){crSay(oid,true,'Энэ ээлжийн суудлын тоолуур үүсээгүй байна. Багшид мэдэгдэнэ үү.');return}
+    if(/permission/.test(c)){crSay(oid,true,'Одоогоор сонгох боломжгүй байна: бүртгэлийн цаг эсвэл '+crClock(crSet().p1)+'-ийн хязгаар. Хуудсаа шинэчлээд дахин шалгана уу.');return}
+    crVerify(oid,st);
+  });
+}
+/* After a network problem, ask the server itself whether the seat or waitlist ticket exists. */
+function crVerify(oid,st){var uid=ME&&ME.uid;if(!uid||!db)return;
+  crSay(oid,false,'Сүлжээ тасарсан байж магадгүй. Сервероос шалгаж байна…');
+  Promise.all([db.doc('offers/'+oid+'/seats/'+uid).getServer(),db.doc('offers/'+oid+'/wait/'+uid).getServer()]).then(function(r){
+    if(r[0].exists)crSay(oid,false,'✓ Шалгалаа: таны суудал серверт бүртгэгдсэн байна.');
+    else if(r[1].exists)crSay(oid,false,'✓ Шалгалаа: та хүлээлгийн жагсаалтад байна.');
+    else crSay(oid,true,'Шалгалаа: суудал аваагүй байна. Интернэтээ шалгаад дахин дарна уу.');
+  },function(){crSay(oid,true,'Сүлжээ тасарсан тул төлөв тодорхойгүй байна. Интернэт сэргэмэгц хуудсаа шинэчилж "✓ Таны суудал" тэмдэг байгаа эсэхийг шалгана уу.')});
 }
 function crLeave(oid,st){
   if(crBusy||!ME||!db)return;var uid=ME.uid,seat=!!MYSEAT[oid];
-  if(!confirm(crName(oid)+'\n\n'+(seat?'Суудлаасаа татгалзах уу? Суудал дараагийн хүүхдэд шилжинэ.':'Хүлээлгийн жагсаалтаас гарах уу?')))return;
-  var ops=seat?[{op:'delete',path:'offers/'+oid+'/seats/'+uid},{op:'merge',path:'offers/'+oid,data:{n:{__inc:-1}}}]:[{op:'delete',path:'offers/'+oid+'/wait/'+uid}];
-  ops.push({op:'set',path:'regs/'+uid,data:{picks:crPicks().filter(function(x){return x!==oid}),rm:oid}});
-  crBusy=true;db.batch(ops).then(function(){crBusy=false},function(e){crBusy=false;if(st){st.className='status err';st.textContent=crErr(e)}});
+  if(!confirm(crName(oid)+'\n\n'+(seat?'Суудлаасаа татгалзах уу? Таны суудал чөлөөлөгдөж, бусад хүүхэд сонгох боломжтой болно. Дараа нь суудал үлдсэн тохиолдолд л дахин авч чадна.':'Хүлээлгийн жагсаалтаас гарах уу? Дараалал тань алга болно.')))return;
+  var P={o:'offers/'+oid,s:'offers/'+oid+'/seats/'+uid,w:'offers/'+oid+'/wait/'+uid,r:'regs/'+uid};
+  crBusy=true;crSay(oid,false,'Илгээж байна…');
+  db.tx([P.o,P.s,P.w,P.r],function(x){
+    var picks=x[P.r].exists?((x[P.r].data()||{}).picks||[]):[],ops=[];
+    if(x[P.s].exists){var n=+((x[P.o].data()||{}).n)||0;ops.push({op:'delete',path:P.s},{op:'merge',path:P.o,data:{n:Math.max(0,n-1)}})}
+    else if(x[P.w].exists)ops.push({op:'delete',path:P.w});
+    if(picks.indexOf(oid)>=0)ops.push({op:'set',path:P.r,data:{picks:picks.filter(function(y){return y!==oid}),rm:oid}});
+    return ops;
+  }).then(function(){crBusy=false;crSay(oid,false,'Цуцлагдлаа.')},function(e){crBusy=false;var c=e&&e.code||'';
+    crSay(oid,true,/permission/.test(c)?'Цуцлах боломжгүй: бүртгэлийн цаг дууссан эсвэл багш таны статусыг өөрчилсөн байна. Багштай холбогдоно уу.':'Сүлжээний алдаа. Хуудсаа шинэчлээд төлвөө шалгана уу.')});
 }
 
 /* -- public clubs page: registration block -- */
@@ -120,7 +164,7 @@ function crBanner(){
   return bx;
 }
 function crOfferRow(c,o){
-  var st=h('span',{cls:'status',role:'status'});var mine=crPicks().indexOf(o.id)>=0;var left=crLeft(o.id),cap=crCap(o.id);
+  var st=h('span',{cls:'status',role:'status','data-crmsg':o.id});crMsgEl(o.id,st);var mine=crPicks().indexOf(o.id)>=0;var left=crLeft(o.id),cap=crCap(o.id);
   var lab=(o.sh?o.sh+' ээлж · ':'')+crDaysTxt(o.days)+' · '+crTm(c);
   var seatTxt=OFFERS[o.id]?(left>0?left+'/'+cap+' суудал үлдсэн':'Дүүрсэн · хүлээлгийн жагсаалт'):cap+' суудал';
   var act;var can=crCanPick(o.id);
@@ -224,7 +268,7 @@ function crMyCard(oid,c,o){
   if(seat)card.appendChild(crPayBox(c,seat));
   if(seat&&seat.status!=='cancel')card.appendChild(crAbsBox(oid,o));
   card.appendChild(h('details',{cls:'crdet'},[h('summary',{text:'Хуанли: бүх хичээлийн өдөр ('+all.length+')'}),crCalendar(o.days,seat)]));
-  var ph=crPhase();if((ph==='p1'||ph==='p2')&&(!seat||seat.status==='seat')){var st=h('span',{cls:'status',role:'status'});card.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:seat?'Суудлаасаа татгалзах':'Хүлээлгээс гарах',onclick:function(){crLeave(oid,st)}}),st]))}
+  var ph=crPhase();if((ph==='p1'||ph==='p2')&&(!seat||seat.status==='seat')){var st=h('span',{cls:'status',role:'status','data-crmsg':oid});crMsgEl(oid,st);card.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:seat?'Суудлаасаа татгалзах':'Хүлээлгээс гарах',onclick:function(){crLeave(oid,st)}}),st]))}
   return card;
 }
 function crAttStats(o,seat){var att=(seat&&seat.att)||{},td=ubToday();var past=crDates(o.days).filter(function(d){return d<=td});var r={p:0,a:0,e:0,held:0};past.forEach(function(d){var v=att[d];if(v){r.held++;r[v]=(r[v]||0)+1}});r.pct=r.held?Math.round(r.p/r.held*100):null;return r}
@@ -266,6 +310,7 @@ function crAdminBox(){
       h('button',{type:'button',cls:'btn line small',text:'✓ Ирц бүртгэх',onclick:function(){crAdminAtt(crAllOffers()[0],'')}}),
       h('button',{type:'button',cls:'btn line small',text:'📝 Хичээлийн тэмдэглэл',onclick:function(){crAdminLog(crAllOffers()[0])}}),
       h('button',{type:'button',cls:'btn line small',text:'⬇ CSV татах',onclick:crCSV})]),
+    crFreeWait().length?h('p',{cls:'status err',style:'margin:0',text:'Анхаар: '+crFreeWait().map(function(x){return crName(x)+' · '+crLeft(x)+' суудал чөлөөтэй, хүлээлгэд '+WAITQ[x].length}).join('; ')+'. Хүлээлгийн дарааллаар "👥 Жагсаалт" хэсгээс суудал өгнө үү (автоматаар шилжихгүй).'}):null,
     h('p',{cls:'muted',style:'margin:0;font-size:13px',text:Object.keys(OFFERS).length?'Суудлын тоолуур идэвхтэй ('+Object.keys(OFFERS).length+' ээлж).':'Анхаар: суудлын тоолуур үүсгээгүй байна. "⚙ Бүртгэлийн цаг, суудлын тоо" дээр дарж хадгална уу. Үүнгүйгээр хүүхдүүд суудал авч чадахгүй.'})]);
 }
 function crDT(ms){var d=ubD(ms);return d.toISOString().slice(0,16)}
@@ -315,6 +360,8 @@ function crUclass(uid){var u=USERS[uid];return u?className(u.classId)||'':''}
 function crOfferTabs(cur,fn){return h('div',{cls:'chips'},crAllOffers().map(function(oid){return h('button',{type:'button',cls:'chip','aria-pressed':String(oid===cur),text:crName(oid)+' ('+crN(oid)+'/'+crCap(oid)+')',onclick:function(){fn(oid)}})}))}
 var crAdminOpen=null;
 function renderCrAdmin(){if(crAdminOpen&&!$('sheet').hidden)crAdminOpen()}
+/* Offers that have free seats while children wait. Seats are not moved automatically; the owner decides. */
+function crFreeWait(){return crAllOffers().filter(function(o){return OFFERS[o]&&crLeft(o)>0&&(WAITQ[o]||[]).length>0})}
 function crAdminList(oid){
   crAdminOpen=function(){crAdminList(oid)};
   var f=crFind(oid);var seats=CRSEATS[oid]||{};var ids=Object.keys(seats).sort(function(a,b){return tsMs(seats[a].at)-tsMs(seats[b].at)});
@@ -337,6 +384,7 @@ function crAdminList(oid){
     tb.appendChild(body);p.appendChild(h('div',{style:'overflow-x:auto'},[tb]));
     if(!ids.length)p.appendChild(h('p',{cls:'muted',text:'Одоогоор суудал авсан хүүхэд алга.'}));
     var q=WAITQ[oid]||[];
+    if(q.length&&crLeft(oid)>0)p.appendChild(h('p',{cls:'status err',text:crLeft(oid)+' суудал чөлөөтэй байна. Хүлээлгийн эхний хүүхдээс эхлэн "Суудал өгөх" дарна уу.'}));
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хүлээлгийн жагсаалт ('+q.length+')'}),q.length?h('ol',{cls:'tl'},q.map(function(uid){return h('li',{},[h('b',{text:crUname(uid)+(crUclass(uid)?' · '+crUclass(uid):'')}),
       h('button',{type:'button',cls:'btn gold small',text:'Суудал өгөх',onclick:function(){if(!confirm((crLeft(oid)<=0?'Анхаар: суудал дүүрсэн байна ('+crN(oid)+'/'+crCap(oid)+'). Нэмэлт суудал болгож өгөх үү?\n\n':'')+crUname(uid)+'-д суудал өгөх үү? Статус нь "Төлбөр хүлээгдэж буй" болно.'))return;
         db.batch([{op:'set',path:'offers/'+oid+'/seats/'+uid,data:{at:{__sv:'time'},status:'pay'}},{op:'merge',path:'offers/'+oid,data:{n:{__inc:1}}},{op:'delete',path:'offers/'+oid+'/wait/'+uid}]).catch(function(){alert('Хадгалж чадсангүй.')})}})])})):h('p',{cls:'muted',style:'margin:0',text:'Хүлээлгийн жагсаалт хоосон.'})]));

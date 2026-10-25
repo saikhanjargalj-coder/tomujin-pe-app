@@ -445,7 +445,7 @@ footer{padding-bottom:96px}
         <a href="#matches" data-go="matches" data-pub><b>Тоглолтууд</b><small>Хуваарь, шууд оноо, үр дүн</small></a>
         <a href="#table" data-go="table" data-pub><b>Онооны хүснэгт</b><small>UBAC ба дотоод тэмцээний байр</small></a>
       </div></div>
-      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Podcast &amp; Broadcast</button><div class="dd">
+      <div class="mg" data-pub><button type="button" class="mt" aria-expanded="false">Podcast &amp; Broadcast</button><div class="dd">
         <a href="#podcast" data-go="podcast" data-pub><b>Tomujin PE Podcast</b><small>Сонсох, үзэх ангиуд, асуулт хариулт</small></a>
         <a href="#youtube" data-go="youtube" data-pub><b>YouTube суваг</b><small>Сувгийн бүх бичлэг энд тоглоно</small></a>
         <a href="#live" data-go="live" data-pub><b>Шууд дамжуулалт</b><small>Тэмцээн, наадам, хуваарь, бичлэг</small></a>
@@ -870,7 +870,7 @@ footer{padding-bottom:96px}
       <span class="eyebrow" data-cms="gd_p_eb">Эцэг эхчүүдэд</span>
       <h2 data-cms="gd_p_h">Танд юу харагдах вэ</h2>
       <ol class="gsteps">
-        <li><div><b data-cms="gd_p1">Нэвтрэлгүйгээр үзэх</b><span class="muted" data-cms="gd_p1t">Хичээл хэрхэн явагддаг, дугуйлан, шигшээ баг, өглөөний 20 минут, Podcast &amp; Broadcast хэсгүүдийг хэн ч үзэж болно.</span></div></li>
+        <li><div><b data-cms="gd_p1">Нэвтрэлгүйгээр үзэх</b><span class="muted" data-cms="gd_p1t">Нүүр, хичээл хэрхэн явагддаг, өглөөний 20 минут, дугуйлан, шигшээ баг, тоглолтын хуваарь ба онооны хүснэгт, Podcast &amp; Broadcast хэсгүүдийг хэн ч үзэж болно. Дасгалын сан, мэдлэгийн сан, тооцоолуур зэрэг бусад хэсэг сурагч сургуулийн имэйлээр нэвтэрсний дараа нээгдэнэ.</span></div></li>
         <li><div><b data-cms="gd_p2">Хүүхэдтэйгээ хамт</b><span class="muted" data-cms="gd_p2t">Хүүхэд тань нэвтэрч, өөрийн даалгавар, тэмдэглэл, үнэлгээгээ танд үзүүлж болно.</span></div></li>
         <li><div><b data-cms="gd_p3">Хүүхдийн мэдээлэл</b><span class="muted" data-cms="gd_p3t">Сурагч бүр зөвхөн өөрийнхөө мэдээллийг хардаг. Бусад сурагч таны хүүхдийн мэдээллийг харахгүй.</span></div></li>
         <li><div><b data-cms="gd_p4">Санал өгөх</b><span class="muted" data-cms="gd_p4t">"💬 Санал өгөх" товчоор нэвтрэлгүйгээр санал илгээнэ. Хариу авах бол утас эсвэл имэйлээ үлдээгээрэй.</span></div></li>
@@ -1844,6 +1844,10 @@ function renderAccount(){
   var label=(MYPROFILE&&MYPROFILE.name)||ME.name||ME.email.split('@')[0];
   b.appendChild(h('button',{type:'button',cls:'chip',text:(MYROLE==='admin'?'Админ · ':MYROLE==='teacher'?'Багш · ':'')+label,onclick:openAccount}));
 }
+/* One rule for every access text: read it from the menu itself (data-pub = open to everyone), so the
+   login note can never disagree with what the site really shows before and after signing in. */
+function navNames(sel){var out=[];[].forEach.call(document.querySelectorAll(sel),function(a){if(a.hidden)return;var b=a.querySelector('b');var t=((b||a).textContent||'').trim();if(t&&out.indexOf(t)<0)out.push(t)});return out}
+function accessNote(){return 'Нэвтрэлгүйгээр үзнэ: '+navNames('nav.tabs a[data-pub]').join(', ')+'. Сургуулийн имэйлээр нэвтэрч, имэйлээ баталгаажуулсны дараа нэмж нээгдэнэ: '+navNames('nav.tabs .mg:not([data-pub]) .dd a').join(', ')+'.'}
 function openLogin(mode){
   mode=mode==='up'?'up':'in';
   openSheet(function(p){
@@ -1867,7 +1871,7 @@ function openLogin(mode){
     p.appendChild(h('div',{cls:'editrow'},[
       h('button',{type:'button',cls:'btn line small',text:mode==='up'?'Бүртгэлтэй юу? Нэвтрэх':'Анх удаа бүртгүүлэх',onclick:function(){openLogin(mode==='up'?'in':'up')}}),
       mode==='in'?h('button',{type:'button',cls:'btn line small',text:'Нууц үгээ мартсан',onclick:function(){var em=val('li-email');if(!em){st.className='status err';st.textContent='Эхлээд имэйлээ бичнэ үү.';return}TPE.reset(em).then(function(){st.className='status';st.textContent='Нууц үг сэргээх холбоос имэйл рүү илгээгдлээ.'},function(e){st.className='status err';st.textContent=authErr(e)})}}):null]));
-    p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Нэвтрэлгүйгээр: нүүр, Tomujin PE хэрхэн явагддаг, дугуйлан ба шигшээ баг, өглөөний 20 минутын танилцуулга. Сургуулийн имэйлээр нэвтэрсний дараа: дасгалын сан, мэдлэгийн сан, хоол тооцоолуур, сайн сайхан байдал, хичээл, бэлтгэлийн төлөвлөгөө, бэлтгэлийн тэмдэглэл.'}));
+    p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:accessNote()}));
   });
 }
 function openVerify(){

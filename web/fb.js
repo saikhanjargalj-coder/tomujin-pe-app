@@ -6,8 +6,8 @@ import {
   sendEmailVerification, sendPasswordResetEmail, signOut, updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
-  query, where, orderBy, limit, writeBatch, serverTimestamp, increment
+  getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
+  query, where, orderBy, limit, writeBatch, runTransaction, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const C = window.TPE_CONFIG || {};
@@ -37,6 +37,15 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
     if (o && o.limit) parts.push(limit(o.limit));
     return parts.length ? query(base, ...parts) : base;
   }
+  // In data, {__sv:"time"} becomes the server time and {__inc:n} adds n on the server.
+  const fix = (v) => {
+    if (v && typeof v === "object" && !Array.isArray(v)) {
+      if (v.__sv === "time") return serverTimestamp();
+      if (typeof v.__inc === "number") return increment(v.__inc);
+      const o = {}; Object.keys(v).forEach((k) => { o[k] = fix(v[k]); }); return o;
+    }
+    return v;
+  };
   const db = {
     doc(path) {
       const r = doc(fs, path);
@@ -44,6 +53,8 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
         set: (data) => setDoc(r, data),
         update: (data) => setDoc(r, data, { merge: true }),
         get: () => getDoc(r).then((s) => ({ id: s.id, exists: s.exists(), data: () => s.data() })),
+        // Asks the server directly (never the local cache): used to confirm what really happened after a network error.
+        getServer: () => getDocFromServer(r).then((s) => ({ id: s.id, exists: s.exists(), data: () => s.data() })),
         delete: () => deleteDoc(r),
         onSnapshot: (next, err) => onSnapshot(r, (s) => next({ id: s.id, exists: s.exists(), data: () => s.data() }), err || (() => {}))
       };
@@ -58,14 +69,6 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
     // Several writes that succeed or fail together. ops: [{op:"set"|"merge"|"delete", path, data}]
     // In data, {__sv:"time"} becomes the server time and {__inc:n} adds n on the server.
     batch(ops) {
-      const fix = (v) => {
-        if (v && typeof v === "object" && !Array.isArray(v)) {
-          if (v.__sv === "time") return serverTimestamp();
-          if (typeof v.__inc === "number") return increment(v.__inc);
-          const o = {}; Object.keys(v).forEach((k) => { o[k] = fix(v[k]); }); return o;
-        }
-        return v;
-      };
       const b = writeBatch(fs);
       ops.forEach((o) => {
         const r = doc(fs, o.path);
@@ -74,6 +77,24 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
         else b.set(r, fix(o.data));
       });
       return b.commit();
+    },
+    // All-or-nothing read-then-write on the server. decide(snaps) gets {path: {exists, data()}} for every path in
+    // reads and returns the writes ([{op, path, data}]) or throws to cancel. If another person changes the same
+    // documents first, Firebase runs decide again with fresh data. Unlike batch(), it never queues offline:
+    // with no connection it fails at once, so the screen never shows a seat that the server has not given.
+    tx(reads, decide) {
+      return runTransaction(fs, async (t) => {
+        const snaps = {};
+        for (const p of reads) { const s = await t.get(doc(fs, p)); snaps[p] = { exists: s.exists(), data: () => s.data() }; }
+        const ops = decide(snaps) || [];
+        ops.forEach((o) => {
+          const r = doc(fs, o.path);
+          if (o.op === "delete") t.delete(r);
+          else if (o.op === "merge") t.set(r, fix(o.data), { merge: true });
+          else t.set(r, fix(o.data));
+        });
+        return ops;
+      });
     },
     group(name, o, next, err) {
       return onSnapshot(build(collectionGroup(fs, name), o), (qs) => next(snapWrap(qs)), err || (() => {}));

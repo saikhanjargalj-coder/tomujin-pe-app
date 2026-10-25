@@ -1,0 +1,10 @@
+{
+  "name": "tomujin-pe-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Server rule tests for firestore.rules. Run from the repo root: npm --prefix tests/rules install && npx -y firebase-tools@13 emulators:exec --only firestore --project demo-tomujin-pe \"node tests/rules/rules.test.mjs\"",
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.12.2"
+  }
+}
