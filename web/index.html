@@ -80,6 +80,47 @@ a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14p
 .topath .story{color:var(--fg)}
 .story.soon{cursor:default;opacity:.92}.story.soon .ph .ini{color:var(--gold)}
 .sub{display:flex;flex-direction:column;gap:12px}
+.pod .pic{aspect-ratio:16/9}.pod.soon{opacity:.95}
+.podart{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:linear-gradient(135deg,var(--brand-ink),var(--cc,var(--brand)));color:#fff;text-align:center}
+.podart .podic{color:var(--gold);display:block;line-height:0}.podart b{font-size:26px;font-weight:900;letter-spacing:.02em}.podart small{font-size:10px;font-weight:800;letter-spacing:.14em;opacity:.8}
+.podframe{width:100%;border:0;border-radius:12px;display:block;background:#000}
+.plat{gap:6px}
+.livebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);text-decoration:none}
+.livebar.on{border-color:#dc2626}.livebar:hover{border-color:var(--brand)}
+.livedot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;letter-spacing:.08em;color:#fff;background:#dc2626;border-radius:999px;padding:3px 10px}
+.livedot::before{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.livebar:not(.on) .livedot{background:var(--teal)}.livedot.off{background:var(--muted)}
+.livebar.on .livedot::before,.livecard.on .livedot::before{animation:lvp 1.4s infinite}
+@keyframes lvp{50%{opacity:.25}}
+.livecard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px}.livecard.on{border:2px solid #dc2626}
+#homeTicker{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.tickhead{display:flex;justify-content:space-between;align-items:baseline;text-decoration:none;color:var(--fg)}.tickhead small{color:var(--brand);font-weight:800}
+.ticks{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.tick{flex:0 0 auto;min-width:170px;scroll-snap-align:start;display:flex;flex-direction:column;gap:3px;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--cc,var(--brand));border-radius:12px;text-decoration:none;color:var(--fg);font-size:14px}
+.tick small{font-size:11px;font-weight:800;color:var(--muted)}.tick.on{border-color:#dc2626}.tick.on small{color:#dc2626}
+.tick span{display:flex;justify-content:space-between;gap:10px}.tick em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}.tick b{font-variant-numeric:tabular-nums}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.mday{margin:14px 0 2px;font-size:15px;color:var(--teal)}
+.mrow{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--cc,var(--brand));border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;cursor:pointer;min-width:0}
+.mrow:hover{border-color:var(--brand)}.mrow.on{border-color:#dc2626;border-top-color:#dc2626}
+[role=button].mrow:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mtop{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.mtop small{font-size:12px}
+.mstat{font-size:12px;font-weight:800;color:var(--teal)}.mstat.ft{color:var(--muted)}.mstat.post{color:var(--orange)}
+.mline{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center}
+.mteam{font-weight:800;font-size:15px;overflow-wrap:anywhere}.mteam.r{text-align:right}.mteam.us{color:var(--brand)}
+.mscore{display:inline-flex;gap:6px;align-items:center;background:var(--tint);border-radius:10px;padding:4px 10px;font-size:20px;font-variant-numeric:tabular-nums}.mscore i{font-style:normal;color:var(--muted)}
+.mscore.live{background:#dc2626;color:#fff}.mscore.live i{color:#fff}.mscore.vs{font-size:14px;font-weight:800;color:var(--muted)}
+.board{background:linear-gradient(135deg,var(--brand-ink),var(--cc,var(--brand)));color:#fff;border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.board small{color:rgba(255,255,255,.85);font-weight:700}.board .mstat{color:var(--gold)}
+.bline{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;text-align:center}
+.bteam{font-weight:900;font-size:18px;overflow-wrap:anywhere}.bscore{font-size:40px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}.bscore.vs{font-size:22px;opacity:.8}
+.bsets{margin:0;text-align:center;font-weight:700;color:rgba(255,255,255,.9)}
+.scorebtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}.scorebtns>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.scorebtns small{width:100%;font-weight:800}
+table.stand td,table.stand th{white-space:nowrap}table.stand tr.us td{background:var(--gold-soft)}
+.form{display:inline-flex;gap:3px}.form i{font-style:normal;font-size:10px;font-weight:900;color:#fff;border-radius:999px;min-width:22px;height:20px;display:inline-grid;place-items:center;padding:0 4px}
+.form .fW{background:#15803d}.form .fL{background:#dc2626}.form .fD{background:#64748b}
+.ytgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.ytgrid .box h3{margin:0}
 .club .badge{font-weight:900;font-size:34px;color:var(--cc,var(--brand));letter-spacing:-.02em}
 .club h3{font-size:16px}
 .club p{margin:0;font-size:13.5px}
@@ -351,6 +392,42 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
 .crdet{border:1px solid var(--line);border-radius:12px;padding:10px 14px}.crdet>summary{cursor:pointer;font-weight:800}.crdet[open]>summary{margin-bottom:10px}
 .crcal{display:flex;flex-direction:column;gap:10px}
 .crtable{border-collapse:collapse;width:100%;font-size:13.5px}.crtable th,.crtable td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+/* beta: badge, notice, feedback button, inbox, guide, updates */
+.logo .beta{font-style:normal;font-size:10px;font-weight:900;letter-spacing:.12em;background:var(--gold);color:#1c1c1c;padding:4px 8px;border-radius:9999px;line-height:1;align-self:flex-start}
+.betanote{background:var(--gold-soft);border-bottom:1px solid var(--line)}
+.betanote .wrap,.fbdone .wrap{display:flex;gap:10px 12px;align-items:center;flex-wrap:wrap;padding-block:10px;font-size:14px}
+.betanote p{margin:0;flex:1 1 260px;color:var(--fg)}
+.betanote .tag{background:var(--gold);color:#1c1c1c;font-weight:900;letter-spacing:.1em}
+.fbdone{background:linear-gradient(135deg,var(--brand-ink),var(--brand));color:var(--on-brand)}
+.fbdone .e{font-size:28px;line-height:1}.fbdone .bd{display:flex;flex-direction:column;gap:2px;flex:1 1 260px}.fbdone .bd b{font-size:16px}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:35;display:inline-flex;align-items:center;gap:10px;padding:15px 22px;border-radius:9999px;border:3px solid var(--gold);background:var(--brand);color:var(--on-brand);font:inherit;font-weight:900;font-size:17px;cursor:pointer;box-shadow:0 10px 26px rgba(40,10,70,.35);transition:transform .15s}
+.fab .ico{font-size:22px;line-height:1}.fab:hover{transform:translateY(-2px)}
+@media (max-width:640px){.fab{padding:13px 18px;font-size:16px}}
+@media print{.fab,.betanote,.fbdone{display:none!important}}
+footer{padding-bottom:96px}
+.fbtypes{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.fbtype{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);font:inherit;color:var(--fg);cursor:pointer;text-align:left}
+.fbtype .e{font-size:28px;line-height:1}.fbtype b{font-size:15px}.fbtype small{color:var(--muted);font-size:12.5px;font-weight:500}
+.fbtype:hover{border-color:var(--brand)}.fbtype[aria-pressed="true"]{border-color:var(--brand);background:var(--tint);box-shadow:inset 0 0 0 1px var(--brand)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.fbstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.fbstat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.fbstat b{font-size:26px;font-weight:900;color:var(--brand);font-variant-numeric:tabular-nums;line-height:1.1}.fbstat span{font-size:12.5px;color:var(--muted);font-weight:700}
+.fbcard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--fc,var(--brand));border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.fbcard .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--muted)}
+.fbcard .txt{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.fbcard .rep{background:var(--tint);border-radius:10px;padding:8px 12px;font-size:14px}
+.guidegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.gcol{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--gc,var(--brand));border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.gcol h2{margin:0}
+.gsteps{margin:0;padding:0;list-style:none;counter-reset:g;display:flex;flex-direction:column;gap:12px}
+.gsteps li{counter-increment:g;display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start}
+.gsteps li::before{content:counter(g);width:28px;height:28px;border-radius:50%;background:var(--gc,var(--brand));color:var(--surface);display:grid;place-items:center;font-weight:900;font-size:14px}
+.gsteps li>div{display:flex;flex-direction:column;gap:2px}.gsteps li span{font-size:14px}
+.updlist{display:flex;flex-direction:column;gap:14px}
+.upd{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.upd .when{font-size:12.5px;font-weight:800;color:var(--teal);letter-spacing:.04em}
+.upd ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
 <script src="/config.js"></script>
@@ -364,16 +441,26 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
     <a class="logo" href="#home" data-go="home" aria-label="Tomujin PE нүүр">
       <svg aria-hidden="true" width="36" height="36" viewBox="0 0 30 30"><polygon points="1.4,0 24.6,0 11.8,9.6" fill="#00bcd4"/><polygon points="0,3.4 17.2,19.9 0,29.2" fill="#5c1090"/><polygon points="29,0 30,0 30,30 11.9,11.5" fill="#f2cd30"/><polygon points="3.6,30 26.4,30 17.9,21.4" fill="#f97316"/></svg>
       <span><b>TOMUJIN</b><small>PHYSICAL EDUCATION</small></span>
+      <i class="beta" title="Туршилтын хувилбар: таны саналаар долоо хоног бүр сайжирна">БЕТА</i>
     </a>
     <nav class="tabs menu" aria-label="Хэсгүүд">
       <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Нүүр</button><div class="dd">
         <a href="#home" data-go="home" data-pub><b>Нүүр хуудас</b><small>Шилдэг тамирчид, өдрийн дадал</small></a>
         <a href="#how" data-go="how" data-pub><b>Хэрхэн явагддаг</b><small>Tomujin PE-ийн 6 алхам</small></a>
         <a href="#priming" data-go="priming" data-pub><b>Өглөөний 20 минут</b><small>Бие, оюунаа сэрээх дасгал</small></a>
+        <a href="#guide" data-go="guide" data-pub><b>Сайтыг хэрхэн ашиглах</b><small>Сурагч, эцэг эхэд зориулсан заавар</small></a>
+        <a href="#updates" data-go="updates" data-pub><b>Юу шинэчлэгдэв</b><small>Таны саналаар долоо хоног бүр сайжирна</small></a>
       </div></div>
       <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Дугуйлан ба баг</button><div class="dd">
         <a href="#clubs" data-go="clubs" data-pub><b>Дугуйлан</b><small>Өглөөний дугуйлан · суудал бүртгэл</small></a>
         <a href="#stories" data-go="stories" data-pub><b>Шигшээ баг</b><small>Сагс, волейбол, хөл бөмбөг, UBAC</small></a>
+        <a href="#matches" data-go="matches" data-pub><b>Тоглолтууд</b><small>Хуваарь, шууд оноо, үр дүн</small></a>
+        <a href="#table" data-go="table" data-pub><b>Онооны хүснэгт</b><small>UBAC ба дотоод тэмцээний байр</small></a>
+      </div></div>
+      <div class="mg" data-pub><button type="button" class="mt" aria-haspopup="true">Podcast &amp; Broadcast</button><div class="dd">
+        <a href="#podcast" data-go="podcast" data-pub><b>Tomujin PE Podcast</b><small>Сонсох, үзэх ангиуд, асуулт хариулт</small></a>
+        <a href="#youtube" data-go="youtube" data-pub><b>YouTube суваг</b><small>Сувгийн бүх бичлэг энд тоглоно</small></a>
+        <a href="#live" data-go="live" data-pub><b>Шууд дамжуулалт</b><small>Тэмцээн, наадам, хуваарь, бичлэг</small></a>
       </div></div>
       <div class="mg"><button type="button" class="mt" aria-haspopup="true">Суралцах</button><div class="dd">
         <a href="#wellbeing" data-go="wellbeing"><b>Сайн сайхан байдал</b><small>4 хэмжээс, 14 чиглэл, өөрийгөө үнэлэх</small></a>
@@ -390,16 +477,27 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
         <a href="#log" data-go="log"><b>Бэлтгэлийн тэмдэглэл</b><small>Хичээлийн дараа 1 минутад бөглөнө</small></a>
         <a href="#tests" data-go="tests"><b>Үнэлгээ</b><small>Тестийн дүн, ахиц</small></a>
         <a href="#coach" data-go="coach" hidden><b>Багшийн самбар</b><small>Сурагчдын тэмдэглэл, ахиц</small></a>
+        <a href="#feedback" data-go="feedback" hidden><b>Санал хүсэлт</b><small>Хэрэглэгчдийн санал, хариу</small></a>
       </div></div>
     </nav>
     <div class="chips" id="editBar"></div>
     <div class="chips" id="acctBar"></div>
   </div>
 </header>
+<div class="betanote" id="betaNote" hidden role="region" aria-label="Туршилтын хувилбар">
+  <div class="wrap">
+    <span class="tag">БЕТА</span>
+    <p>Энэ бол Tomujin PE-ийн туршилтын хувилбар. Зарим хэсэг дутуу байж магадгүй. Та ашиглаад санал өгвөл бид долоо хоног бүр сайжруулна.</p>
+    <button type="button" class="btn line small" id="betaGuide">Хэрхэн ашиглах</button>
+    <button type="button" class="btn line small" id="betaOk">Ойлголоо ✓</button>
+  </div>
+</div>
+<div class="fbdone" id="fbDone" hidden role="status"></div>
 
 <main class="wrap">
 
 <section class="view" id="v-home">
+  <div id="homeTicker" hidden></div>
   <div class="hero">
     <div style="display:flex;flex-direction:column;gap:14px">
       <span class="eyebrow">Сурагч · Эцэг эх · Багш</span>
@@ -633,6 +731,79 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
   </section>
 
 
+<section class="view" id="v-matches" hidden aria-labelledby="matchT">
+    <div class="head">
+      <span class="eyebrow">Match Centre · UBAC · Дотоод тэмцээн</span>
+      <h2 id="matchT">Тоглолтууд</h2>
+      <p class="lede">Манай багуудын тоглолтын хуваарь, шууд оноо, үр дүн. Тоглолт болж байхад оноо энд шууд шинэчлэгдэнэ. Карт дээр дарж дэлгэрэнгүй, шууд дамжуулалтыг үзээрэй.</p>
+    </div>
+    <div class="chips" id="matchAdd"></div>
+    <div class="chips" id="matchTabs"></div>
+    <div class="chips" id="matchComp"></div>
+    <p class="muted" id="matchEmpty" hidden></p>
+    <div id="matchList"></div>
+  </section>
+
+<section class="view" id="v-table" hidden aria-labelledby="tableT">
+    <div class="head">
+      <span class="eyebrow">Standings · Байр эзлэлт</span>
+      <h2 id="tableT">Онооны хүснэгт</h2>
+      <p class="lede">Тоглолтын үр дүнгээс автоматаар бодогдоно. Манай баг шараар тодорч харагдана. Хамгийн гол нь оноо биш, тоглолт бүрээс суралцаж, өсөж буй нь.</p>
+    </div>
+    <div class="chips" id="tableEdit"></div>
+    <div class="chips" id="tableComp"></div>
+    <div id="tableWrap" class="sub"></div>
+  </section>
+
+<section class="view" id="v-podcast" hidden aria-labelledby="podT">
+    <div class="head">
+      <span class="eyebrow">Tomujin PE Podcast · Сонсох · Үзэх</span>
+      <h2 id="podT">Подкаст</h2>
+      <p class="lede">Сайн байцгаана уу, Tomujin-ийн гэр бүл! Хөдөлгөөн, бэлтгэл, нойр, хоол, сайн дадал, спорт, тэмцээний тухай чөлөөтэй яриа. Анги бүр өөрийн хуудастай: тоглуулагч, гол санаанууд, нэмэлт материал, линк. Замдаа, гэртээ, хүссэн үедээ сонсоорой.</p>
+    </div>
+    <div id="podLiveBar"></div>
+    <div class="chips" id="podPlat"></div>
+    <div class="chips" id="podAdd"></div>
+    <div class="chips" id="podFilter"></div>
+    <p class="muted" id="podEmpty" hidden>Энэ сэдвээр анги удахгүй нэмэгдэнэ.</p>
+    <div class="clubgrid" id="podGrid"></div>
+    <div id="podAsk" style="margin-top:18px"></div>
+  </section>
+
+<section class="view" id="v-youtube" hidden aria-labelledby="ytT">
+    <div class="head">
+      <span class="eyebrow">YouTube · Coach Jack · Tomujin PE</span>
+      <h2 id="ytT">YouTube суваг</h2>
+      <p class="lede">Сувгийн бүх бичлэг энд, сайтаас гаралгүй тоглоно. Шинэ бичлэг нэмэгдэхэд энд автоматаар гарч ирнэ. Тоглуулагчийн баруун дээд буланд дарж бүх бичлэгийн жагсаалтыг харна.</p>
+    </div>
+    <div class="chips" id="ytEdit"></div>
+    <div id="ytMain"></div>
+    <div class="head" style="margin-top:18px">
+      <span class="eyebrow">Сэдвээр</span>
+      <h2 id="ytListT">Тоглуулах жагсаалтууд</h2>
+    </div>
+    <p class="muted" id="ytListEmpty">Тоглолт, дасгал, подкаст гэх мэт жагсаалтууд удахгүй нэмэгдэнэ.</p>
+    <div class="ytgrid" id="ytLists"></div>
+  </section>
+
+<section class="view" id="v-live" hidden aria-labelledby="liveT">
+    <div class="head">
+      <span class="eyebrow">Broadcasting · Шууд дамжуулалт</span>
+      <h2 id="liveT">Шууд дамжуулалт</h2>
+      <p class="lede">Сургуулийн тэмцээн, UBAC-ын тоглолт, спортын наадам, өглөөний 20 минутын дасгалыг шууд үзээрэй. Гэртээ байгаа эцэг эх, найз нөхөд ч манай тамирчдыг дэмжих боломжтой.</p>
+    </div>
+    <div class="chips" id="liveEdit"></div>
+    <div id="liveStage"></div>
+    <div id="liveYT"></div>
+    <div class="box"><h3>Дараагийн дамжуулалтууд</h3><div id="liveSched"></div></div>
+    <div class="head" style="margin-top:18px">
+      <span class="eyebrow">Дахин үзэх</span>
+      <h2 id="liveRepT">Өмнөх дамжуулалтын бичлэг</h2>
+    </div>
+    <p class="muted" id="liveReplayEmpty">Бичлэгүүд удахгүй нэмэгдэнэ.</p>
+    <div class="clubgrid" id="liveReplay"></div>
+  </section>
+
 <section class="view" id="v-myclubs" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Суудал · Хуваарь · Ирц · Хийсэн зүйл</span>
@@ -688,12 +859,71 @@ table.tests input.tin{width:72px;font:inherit;padding:6px 8px;border:1px solid v
   <div id="lessonList" style="display:flex;flex-direction:column;gap:22px"></div>
 </section>
 
+<section class="view" id="v-guide" hidden aria-labelledby="guideT">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow" data-cms="gd_eb">Сурагч · Эцэг эх · Бета хувилбар</span>
+    <h1 id="guideT" data-cms="gd_h">Сайтыг хэрхэн ашиглах вэ</h1>
+    <p class="lede" data-cms="gd_p">Tomujin PE бол манай сургуулийн хөдөлгөөн, эрүүл дадлын вэб. Одоо туршилтын (бета) хувилбар ажиллаж байна. Та ашиглаж, санал өгснөөр бид хамтдаа сайжруулна.</p>
+  </div>
+  <div class="guidegrid">
+    <div class="gcol" style="--gc:var(--teal)">
+      <span class="eyebrow" data-cms="gd_s_eb">Сурагчдад</span>
+      <h2 data-cms="gd_s_h">5 алхам</h2>
+      <ol class="gsteps">
+        <li><div><b data-cms="gd_s1">Бүртгүүлэх</b><span class="muted" data-cms="gd_s1t">Баруун дээд буланд "Бүртгүүлэх" дарна. Сургуулийн имэйл (@tomujin.edu.mn), нууц үг, нэр, ангиа бичээд Gmail-ээ нээж баталгаажуулна.</span></div></li>
+        <li><div><b data-cms="gd_s2">Өнөөдрийн даалгавар</b><span class="muted" data-cms="gd_s2t">"Миний хэсэг" цэснээс багшийн ангид чинь оноосон дасгалыг хараад, хийж дуусаад "Хийж дууслаа" дарна.</span></div></li>
+        <li><div><b data-cms="gd_s3">Бэлтгэлийн тэмдэглэл</b><span class="muted" data-cms="gd_s3t">Хичээлийн дараа 1 минутад бөглөнө: хэр хүнд байсан, хэдэн минут хөдөлсөн, бие ямар байна.</span></div></li>
+        <li><div><b data-cms="gd_s4">Дасгалын сан</b><span class="muted" data-cms="gd_s4t">Дасгал нээж хөдөлгөөнт зургийг нь харна. Таалагдсан дасгалаа "☆ Хадгалах" дарж хадгална.</span></div></li>
+        <li><div><b data-cms="gd_s5">Санал өгөх</b><span class="muted" data-cms="gd_s5t">Ойлгомжгүй, алдаатай зүйл эсвэл гоё санаа байвал баруун доод буланд байгаа "💬 Санал өгөх" товчийг дарна.</span></div></li>
+      </ol>
+    </div>
+    <div class="gcol" style="--gc:var(--orange)">
+      <span class="eyebrow" data-cms="gd_p_eb">Эцэг эхчүүдэд</span>
+      <h2 data-cms="gd_p_h">Танд юу харагдах вэ</h2>
+      <ol class="gsteps">
+        <li><div><b data-cms="gd_p1">Нэвтрэлгүйгээр үзэх</b><span class="muted" data-cms="gd_p1t">Хичээл хэрхэн явагддаг, дугуйлан, шигшээ баг, өглөөний 20 минут, Podcast &amp; Broadcast хэсгүүдийг хэн ч үзэж болно.</span></div></li>
+        <li><div><b data-cms="gd_p2">Хүүхэдтэйгээ хамт</b><span class="muted" data-cms="gd_p2t">Хүүхэд тань нэвтэрч, өөрийн даалгавар, тэмдэглэл, үнэлгээгээ танд үзүүлж болно.</span></div></li>
+        <li><div><b data-cms="gd_p3">Хүүхдийн мэдээлэл</b><span class="muted" data-cms="gd_p3t">Сурагч бүр зөвхөн өөрийнхөө мэдээллийг хардаг. Бусад сурагч таны хүүхдийн мэдээллийг харахгүй.</span></div></li>
+        <li><div><b data-cms="gd_p4">Санал өгөх</b><span class="muted" data-cms="gd_p4t">"💬 Санал өгөх" товчоор нэвтрэлгүйгээр санал илгээнэ. Хариу авах бол утас эсвэл имэйлээ үлдээгээрэй.</span></div></li>
+        <li><div><b data-cms="gd_p5">Шинэчлэл</b><span class="muted" data-cms="gd_p5t">Бид долоо хоног бүр сайжруулна. Юу өөрчлөгдсөнийг "Юу шинэчлэгдэв" хэсгээс харна.</span></div></li>
+      </ol>
+    </div>
+  </div>
+  <div class="gcol" style="--gc:var(--gold)">
+    <span class="eyebrow" data-cms="gd_b_eb">Бета хувилбар</span>
+    <h2 data-cms="gd_b_h">Яагаад "бета" гэж?</h2>
+    <p class="lede" data-cms="gd_b_p">Бид сайтыг дуусгаж байж гаргахын оронд та бүхэнтэй хамт хөгжүүлж байна. Ашиглаж байгаа хүмүүсийн санал хамгийн үнэ цэнэтэй. Долоо хоног бүр сайжруулж, ойролцоогоор 6 сарын дараа анхны бүрэн хувилбараа гаргана.</p>
+    <div class="chips"><button type="button" class="btn gold" data-fb>💬 Санал өгөх</button><a class="btn line" href="#updates" data-go="updates">Юу шинэчлэгдэв</a></div>
+  </div>
+</section>
+
+<section class="view" id="v-updates" hidden aria-labelledby="updT">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow" data-cms="up_eb">Бета · Долоо хоног бүр сайжирна</span>
+    <h1 id="updT" data-cms="up_h">Юу шинэчлэгдэв</h1>
+    <p class="lede" data-cms="up_p">Та бүхний санал дээр үндэслэн хийсэн өөрчлөлтүүд. Шинэ санаа байвал "💬 Санал өгөх" товчийг дараарай.</p>
+  </div>
+  <div class="chips" id="updEdit"></div>
+  <div class="updlist" id="updOut"></div>
+</section>
+
+<section class="view" id="v-feedback" hidden aria-labelledby="fbT">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow" data-cms="fb_eb">Зөвхөн админд</span>
+    <h1 id="fbT" data-cms="fb_h">Санал хүсэлт</h1>
+    <p class="lede" data-cms="fb_p">Хэрэглэгчдийн илгээсэн санал. Хийж дууссаныг "Хийсэн" болгоод хэрэглэгчид хэлэх үгээ бичвэл тэр хүн дараа нэвтрэхдээ харна.</p>
+  </div>
+  <div id="fbOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
 </main>
 
 <footer id="contact"><div class="wrap footgrid">
   <div class="fcol"><strong data-cms="ft_h">Холбоо барих</strong><span>Tomujin PE · Tomujin Alternative School · Coach Jack</span></div>
   <nav class="flinks" id="footLinks" aria-label="Холбоо барих"></nav>
 </div></footer>
+
+<button type="button" class="fab" id="fbFab" aria-haspopup="dialog"><span class="ico" aria-hidden="true">💬</span>Санал өгөх</button>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="panel" id="panel"></div>
@@ -1121,7 +1351,7 @@ var ART=[
  body:[['p','Америкийн хүүхдийн эмч нарын академи (AAP) энергийн ундааг хүүхэд, өсвөр үеийнхэн хэрэглэх ёсгүй гэж үздэг. Кофеин зүрхний цохилтыг түргэсгэж, нойрыг хойшлуулж, сэтгэл түгшүүр нэмдэг.'],['h','"Энерги" нь хаанаас ирдэг вэ?'],['ul',['8–10 цагийн нойр','Өглөөний цай ба тогтмол хооллолт','Ус: бага зэрэг шингэн алдахад ч ядарч, толгой өвддөг','Хөдөлгөөн: 10 минут алхахад сэргэдэг']],['h','Өнөөдрөөс хийх 3 алхам'],['ol',['Ядарсан үедээ эхлээд ус уугаад 5 минут алх','Шалгалтын үеэр кофеины оронд нойроо хамгаал','Найзуудтайгаа "энергийн ундаагүй сар" сорилд оролц']]],
  src:'AAP Committee on Nutrition (2011), Pediatrics 127(6)'},
 {id:'family',ws:['move','care','connect'],topic:'Хөдөлгөөн',aud:['p'],big:'10',t:'Эцэг эхэд: гэр бүлээрээ хөдлөх 10 санаа',sum:'Хүүхэд хөдөлгөөнийг сургуулиас биш, гэрээсээ сурдаг. Том хүний жишээ хамгийн хүчтэй.',
- body:[['ol',['Оройн хоолны дараа 15 минут алхах','Амралтын өдөр Богд уул, Зайсан руу авирах','Гэртээ "дасгалын шоо": тоо бүрт нэг дасгал','Телевизийн реклам бүрт 10 суулт','Хүүхдээрээ дасгалын сангаас нэг дасгал заалгах','Дэлгүүр рүү машингүй явах','Өвөл тэшүүр, цанаар гулгах','Хүүхдийнхээ PE-д юу хийснийг асуух','Гэр бүлийн нойрны цаг тогтоох','Хамт хоол хийж, тавагны загвараар тавих']],['p','Хүүхдийнхээ ахицыг "хэн нэгнээс хурдан" биш, "өнгөрсөн сараасаа илүү" гэж хэмжээрэй. Энэ бол Томүжингийн PE-ийн гол зарчим.']],
+ body:[['ol',['Оройн хоолны дараа 15 минут алхах','Амралтын өдөр Богд уул, Зайсан руу авирах','Гэртээ "дасгалын шоо": тоо бүрт нэг дасгал','Телевизийн реклам бүрт 10 суулт','Хүүхдээрээ дасгалын сангаас нэг дасгал заалгах','Дэлгүүр рүү машингүй явах','Өвөл тэшүүр, цанаар гулгах','Хүүхдийнхээ PE-д юу хийснийг асуух','Гэр бүлийн нойрны цаг тогтоох','Хамт хоол хийж, тавагны загвараар тавих']],['p','Хүүхдийнхээ ахицыг "хэн нэгнээс хурдан" биш, "өнгөрсөн сараасаа илүү" гэж хэмжээрэй. Энэ бол Tomujin-ий PE-ийн гол зарчим.']],
  src:'Coach Jack · Tomujin PE'}
 ];
 var LESSONS=[
@@ -1194,10 +1424,10 @@ var CRCAL={start:'2026-11-09',end:'2027-04-30',
 };
 var CRDAY=['Ня','Да','Мя','Лх','Пү','Ба','Бя'];
 var CRCLUBS=[
- {k:'bb',n:'Сагсан бөмбөг',fig:'bb-set-shot',cc:'#f97316',place:'Family Sport Center',time:'06:30–07:50',pay:'fee',
+ {k:'bb',n:'Сагсан бөмбөг',fig:'bb-set-shot',cc:'#f97316',place:'Family Sport Center',time:'06:00–08:00',pay:'fee',
   d:'Дриблинг, дамжуулалт, шидэлт, хамгаалалт, багийн тоглолт. Хурд, авхаалж, хамтран ажиллах чадвар.',
   offers:[{id:'bb',sh:'',days:[1,3],cap:30}]},
- {k:'hb',n:'Гар бөмбөг',badge:'HB',cc:'#0e7490',place:'Naran Sport Center',time:'06:30–07:50',pay:'fee',
+ {k:'hb',n:'Гар бөмбөг',badge:'HB',cc:'#0e7490',place:'Naran Sport Center',time:'06:00–08:00',pay:'fee',
   d:'Дамжуулалт, шидэлт, хаалгачийн үндэс, довтолгоо, хамгаалалт, багийн тоглолт.',
   offers:[{id:'hb',sh:'',days:[2,4],cap:30}]},
  {k:'jj',n:'Жиу-жицу',badge:'JJ',cc:'#c2410c',place:'Сургууль · B1 заал (дэвсгэр)',time:'07:00–08:20',pay:'dep',fri:true,
@@ -1305,7 +1535,7 @@ function crBanner(){
 }
 function crOfferRow(c,o){
   var st=h('span',{cls:'status',role:'status'});var mine=crPicks().indexOf(o.id)>=0;var left=crLeft(o.id),cap=crCap(o.id);
-  var lab=(o.sh?o.sh+' ээлж · ':'')+crDaysTxt(o.days)+' · '+c.time;
+  var lab=(o.sh?o.sh+' ээлж · ':'')+crDaysTxt(o.days)+' · '+crTm(c);
   var seatTxt=OFFERS[o.id]?(left>0?left+'/'+cap+' суудал үлдсэн':'Дүүрсэн · хүлээлгийн жагсаалт'):cap+' суудал';
   var act;var can=crCanPick(o.id);
   if(mine){var ph=crPhase();act=h('div',{cls:'chips'},[h('span',{cls:'tag ok',text:MYSEAT[o.id]?'✓ Таны суудал':'Хүлээлгийн №'+(crRank(o.id)||'…')}),
@@ -1324,7 +1554,7 @@ function renderClubReg(){
     g.appendChild(h('div',{cls:'club',style:'--cc:'+c.cc+';cursor:default'},[
       h('div',{cls:'pic',role:'button',tabindex:'0',style:'cursor:pointer','aria-label':c.n+' дэлгэрэнгүй',onclick:function(){openCrClub(c.k)},onkeydown:function(e){if(e.key==='Enter'){openCrClub(c.k)}}},[crPic(c)]),
       h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+c.cc,text:c.pay==='fee'?'Төлбөртэй':'Үнэгүй · барьцаатай'}),h('span',{cls:'tag t',text:n+' хичээл'})]),
-      h('h3',{text:c.n}),h('p',{cls:'muted',text:c.place+(cf.coach?' · Багш: '+cf.coach:'')}),
+      h('h3',{text:c.n}),h('p',{cls:'muted',text:crPl(c)+(cf.coach?' · Багш: '+cf.coach:'')}),
       h('div',{cls:'sub',style:'gap:10px'},c.offers.map(function(o){return crOfferRow(c,o)})),
       c.fri?h('small',{cls:'muted',text:'Баасан: сургууль дээр нэмэлт / нөхөх хичээл (заавал биш)'}):null,
       h('button',{type:'button',cls:'btn line small',text:'Дэлгэрэнгүй',onclick:function(){openCrClub(c.k)}})]))});
@@ -1351,14 +1581,16 @@ function openCrClub(k){
     $('sheetEyebrow').textContent='Дугуйлан · 2-р улирал (11/9–4/30)';
     p.appendChild(h('h2',{id:'sheetTitle',text:c.n,style:'font-size:30px'}));
     p.appendChild(h('div',{cls:'club',style:'cursor:default;--cc:'+c.cc},[h('div',{cls:'pic',style:'aspect-ratio:16/8'},[crPic(c)])]));
-    p.appendChild(h('p',{cls:'lede',text:c.d}));
+    p.appendChild(h('p',{cls:'lede',text:crCfg(c.k).d||c.d}));
     if(cf.notice)p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Мэдэгдэл'}),h('p',{style:'margin:0',text:cf.notice})]));
     p.appendChild(crCoachBox(cf));
-    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хаана, хэзээ'}),h('div',{cls:'fgrid'},[crKV('Хаана',c.place),crKV('Цаг',c.time),crKV('Төлбөр',CRPAY[c.pay]),crKV('Нийт хичээл',crDates(c.offers[0].days).length+' (ээлж бүр)')]),
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Хаана, хэзээ'}),h('div',{cls:'fgrid'},[crKV('Хаана',crPl(c)),crKV('Цаг',crTm(c)),crKV('Төлбөр',crCfg(c.k).payTxt||CRPAY[c.pay]),crKV('Нийт хичээл',crDates(c.offers[0].days).length+' (ээлж бүр)')]),
       h('div',{cls:'sub',style:'gap:10px'},c.offers.map(function(o){return crOfferRow(c,o)}))]));
     p.appendChild(crWhatBox(cf));
   });
 }
+function crTm(c){return crCfg(c.k).time||c.time}
+function crPl(c){return crCfg(c.k).place||c.place}
 function crKV(k,v){return h('div',{},[h('small',{cls:'muted',text:k}),h('p',{style:'margin:0;font-weight:700',text:v||'—'})])}
 function crCoachBox(cf){return h('div',{cls:'box crcoach'},[cf.coachImg?h('img',{src:imgSrc(cf.coachImg),alt:cf.coach||'Багш',loading:'lazy'}):h('span',{cls:'crava',text:(cf.coach||'?').slice(0,1)}),
   h('div',{},[h('small',{cls:'muted',text:'Багш'}),h('h3',{style:'margin:0',text:cf.coach||'Удахгүй зарлана'}),cf.coachBio?h('p',{style:'margin:4px 0 0',text:cf.coachBio}):null])])}
@@ -1395,8 +1627,8 @@ function crMyCard(oid,c,o){
     h('div',{cls:'crstep'},[h('b',{text:'Дараагийн алхам'}),h('p',{style:'margin:0',text:ns[2]})])]);
   if(cf.notice)card.appendChild(h('div',{cls:'crstep',style:'background:var(--gold-soft)'},[h('b',{text:'Мэдэгдэл'}),h('p',{style:'margin:0',text:cf.notice})]));
   var nx=crNext(o.days),all=crDates(o.days),td=ubToday();
-  var nTxt=nx?crMD(nx)+' · '+c.time+(nx===td?' · Өнөөдөр':' · '+Math.round((ymdD(nx)-ymdD(td))/864e5)+' хоногийн дараа'):'Улирал дууссан';
-  card.appendChild(h('div',{cls:'fgrid'},[crKV('Дараагийн хичээл',nTxt),crKV('Хаана',c.place),crKV('Өдөр, цаг',crDaysTxt(o.days)+' · '+c.time),crKV('Нийт хичээл',all.length+' (11/9–4/30)')]));
+  var nTxt=nx?crMD(nx)+' · '+crTm(c)+(nx===td?' · Өнөөдөр':' · '+Math.round((ymdD(nx)-ymdD(td))/864e5)+' хоногийн дараа'):'Улирал дууссан';
+  card.appendChild(h('div',{cls:'fgrid'},[crKV('Дараагийн хичээл',nTxt),crKV('Хаана',crPl(c)),crKV('Өдөр, цаг',crDaysTxt(o.days)+' · '+crTm(c)),crKV('Нийт хичээл',all.length+' (11/9–4/30)')]));
   card.appendChild(crCoachBox(cf));
   card.appendChild(crWhatBox(cf));
   if(cf.plan)card.appendChild(h('div',{cls:'box'},[h('h3',{text:'Юу хийгдэх вэ (төлөвлөгөө)'}),h('p',{style:'margin:0;white-space:pre-line',text:cf.plan})]));
@@ -1477,6 +1709,8 @@ function crAdminClub(k){
   openSheet(function(p){
     $('sheetEyebrow').textContent='Удирдлага · дугуйлангийн мэдээлэл';p.appendChild(h('h2',{id:'sheetTitle',text:c.n}));
     p.appendChild(h('div',{cls:'chips'},CRCLUBS.map(function(x){return h('button',{type:'button',cls:'chip','aria-pressed':String(x.k===k),text:x.n,onclick:function(){crAdminClub(x.k)}})})));
+    p.appendChild(h('div',{cls:'fgrid'},[fText('cc-time','Цаг',cf.time||c.time,{help:'Жишээ: 06:00–08:00'}),fText('cc-place','Хаана',cf.place||c.place),fText('cc-pay','Төлбөр',cf.payTxt||CRPAY[c.pay])]));
+    p.appendChild(fText('cc-d','Товч тайлбар',cf.d||c.d,{area:1,rows:2}));
     p.appendChild(h('div',{cls:'fgrid'},[fText('cc-coach','Багшийн нэр',cf.coach),fText('cc-img','Багшийн зураг (линк)',cf.coachImg,{ph:'https://… Google Drive линк'})]));
     p.appendChild(fText('cc-bio','Багшийн танилцуулга',cf.coachBio,{area:1,rows:3}));
     p.appendChild(fText('cc-what','Юу орох вэ (мөр бүрт нэг)',(cf.what||[]).join('\n'),{area:1,rows:5}));
@@ -1485,7 +1719,7 @@ function crAdminClub(k){
     p.appendChild(fText('cc-note','Мэдэгдэл (хичээл цуцлагдсан, цаг өөрчлөгдсөн…)',cf.notice,{area:1,rows:2,help:'Хоосон орхивол мэдэгдэл харагдахгүй.'}));
     var st=h('span',{cls:'status',role:'status'});
     p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){
-      var d={coach:val('cc-coach'),coachImg:val('cc-img'),coachBio:val('cc-bio'),what:lines(val('cc-what')),levels:lines(val('cc-lv')),plan:val('cc-plan'),notice:val('cc-note')};var cl={};cl[k]=d;
+      var d={time:val('cc-time'),place:val('cc-place'),payTxt:val('cc-pay'),d:val('cc-d'),coach:val('cc-coach'),coachImg:val('cc-img'),coachBio:val('cc-bio'),what:lines(val('cc-what')),levels:lines(val('cc-lv')),plan:val('cc-plan'),notice:val('cc-note')};var cl={};cl[k]=d;
       st.className='status';st.textContent='Хадгалж байна…';
       db.batch([{op:'merge',path:'site/clubreg',data:{clubs:cl,updatedAt:new Date().toISOString()}}]).then(function(){st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st]));
   });
@@ -1992,10 +2226,10 @@ function renderMeal(){
 var BASE={ex:EX.slice(),art:ART.slice(),les:LESSONS.slice()};
 var CLASSDEF=[['1a','1A','1'],['6-7a','6A + 7A','6–7'],['8-9a','8A + 9A','8–9'],['10a','10A','10'],['10b','10B','10'],['11a','11A','11'],['11b','11B','11'],['12a','12A','12'],['12b','12B','12'],['12c','12C','12']];
 BASE.les.forEach(function(l){if(l.id==='g11')l.cls=['11a','11b'];if(l.id==='g67')l.cls=['6-7a']});
-var OV={ex:{},art:{},les:{},classes:{},club:{},story:{},team:{},roster:{}};var CLASSES=[],CLUBS=[],STORIES=[],TEAMS=[],ROSTERS=[];
+var OV={ex:{},art:{},les:{},classes:{},club:{},story:{},team:{},roster:{},pod:{},match:{}};var CLASSES=[],CLUBS=[],STORIES=[],TEAMS=[],ROSTERS=[];
 var editMode=false,showHidden=false;
-var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes',club:'clubs',story:'stories',team:'teams',roster:'rosters'};
-var PUBLIC_KINDS=['classes','club','story','team','roster'];
+var COLL={ex:'ex',art:'art',les:'lessons',classes:'classes',club:'clubs',story:'stories',team:'teams',roster:'rosters',pod:'podcast',match:'matches'};
+var PUBLIC_KINDS=['classes','club','story','team','roster','pod','match'];
 function merge(kind,base){
   var out=[],seen={};
   base.forEach(function(b){seen[b.id]=1;var o=OV[kind][b.id];if(o&&o.deleted&&!showHidden)return;out.push(Object.assign({},b,o||{},{builtin:true}))});
@@ -2012,10 +2246,12 @@ function applyCMS(){
   CLASSES=merge('classes',cb);
   CLUBS=merge('club',CLUBDEF);
   TEAMS=merge('team',TEAMDEF);
+  MATCHES=merge('match',[]);
+  PODS=merge('pod',PODDEF).sort(function(a,b){return (+b.num||0)-(+a.num||0)||String(b.date||'').localeCompare(String(a.date||''))});
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderTop();renderToday();renderTests();renderHomeToday();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderToday();renderTests();renderHomeToday();renderUpdates();renderFeedback();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -2041,6 +2277,7 @@ function firstPhoto(e){var a=(e.att||[]).filter(function(x){return attKind(x)===
 function renderEditBar(){
   var b=$('editBar');if(!b)return;b.innerHTML='';
   if(!canEdit){return}
+  b.appendChild(fbChip());
   b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(editMode),text:editMode?'✎ Засах горим: идэвхтэй':'✎ Засах горим',onclick:function(){editMode=!editMode;if(!editMode)showHidden=false;rerenderAll()}}));
   if(editMode)b.appendChild(h('span',{cls:'tag',style:'background:var(--gold-soft);color:#1c1c1c',text:'Шар тасархай хүрээтэй текст дээр дарж засна'}));if(editMode)b.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(showHidden),text:showHidden?'Нуусныг харуулж байна':'Нуусныг харах',onclick:function(){showHidden=!showHidden;rerenderAll()}}));
 }
@@ -2129,7 +2366,7 @@ function openEditor(kind,item){
   var isNew=!item||!item.id;item=item||{};var id=item.id||slug();
   var att=attEditor(item.att);var st=h('p',{cls:'status',role:'status'});
   openSheet(function(p){
-    $('sheetEyebrow').textContent=(isNew?'Шинэ ':'Засах · ')+({ex:'дасгал',art:'нийтлэл',les:'хичээл',classes:'анги',club:'дугуйлан',story:'амжилтын түүх',team:'шигшээ баг'})[kind];
+    $('sheetEyebrow').textContent=(isNew?'Шинэ ':'Засах · ')+({ex:'дасгал',art:'нийтлэл',les:'хичээл',classes:'анги',club:'дугуйлан',story:'амжилтын түүх',team:'шигшээ баг',pod:'подкастын анги',match:'тоглолт'})[kind];
     p.appendChild(h('h2',{id:'sheetTitle',text:isNew?'Шинээр нэмэх':(item.n||item.t||item.title||item.name)}));
     var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
     if(kind==='ex'){
@@ -2175,6 +2412,24 @@ function openEditor(kind,item){
       f.appendChild(fText('t-ach','Амжилт (мөр бүрт: он | тэмцээн | үр дүн)',(item.ach||[]).map(function(x){return x.join(' | ')}).join('\n'),{area:1,rows:5,help:'Жишээ: 2025–26 | UBAC U19 охид | 2-р байр'}));
       f.appendChild(fText('t-join','Багт хэрхэн орох',item.join,{area:1,rows:2}));
       f.appendChild(fImage('t-img','Багийн зураг (заавал биш)',item.img));
+    }else if(kind==='match'){
+      f.appendChild(h('div',{cls:'fgrid'},[fSelect('m-comp','Тэмцээн',COMPS.map(function(c){return [c.id,c.n]}),item.comp||(mComp!=='all'?mComp:(COMPS[0]||{}).id)),fText('m-stage','Шат / тойрог',item.stage,{ph:'жишээ: 3-р тойрог, хагас шигшээ'}),fSelect('m-status','Төлөв',Object.keys(MSTAT).map(function(k){return [k,MSTAT[k]]}),item.status||'sched')]));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('m-home','Гэрийн баг',item.home,{ph:'жишээ: Tomujin (TAS)'}),fText('m-away','Зочин баг',item.away)]));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('m-date','Огноо',item.date,{type:'date'}),fText('m-time','Цаг',item.time,{type:'time'}),fText('m-venue','Хаана',item.venue,{ph:'жишээ: U1 заал'})]));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('m-hs','Гэрийн баг: оноо / сет',item.hs,{type:'number',min:0,max:999}),fText('m-as','Зочин баг: оноо / сет',item.as,{type:'number',min:0,max:999}),fText('m-sets','Сет / үеийн оноо',item.sets,{ph:'жишээ: 25-20, 22-25, 15-11'})]));
+      f.appendChild(fText('m-url','Шууд дамжуулалт / бичлэгийн линк',item.url,{ph:'https://youtube.com/live/… эсвэл Facebook видео'}));
+      f.appendChild(fText('m-mvp','Тоглолтын шилдэг тамирчин (зөвшөөрөлтэй бол)',item.mvp));
+      f.appendChild(fText('m-notes','Тоглолтын тойм',item.notes,{area:1,rows:4}));
+    }else if(kind==='pod'){
+      f.appendChild(h('div',{cls:'fgrid'},[fText('p-num','Ангийн дугаар',item.num,{type:'number',min:1,max:999}),fSelect('p-type','Төрөл',Object.keys(PODTYPE).map(function(k){return [k,PODTYPE[k]]}),item.type||'video'),fSelect('p-topic','Сэдэв',Object.keys(PODTOPIC).map(function(k){return [k,PODTOPIC[k][0]]}),item.topic||'move')]));
+      f.appendChild(fText('p-t','Гарчиг',item.t));
+      f.appendChild(h('div',{cls:'fgrid'},[fText('p-guest','Зочин / ярилцагч',item.guest,{ph:'жишээ: Coach Jack, волейболын баг'}),fText('p-date','Огноо',item.date,{ph:'жишээ: 2026-11-05'}),fText('p-min','Үргэлжлэх хугацаа (минут)',item.min)]));
+      f.appendChild(fText('p-url','Бичлэг / аудионы линк',item.url,{ph:'https://youtube.com/watch?v=… эсвэл Spotify, Apple Podcasts, Google Drive, Facebook видео',help:'YouTube, Spotify, Apple Podcasts, Google Drive ("Anyone with the link"), Facebook видео, mp3 линк хуудсан дээрээ шууд тоглогдоно.'}));
+      f.appendChild(fText('p-sum','Товч агуулга',item.sum,{area:1,rows:2}));
+      f.appendChild(fText('p-notes','Энэ ангид (гол санаа, show notes)',bodyToText(item.notes),{area:1,rows:6,help:'"## " гарчиг, "- " жагсаалт. Хоосон мөрөөр догол мөр тусгаарлана.'}));
+      f.appendChild(fImage('p-img','Нүүр зураг (заавал биш, YouTube бол автоматаар авна)',item.img));
+      var sn=h('input',{type:'checkbox',id:'p-soon'});sn.checked=!!item.soon;
+      f.appendChild(h('label',{cls:'chk',for:'p-soon'},[sn,' Удахгүй гарна (тоглуулагчийг харуулахгүй)']));
     }else if(kind==='story'){
       f.appendChild(h('div',{cls:'fgrid'},[fText('s-n','Нэр',item.n),fSelect('s-type','Төрөл',Object.keys(STORYTYPE).map(function(k){return [k,STORYTYPE[k]]}),item.type||'ubac'),fText('s-sport','Спорт / чиглэл',item.sport),fText('s-gr','Анги / төгсөлтийн он',item.gr,{ph:'жишээ: 12-р анги эсвэл 2025 оны төгсөгч'})]));
       f.appendChild(fImage('s-img','Зураг',item.img));
@@ -2202,13 +2457,19 @@ function openEditor(kind,item){
         d={n:cn,cat:val('c-cat'),gr:val('c-gr'),when:val('c-when'),where:val('c-where'),coach:val('c-coach'),d:val('c-d'),gain:lines(val('c-gain')),does:lines(val('c-do')),join:val('c-join'),img:val('c-img')};if(!item.builtin)d.custom=true}
       else if(kind==='team'){var tn=val('t-n');if(!tn){st.className='status err';st.textContent='Нэр оруулна уу.';return}
         d={n:tn,fig:val('t-fig'),league:val('t-league'),div:val('t-div'),coach:val('t-coach'),when:val('t-when'),where:val('t-where'),d:val('t-d'),ach:lines(val('t-ach')).map(function(l){var q=l.split('|').map(function(x){return x.trim()});return [q[0]||'',q[1]||'',q[2]||'']}),join:val('t-join'),img:val('t-img')};if(!item.builtin)d.custom=true}
+      else if(kind==='match'){var mh=val('m-home'),ma=val('m-away');if(!mh||!ma){st.className='status err';st.textContent='Хоёр багийн нэрийг оруулна уу.';return}
+        var mu=val('m-url');if(mu&&!/^https:\/\//.test(mu)){st.className='status err';st.textContent='Линк https:// -ээр эхлэх ёстой.';return}
+        d={comp:val('m-comp'),stage:val('m-stage'),status:val('m-status'),home:mh,away:ma,date:val('m-date'),time:val('m-time'),venue:val('m-venue'),hs:+val('m-hs')||0,as:+val('m-as')||0,sets:val('m-sets'),url:mu,mvp:val('m-mvp'),notes:$('m-notes').value.trim(),custom:true}}
+      else if(kind==='pod'){var pt=val('p-t');if(!pt){st.className='status err';st.textContent='Гарчиг оруулна уу.';return}
+        var pu=val('p-url');if(pu&&!/^https:\/\//.test(pu)){st.className='status err';st.textContent='Линк https:// -ээр эхлэх ёстой.';return}
+        d={num:+val('p-num')||null,type:val('p-type'),topic:val('p-topic'),t:pt,guest:val('p-guest'),date:val('p-date'),min:val('p-min'),url:pu,sum:val('p-sum'),notes:textToBody($('p-notes').value),img:val('p-img'),soon:$('p-soon').checked};if(!item.builtin)d.custom=true}
       else if(kind==='story'){var sn=val('s-n');if(!sn){st.className='status err';st.textContent='Нэр оруулна уу.';return}
         if(!$('s-consent').checked){st.className='status err';st.textContent='Нийтлэхийн өмнө сурагч, эцэг эхийн зөвшөөрөл авсан байх шаардлагатай.';return}
         d={n:sn,type:val('s-type'),sport:val('s-sport'),gr:val('s-gr'),img:val('s-img'),q:val('s-q'),body:textToBody($('s-body').value),path:lines(val('s-path')).map(function(l){var p=l.split('|').map(function(x){return x.trim()});return [p[0]||'',p[1]||'',p[2]||'']}),before:val('s-before'),after:val('s-after'),order:+val('s-order')||99,team:val('s-team'),top:$('s-top').checked,consent:true,custom:true,year:(lines(val('s-path'))[0]||'').split('|')[0].trim()}}
       else{var nm=val('k-name');if(!nm){st.className='status err';st.textContent='Нэр оруулна уу.';return}
         d={name:nm,grade:val('k-grade'),note:$('k-note').value,exIds:val('k-ex').split(',').map(function(s){s=s.trim();var hit=EX.filter(function(e){return e.n===s||e.id===s})[0];return hit?hit.id:null}).filter(Boolean)};if(!item.builtin)d.custom=true}
       d.att=att.get();if(item.deleted)d.deleted=true;
-      saveDoc(kind,id,d,st,true).then(function(){att.commit();closeSheet();if(kind==='ex')openEx(id);else if(kind==='art')openArt(id);else if(kind==='classes')openClass(id);else if(kind==='club')openClub(id);else if(kind==='story')openStory(id);else if(kind==='team')openTeam(id)},function(){});
+      saveDoc(kind,id,d,st,true).then(function(){att.commit();closeSheet();if(kind==='ex')openEx(id);else if(kind==='art')openArt(id);else if(kind==='classes')openClass(id);else if(kind==='club')openClub(id);else if(kind==='story')openStory(id);else if(kind==='team')openTeam(id);else if(kind==='pod')openPod(id);else if(kind==='match')openMatch(id)},function(){});
     }});
     var cancel=h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){att.discard();closeSheet()}});
     f.appendChild(h('div',{cls:'editrow'},[save,cancel,st]));
@@ -2552,8 +2813,9 @@ async function fbInit(){
     ME=u;MYROLE=role;MYPROFILE=null;SAVED={};fSaved=false;MYDONE={};MYRES={};MYPEND=null;PENDRES={};DONEALL=[];RESALL=[];canEdit=role==='admin';if(!canEdit)editMode=false;
     setAuthed(!!(u&&u.emailVerified&&role));
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
-    await ensureProfile();startSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
+    await ensureProfile();startSubs();startFbSubs();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
     [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!(role==='admin'||role==='teacher')});
+    [].forEach.call(document.querySelectorAll('nav [data-go=feedback]'),function(a){a.hidden=role!=='admin'});
   });
 }
 
@@ -2762,6 +3024,253 @@ function openStory(id){
     if(x.body&&x.body.length){var bx=h('div',{cls:'box'},[h('h3',{text:'Түүх'})]);x.body.forEach(function(b){if(b[0]==='p')bx.appendChild(h('p',{style:'margin:0',text:b[1]}));else if(b[0]==='h')bx.appendChild(h('h3',{text:b[1]}));else bx.appendChild(h(b[0],{cls:'cues'},b[1].map(function(l){return h('li',{text:l})})))});p.appendChild(bx)}
     if(x.path&&x.path.length)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тэмцээн, замнал'}),h('ol',{cls:'tl'},x.path.map(function(r){return h('li',{},[h('b',{text:(r[0]?r[0]+' · ':'')+r[1]}),r[2]?h('span',{cls:'muted',text:r[2]}):null])}))]));
     var at=attView(x.att);if(at)p.appendChild(at);
+  });
+}
+
+/* ---------- match centre & league tables ---------- */
+var SPORT={vb:['Волейбол','#5c1090','Сет'],bb:['Сагсан бөмбөг','#f97316','Оноо'],fb:['Хөл бөмбөг','#15803d','Гоол'],tt:['Ширээний теннис','#0e7490','Сет'],tn:['Теннис','#a16207','Сет'],ch:['Шатар','#475569','Оноо']};
+var MSTAT={sched:'Удахгүй',live:'LIVE',ft:'Дууссан',post:'Хойшилсон'};
+var COMPS=[],MATCHES=[],mComp='all',mTab='up';
+var DEFCOMPS=[
+ {id:'ubac-vb-u19',n:'UBAC U19 волейбол',sport:'vb',season:'2026–27',div:'U19',rule:'vb'},
+ {id:'ubac-bb',n:'UBAC сагсан бөмбөг',sport:'bb',season:'2026–27',div:'',rule:'bb'},
+ {id:'ubac-fb',n:'UBAC хөл бөмбөг',sport:'fb',season:'2026–27',div:'',rule:'fb'},
+ {id:'school-cup',n:'Tomujin дотоод тэмцээн',sport:'vb',season:'2026–27',div:'Анги хоорондын',rule:'vb'}
+];
+function compOf(m){return COMPS.filter(function(c){return c.id===m.comp})[0]||{n:m.comp||'Тэмцээн',sport:m.sport||'vb',rule:'fb'}}
+function sportOf(m){var c=compOf(m);return SPORT[m.sport||c.sport]||SPORT.vb}
+function isUs(n){return /tomujin|tas\b|томүжин/i.test(String(n||''))}
+function mDate(m){return (m.date||'9999-12-31')+' '+(m.time||'99:99')}
+function mDateTxt(m){if(!m.date)return 'Огноо тодорхойгүй';var d=new Date(m.date+'T00:00:00');if(isNaN(d))return m.date;var wd=['Ням','Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба'][d.getDay()];return (d.getMonth()+1)+'/'+d.getDate()+' '+wd+(m.time?' · '+m.time:'')}
+function hasScore(m){return m.status==='live'||m.status==='ft'}
+function teamEl(n,right){return h('span',{cls:'mteam'+(isUs(n)?' us':'')+(right?' r':''),text:n||'—'})}
+function scoreEl(m){return hasScore(m)?h('span',{cls:'mscore'+(m.status==='live'?' live':'')},[h('b',{text:String(+m.hs||0)}),h('i',{text:'–'}),h('b',{text:String(+m.as||0)})]):h('span',{cls:'mscore vs',text:m.time||'vs'})}
+function statusEl(m){return m.status==='live'?h('span',{cls:'livedot',text:'LIVE'}):h('span',{cls:'mstat '+(m.status||'sched'),text:m.status==='ft'?'Дууссан':m.status==='post'?'Хойшилсон':mDateTxt(m)})}
+function matchRow(m){var sp=sportOf(m);
+  return tapCard('mrow'+(m.status==='live'?' on':''),'--cc:'+sp[1],function(){openMatch(m.id)},[
+    h('div',{cls:'mtop'},[statusEl(m),h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+sp[1],text:sp[0]}),h('small',{cls:'muted',text:compOf(m).n+(m.stage?' · '+m.stage:'')})]),
+    h('div',{cls:'mline'},[teamEl(m.home,true),scoreEl(m),teamEl(m.away)]),
+    m.sets&&hasScore(m)?h('small',{cls:'muted',style:'text-align:center',text:m.sets+(m.status==='live'&&m.cur?' · одоо '+m.cur:'')}):null,
+    m.venue||m.url?h('small',{cls:'muted',style:'text-align:center',text:[m.venue,m.url?'▶ Шууд үзэх боломжтой':null].filter(Boolean).join(' · ')}):null])}
+function tickChip(m){var sp=sportOf(m);
+  return h('a',{href:'#matches',cls:'tick'+(m.status==='live'?' on':''),style:'--cc:'+sp[1],onclick:function(e){e.preventDefault();openMatch(m.id)}},[
+    h('small',{text:m.status==='live'?'● LIVE':m.status==='ft'?'Дууссан':mDateTxt(m)}),
+    h('span',{},[h('em',{text:m.home||'—'}),hasScore(m)?h('b',{text:String(+m.hs||0)}):null]),
+    h('span',{},[h('em',{text:m.away||'—'}),hasScore(m)?h('b',{text:String(+m.as||0)}):null])])}
+function renderTicker(){var T=$('homeTicker');if(!T)return;T.innerHTML='';
+  var live=MATCHES.filter(function(m){return m.status==='live'});
+  var up=MATCHES.filter(function(m){return m.status==='sched'}).sort(function(a,b){return mDate(a).localeCompare(mDate(b))}).slice(0,4);
+  var done=MATCHES.filter(function(m){return m.status==='ft'}).sort(function(a,b){return mDate(b).localeCompare(mDate(a))}).slice(0,4);
+  var all=live.concat(up,done);if(!all.length){T.hidden=true;return}T.hidden=false;
+  T.appendChild(h('a',{href:'#matches',cls:'tickhead',onclick:function(e){e.preventDefault();show('matches')}},[h('b',{text:'Тоглолтууд'}),h('small',{text:'Бүгдийг харах →'})]));
+  var row=h('div',{cls:'ticks'});all.forEach(function(m){row.appendChild(tickChip(m))});T.appendChild(row)}
+function compChips(el,cur,fn){el.innerHTML='';[['all','Бүх тэмцээн']].concat(COMPS.map(function(c){return [c.id,c.n]})).forEach(function(o){el.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(cur===o[0]),text:o[1],onclick:function(){fn(o[0])}}))})}
+function renderMatches(){
+  var W=$('matchList');if(!W)return;W.innerHTML='';
+  var A=$('matchAdd');A.innerHTML='';if(editMode){A.appendChild(addBtn('Тоглолт нэмэх',function(){openEditor('match',null)}));A.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Тэмцээнүүд (лиг, аварга)',onclick:function(){editList('comps')}}))}
+  compChips($('matchComp'),mComp,function(v){mComp=v;renderMatches()});
+  var TB=$('matchTabs');TB.innerHTML='';[['up','Удахгүй ба шууд'],['ft','Үр дүн']].forEach(function(o){TB.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(mTab===o[0]),text:o[1],onclick:function(){mTab=o[0];renderMatches()}}))});
+  var list=MATCHES.filter(function(m){return mComp==='all'||m.comp===mComp});
+  var live=list.filter(function(m){return m.status==='live'});
+  list=mTab==='ft'?list.filter(function(m){return m.status==='ft'}).sort(function(a,b){return mDate(b).localeCompare(mDate(a))}):list.filter(function(m){return m.status==='sched'||m.status==='post'}).sort(function(a,b){return mDate(a).localeCompare(mDate(b))});
+  if(mTab==='up'&&live.length){W.appendChild(h('h3',{cls:'mday',text:'● Одоо болж байна'}));var g=h('div',{cls:'mgrid'});live.forEach(function(m){g.appendChild(matchRow(m))});W.appendChild(g)}
+  var day=null,grid=null;
+  list.forEach(function(m){var d=m.date||'';if(d!==day){day=d;W.appendChild(h('h3',{cls:'mday',text:d?mDateTxt({date:d}):'Огноо тодорхойгүй'}));grid=h('div',{cls:'mgrid'});W.appendChild(grid)}grid.appendChild(matchRow(m))});
+  $('matchEmpty').hidden=!!(list.length||(mTab==='up'&&live.length));
+  $('matchEmpty').textContent=mTab==='ft'?'Одоогоор дууссан тоглолт алга.':'Тоглолтын хуваарь удахгүй нэмэгдэнэ.';
+}
+/* standings */
+function standings(c){
+  var rows={};function R(n){return rows[n]||(rows[n]={n:n,p:0,w:0,d:0,l:0,f:0,a:0,pts:0,form:[]})}
+  MATCHES.filter(function(m){return m.comp===c.id&&m.status==='ft'&&m.home&&m.away}).sort(function(a,b){return mDate(a).localeCompare(mDate(b))}).forEach(function(m){
+    var H=R(m.home),A=R(m.away),hs=+m.hs||0,as=+m.as||0;H.p++;A.p++;H.f+=hs;H.a+=as;A.f+=as;A.a+=hs;
+    if(hs===as){H.d++;A.d++;H.pts+=1;A.pts+=1;H.form.push('D');A.form.push('D');return}
+    var W=hs>as?H:A,L=hs>as?A:H,ws=Math.max(hs,as),ls=Math.min(hs,as);W.w++;L.l++;W.form.push('W');L.form.push('L');
+    if(c.rule==='vb'){if(ls===ws-1){W.pts+=2;L.pts+=1}else W.pts+=3}
+    else if(c.rule==='bb'){W.pts+=2;L.pts+=1}
+    else W.pts+=3});
+  return Object.keys(rows).map(function(k){return rows[k]}).sort(function(x,y){return y.pts-x.pts||y.w-x.w||(y.f-y.a)-(x.f-x.a)||y.f-x.f||x.n.localeCompare(y.n)})}
+var RULETXT={vb:'Волейбол: 3:0, 3:1 (2:0) хожвол 3 оноо; 3:2 (2:1) хожвол 2, хожигдвол 1 оноо.',bb:'Сагсан бөмбөг: хожвол 2, хожигдвол 1 оноо.',fb:'Хожвол 3, тэнцвэл 1, хожигдвол 0 оноо.'};
+var tComp=null;
+function renderTables(){
+  var W=$('tableWrap');if(!W)return;W.innerHTML='';
+  var E=$('tableEdit');E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Тэмцээнүүд (лиг, аварга)',onclick:function(){editList('comps')}}));
+  var F=$('tableComp');F.innerHTML='';
+  var cs=COMPS.filter(function(c){return MATCHES.some(function(m){return m.comp===c.id})});if(!cs.length)cs=COMPS.slice();
+  if(!tComp||!cs.some(function(c){return c.id===tComp}))tComp=cs.length?cs[0].id:null;
+  cs.forEach(function(c){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(tComp===c.id),text:c.n,onclick:function(){tComp=c.id;renderTables()}}))});
+  var c=COMPS.filter(function(x){return x.id===tComp})[0];if(!c)return;var sp=SPORT[c.sport]||SPORT.vb;
+  var st=standings(c);
+  var box=h('div',{cls:'box'},[h('div',{cls:'chips',style:'justify-content:space-between'},[h('h3',{style:'margin:0',text:c.n}),h('small',{cls:'muted',text:[c.season,c.div,sp[0]].filter(Boolean).join(' · ')})])]);
+  if(!st.length)box.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Тоглолтын үр дүн орж ирэхэд хүснэгт энд автоматаар бодогдоно.'}));
+  else{var sh=c.rule==='fb'||c.rule==='bb';
+    box.appendChild(h('div',{cls:'scroll'},[h('table',{cls:'dose stand'},[h('thead',{},[h('tr',{},['#','Баг','Т','Х',c.rule==='fb'?'Тэ':null,'Хж',sp[2]+' +/−','Зөрүү','Оноо','Сүүлийн 5'].filter(function(x){return x!==null}).map(function(x,i){return h('th',{text:x,title:({Т:'Тоглосон',Х:'Хожсон',Тэ:'Тэнцсэн',Хж:'Хожигдсон'})[x]||null})}))]),
+      h('tbody',{},st.map(function(r,i){return h('tr',{cls:isUs(r.n)?'us':null},[h('td',{cls:'num',text:String(i+1)}),h('td',{},[h('b',{text:r.n})]),h('td',{cls:'num',text:String(r.p)}),h('td',{cls:'num',text:String(r.w)}),c.rule==='fb'?h('td',{cls:'num',text:String(r.d)}):null,h('td',{cls:'num',text:String(r.l)}),h('td',{cls:'num',text:r.f+':'+r.a}),h('td',{cls:'num',text:(r.f-r.a>0?'+':'')+(r.f-r.a)}),h('td',{cls:'num'},[h('b',{text:String(r.pts)})]),
+        h('td',{},[h('span',{cls:'form'},r.form.slice(-5).map(function(x){return h('i',{cls:'f'+x,title:x==='W'?'Хожсон':x==='L'?'Хожигдсон':'Тэнцсэн',text:x==='W'?'Х':x==='L'?'Хж':'Т'})}))])])}))])]));
+  }
+  box.appendChild(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:(RULETXT[c.rule]||RULETXT.fb)+' Тэнцсэн үед: хожлын тоо, зөрүү, авсан '+sp[2].toLowerCase()+'-ээр жагсаана. Т = тоглосон, Х = хожсон, Хж = хожигдсон.'}));
+  W.appendChild(box);
+  var recent=MATCHES.filter(function(m){return m.comp===c.id&&m.status==='ft'}).sort(function(a,b){return mDate(b).localeCompare(mDate(a))}).slice(0,6);
+  if(recent.length){var g=h('div',{cls:'mgrid'});recent.forEach(function(m){g.appendChild(matchRow(m))});W.appendChild(h('div',{cls:'sub'},[h('h3',{cls:'mday',text:'Сүүлийн үр дүн'}),g]))}
+}
+function openMatch(id){
+  var m=MATCHES.filter(function(x){return x.id===id})[0];if(!m)return;var sp=sportOf(m),c=compOf(m);
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=sp[0]+' · '+c.n+(m.stage?' · '+m.stage:'');
+    p.appendChild(h('h2',{id:'sheetTitle',text:(m.home||'—')+' – '+(m.away||'—'),style:'font-size:26px'}));
+    var er=editRow('match',m,openMatch);if(er)p.appendChild(er);
+    p.appendChild(h('div',{cls:'board'+(m.status==='live'?' on':''),style:'--cc:'+sp[1]},[
+      h('div',{cls:'chips',style:'justify-content:center'},[statusEl(m),m.status!=='sched'?h('small',{text:mDateTxt(m)}):null]),
+      h('div',{cls:'bline'},[h('span',{cls:'bteam',text:m.home||'—'}),hasScore(m)?h('span',{cls:'bscore',text:(+m.hs||0)+' – '+(+m.as||0)}):h('span',{cls:'bscore vs',text:'vs'}),h('span',{cls:'bteam',text:m.away||'—'})]),
+      m.sets?h('p',{cls:'bsets',text:sp[2]+': '+m.sets}):null,
+      m.status==='live'&&m.cur?h('p',{cls:'bsets',text:'Одоогийн '+(sp[2]==='Сет'?'сет':'хэсэг')+': '+m.cur}):null]));
+    if(editMode)p.appendChild(liveControls(m));
+    if(m.url){var pl=playerEl(m.url,m.home+' – '+m.away);if(pl)p.appendChild(h('div',{cls:'box'},[h('h3',{text:m.status==='ft'?'Бичлэг':'Шууд дамжуулалт'}),pl]))}
+    p.appendChild(h('div',{cls:'box'},[h('div',{cls:'fgrid'},[
+      h('div',{},[h('small',{cls:'muted',text:'Хэзээ'}),h('p',{style:'margin:0;font-weight:700',text:mDateTxt(m)})]),
+      h('div',{},[h('small',{cls:'muted',text:'Хаана'}),h('p',{style:'margin:0;font-weight:700',text:m.venue||'—'})]),
+      h('div',{},[h('small',{cls:'muted',text:'Тэмцээн'}),h('p',{style:'margin:0;font-weight:700',text:c.n+(m.stage?' · '+m.stage:'')})])])]));
+    if(m.mvp)p.appendChild(h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'★ Тоглолтын шилдэг тамирчин'}),h('p',{style:'margin:0;font-weight:700',text:m.mvp})]));
+    if(m.notes)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Тоглолтын тойм'}),h('p',{style:'margin:0;white-space:pre-line',text:m.notes})]));
+    var at=attView(m.att);if(at)p.appendChild(at);
+  });
+}
+/* quick live scoring (owner only, saves straight away; everyone sees it update) */
+function liveControls(m){
+  var st=h('span',{cls:'status',role:'status'});var sp=sportOf(m),isSet=sp[2]==='Сет';
+  function put(patch){saveDoc('match',m.id,patch,st,true).then(function(){openMatch(m.id)},function(){})}
+  var cur=String(m.cur||'0-0').split('-').map(function(x){return +x||0});
+  var box=h('div',{cls:'box livectl'},[h('h3',{text:'Шууд оноо оруулах'})]);
+  box.appendChild(h('div',{cls:'chips'},[['sched','Удахгүй'],['live','● Эхэллээ (LIVE)'],['ft','Дууссан'],['post','Хойшилсон']].map(function(o){return h('button',{type:'button',cls:'chip','aria-pressed':String((m.status||'sched')===o[0]),text:o[1],onclick:function(){var pt={status:o[0]};if(o[0]==='ft')pt.cur='';put(pt)}})})));
+  if(isSet){
+    box.appendChild(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Одоогийн сетийн оноо: '+cur[0]+' – '+cur[1]}));
+    box.appendChild(h('div',{cls:'scorebtns'},[
+      h('div',{},[h('small',{text:m.home||'Гэрийн'}),h('button',{type:'button',cls:'btn gold',text:'+1',onclick:function(){put({status:'live',cur:(cur[0]+1)+'-'+cur[1]})}}),h('button',{type:'button',cls:'btn line small',text:'−1',onclick:function(){put({cur:Math.max(0,cur[0]-1)+'-'+cur[1]})}})]),
+      h('div',{},[h('small',{text:m.away||'Зочин'}),h('button',{type:'button',cls:'btn gold',text:'+1',onclick:function(){put({status:'live',cur:cur[0]+'-'+(cur[1]+1)})}}),h('button',{type:'button',cls:'btn line small',text:'−1',onclick:function(){put({cur:cur[0]+'-'+Math.max(0,cur[1]-1)})}})])]));
+    box.appendChild(h('button',{type:'button',cls:'btn line small',text:'✓ Сет дуусгах ('+cur[0]+'–'+cur[1]+')',onclick:function(){if(cur[0]===cur[1]){st.className='status err';st.textContent='Тэнцүү оноотой сетийг дуусгах боломжгүй.';return}
+      put({sets:(m.sets?m.sets+', ':'')+cur[0]+'-'+cur[1],hs:(+m.hs||0)+(cur[0]>cur[1]?1:0),as:(+m.as||0)+(cur[1]>cur[0]?1:0),cur:'0-0',status:'live'})}}));
+  }else{
+    var steps=sp[2]==='Оноо'&&m.sport!=='ch'&&compOf(m).sport!=='ch'?[1,2,3]:[1];
+    box.appendChild(h('div',{cls:'scorebtns'},[['hs',m.home||'Гэрийн'],['as',m.away||'Зочин']].map(function(s){return h('div',{},[h('small',{text:s[1]})].concat(steps.map(function(n){return h('button',{type:'button',cls:'btn gold',text:'+'+n,onclick:function(){var pt={status:'live'};pt[s[0]]=(+m[s[0]]||0)+n;put(pt)}})}),[h('button',{type:'button',cls:'btn line small',text:'−1',onclick:function(){var pt={};pt[s[0]]=Math.max(0,(+m[s[0]]||0)-1);put(pt)}})]))})));
+    box.appendChild(h('div',{cls:'chips'},[h('input',{type:'text',id:'q-cur',placeholder:'Хэсэг / үе (жишээ: 3-р үе)',value:m.cur||'',style:'max-width:220px'}),h('button',{type:'button',cls:'btn line small',text:'Хадгалах',onclick:function(){put({cur:val('q-cur')})}})]));
+  }
+  box.appendChild(st);return box}
+
+/* ---------- YouTube channel ---------- */
+var YTLISTS=[];
+function ytChan(){return (window.TPE_CONFIG&&TPE_CONFIG.YOUTUBE_CHANNEL_ID)||''}
+function ytListId(u){var m=String(u||'').match(/[?&]list=([\w-]+)/);return m?m[1]:(/^(PL|UU|OL|FL)[\w-]{10,}$/.test(String(u||'').trim())?String(u).trim():null)}
+function ytFrame(src,title){return h('iframe',{src:src,title:title||'YouTube',loading:'lazy',allow:'autoplay; encrypted-media; picture-in-picture; fullscreen',allowfullscreen:'',referrerpolicy:'strict-origin-when-cross-origin',cls:'podframe',style:'aspect-ratio:16/9'})}
+function ytChanUrl(){var c=(window.TPE_CONFIG&&TPE_CONFIG.CONTACT)||{};return c.youtube||(ytChan()?'https://www.youtube.com/channel/'+ytChan():'')}
+function renderYT(){
+  var M=$('ytMain');if(!M)return;M.innerHTML='';var ch=ytChan();
+  var E=$('ytEdit');E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Тоглуулах жагсаалт нэмэх / засах',onclick:function(){editList('ytlists')}}));
+  var link=ytChanUrl();
+  if(ch)M.appendChild(h('div',{cls:'box'},[h('div',{cls:'chips',style:'justify-content:space-between'},[h('h3',{style:'margin:0',text:'Сүүлийн бичлэгүүд'}),link?h('a',{cls:'btn line small',href:link+(/\?/.test(link)?'&':'?')+'sub_confirmation=1',target:'_blank',rel:'noopener',text:'▶ Сувагт бүртгүүлэх'}):null]),
+    ytFrame('https://www.youtube-nocookie.com/embed/videoseries?list=UU'+ch.slice(2),'Tomujin PE: сувгийн бүх бичлэг')]));
+  else M.appendChild(h('p',{cls:'muted',text:'YouTube сувгийн ID-г config.js-д оруулаагүй байна.'}));
+  var L=$('ytLists');L.innerHTML='';var n=0;
+  YTLISTS.forEach(function(x){var id=ytListId(x[1]);if(!id)return;n++;
+    L.appendChild(h('div',{cls:'box'},[h('h3',{text:x[0]||'Тоглуулах жагсаалт'}),x[2]?h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]}):null,ytFrame('https://www.youtube-nocookie.com/embed/videoseries?list='+id,x[0])]))});
+  $('ytListEmpty').hidden=!!n;
+}
+/* ---------- podcast & live broadcast ---------- */
+var PODTOPIC={move:['Хөдөлгөөн ба бэлтгэл','var(--brand)'],life:['Нойр, хоол, дадал','var(--teal)'],sport:['Спорт ба UBAC','var(--orange)'],parent:['Эцэг эхэд','#be185d'],voice:['Сурагчдын дуу хоолой','#15803d'],teach:['Багш нарт','#a16207']};
+var PODTYPE={audio:'Подкаст',video:'Видео подкаст',replay:'Шууд дамжуулалтын бичлэг'};
+var PODDEF=[
+ {id:'ep1',num:1,soon:true,type:'video',topic:'move',t:'Just Show Up: Tomujin PE хэрхэн явагддаг вэ?',guest:'Coach Jack',min:'20',sum:'Бидний хичээл яагаад "зүгээр л ирээрэй" гэдгээс эхэлдэг вэ? Бусадтай биш, өчигдрийн өөртэйгөө өрсөлдөх тухай.',notes:[['ul',['Tomujin PE-ийн 6 алхам','Ахиц гэж юу вэ, яаж хэмжих вэ','Сахилга бат бол харагдах зан үйл']]]},
+ {id:'ep2',num:2,soon:true,type:'audio',topic:'life',t:'Сайн унтвал сайн тоглоно: нойр ба хөдөлгөөн',guest:'Coach Jack',min:'15',sum:'Нойр бол хамгийн хүчтэй "нэмэлт тэжээл". Хэдэн цаг унтах хэрэгтэй, дэлгэц нойронд яаж нөлөөлдөг вэ.',notes:[]},
+ {id:'ep3',num:3,soon:true,type:'video',topic:'sport',t:'UBAC-ын замнал: шигшээ багийн тамирчидтай ярилцъя',guest:'Шигшээ багийн тамирчид',min:'25',sum:'Бэлтгэл, тэмцээн, ялалт ба ялагдал. Багийнхан өөрсдөө ярина.',notes:[]},
+ {id:'ep4',num:4,soon:true,type:'audio',topic:'parent',t:'Хүүхэд маань биеийн тамирт дургүй бол яах вэ?',guest:'Coach Jack',min:'15',sum:'Эцэг эхчүүдэд: хүүхдээ хөдөлгөөнд дурлуулах энгийн, зөөлөн аргууд.',notes:[]},
+ {id:'ep5',num:5,soon:true,type:'video',topic:'teach',t:'Өглөөний 20 минут: багш нарт зориулсан эрч хүч',guest:'Coach Jack',min:'20',sum:'Ажлын өдрөө бие, оюунаа сэрээж эхлэх богино дадал.',notes:[]},
+ {id:'ep6',num:6,soon:true,type:'audio',topic:'voice',t:'Та асуу, Coach Jack хариулъя',guest:'Сурагчид, эцэг эхчүүд',min:'20',sum:'Таны илгээсэн асуултуудад хариулах асуулт-хариултын анги.',notes:[]}
+];
+var PODS=[],podTopic='all';
+var PODLIVE=[],PODLINKS=[];
+function podDefLinks(){var c=(window.TPE_CONFIG&&TPE_CONFIG.CONTACT)||{};return [['YouTube',c.youtube||''],['Spotify',''],['Apple Podcasts',''],['Facebook',c.facebook||'']]}
+function ytId(u){var m=String(u||'').match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|live\/|shorts\/))([\w-]{11})/);return m?m[1]:null}
+function embedOf(u){u=String(u||'').trim();if(!/^https:\/\//.test(u))return null;var m;
+  var y=ytId(u);if(y)return {k:'frame',src:'https://www.youtube-nocookie.com/embed/'+y,r:'16/9'};
+  if((m=u.match(/open\.spotify\.com\/(?:embed\/)?(episode|show)\/([\w]+)/)))return {k:'frame',src:'https://open.spotify.com/embed/'+m[1]+'/'+m[2],h:m[1]==='show'?352:232};
+  if((m=u.match(/podcasts\.apple\.com\/(.+)$/)))return {k:'frame',src:'https://embed.podcasts.apple.com/'+m[1],h:175};
+  if((m=u.match(/drive\.google\.com\/file\/d\/([\w-]{20,})/)))return {k:'frame',src:'https://drive.google.com/file/d/'+m[1]+'/preview',r:'16/9'};
+  if(/facebook\.com\/.+\/videos\/|fb\.watch\//.test(u))return {k:'frame',src:'https://www.facebook.com/plugins/video.php?show_text=false&href='+encodeURIComponent(u),r:'16/9'};
+  if(/\.(mp3|m4a|aac|ogg|wav)(\?|$)/i.test(u))return {k:'audio',src:u};
+  if(/\.(mp4|webm)(\?|$)/i.test(u))return {k:'video',src:u};
+  return null}
+function playerEl(u,title){var e=embedOf(u);if(!e)return u?h('a',{href:u,target:'_blank',rel:'noopener',cls:'btn gold',text:'▶ Нээж үзэх / сонсох ↗ '+hostOf(u)}):null;
+  if(e.k==='audio')return h('audio',{src:e.src,controls:'',preload:'none',style:'width:100%'});
+  if(e.k==='video')return h('video',{src:e.src,controls:'',playsinline:'',preload:'metadata',style:'width:100%;border-radius:12px;background:#000'});
+  return h('iframe',{src:e.src,title:title||'Тоглуулагч',loading:'lazy',allow:'autoplay; encrypted-media; picture-in-picture; fullscreen',allowfullscreen:'',referrerpolicy:'strict-origin-when-cross-origin',cls:'podframe',style:e.h?'height:'+e.h+'px':'aspect-ratio:'+e.r})}
+var MICSVG='<svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0M12 17v4M8.5 21h7"/></svg>';
+var CAMSVG='<svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l6-3.5v10l-6-3.5z"/></svg>';
+function podNum(x){return x.num?'Анги '+String(x.num).padStart(2,'0'):''}
+function podPic(x){var cc=(PODTOPIC[x.topic]||PODTOPIC.move)[1];
+  if(x.img)return h('img',{src:imgSrc(x.img),alt:x.t,loading:'lazy',style:'width:100%;height:100%;object-fit:cover'});
+  var y=ytId(x.url);if(y)return h('img',{src:'https://i.ytimg.com/vi/'+y+'/hqdefault.jpg',alt:x.t,loading:'lazy',style:'width:100%;height:100%;object-fit:cover'});
+  var ic=h('span',{cls:'podic'});ic.innerHTML=x.type==='audio'?MICSVG:CAMSVG;
+  return h('div',{cls:'podart',style:'--cc:'+cc},[ic,h('b',{text:x.num?'EP '+String(x.num).padStart(2,'0'):'TPE'}),h('small',{text:'TOMUJIN PE PODCAST'})])}
+function podMeta(x){return [x.date,x.min?x.min+' мин':null,x.guest?'Зочин: '+x.guest:null].filter(Boolean).join(' · ')}
+function podCard(x){var tp=PODTOPIC[x.topic]||PODTOPIC.move;
+  return tapCard('club pod'+(x.deleted?' hiddenitem':'')+(x.soon?' soon':''),'--cc:'+tp[1],function(){openPod(x.id)},[h('div',{cls:'pic'},[podPic(x)]),
+    h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+tp[1],text:tp[0]}),h('span',{cls:'tag t',text:PODTYPE[x.type]||'Подкаст'}),x.soon?h('span',{cls:'tag',style:'background:var(--gold-soft);color:#1c1c1c',text:'Удахгүй'}):null]),
+    h('small',{cls:'muted',style:'font-weight:800',text:[podNum(x),podMeta(x)].filter(Boolean).join(' · ')}),
+    h('h3',{text:x.t}),x.sum?h('p',{cls:'muted',text:x.sum}):null])}
+function platformChips(){var row=h('div',{cls:'chips plat'});
+  PODLINKS.forEach(function(l){if(l[1])row.appendChild(h('a',{cls:'btn line small',href:l[1],target:'_blank',rel:'noopener',text:'▶ '+l[0]}))});
+  return row.children.length?row:null}
+function liveNow(){return PODLIVE.filter(function(r){return r[3]==='live'})[0]||null}
+function liveBanner(){var L=liveNow();if(!L){var lm=MATCHES.filter(function(m){return m.status==='live'})[0];if(lm)L=[lm.home+' – '+lm.away]}var nx=PODLIVE.filter(function(r){return r[3]==='soon'})[0];if(!L&&!nx)return null;
+  return h('a',{href:'#live',cls:'livebar'+(L?' on':''),onclick:function(e){e.preventDefault();show('live')}},[h('span',{cls:'livedot',text:L?'LIVE':'Удахгүй'}),h('b',{text:(L||nx)[0]}),h('span',{cls:'muted',text:L?'Одоо шууд дамжуулж байна. Энд дарж үзээрэй →':((nx[1]?nx[1]+' · ':'')+'Шууд дамжуулалтын хуваарь →')})])}
+function askBox(){var c=(window.TPE_CONFIG&&TPE_CONFIG.CONTACT)||{};var mail=c.email?'mailto:'+c.email+'?subject='+encodeURIComponent('Tomujin PE Podcast: асуулт / сэдэв'):null;
+  return h('div',{cls:'box',style:'background:var(--gold-soft);border-color:transparent'},[h('h3',{text:'Асуултаа илгээгээрэй'}),
+    h('p',{style:'margin:0',text:'Хөдөлгөөн, бэлтгэл, нойр, хоол, тэмцээн, эсвэл хүүхдийнхээ тухай асуух зүйл байна уу? Илгээсэн асуултуудад тань "Та асуу, Coach Jack хариулъя" ангиудад хариулна. Сурагчид, эцэг эхчүүд, багш нар бүгд асууж болно.'}),
+    mail?h('div',{cls:'chips'},[h('a',{cls:'btn gold small',href:mail,text:'✉ Асуулт, сэдэв илгээх'})]):null])}
+function renderPodcast(){
+  var W=$('podGrid');if(!W)return;W.innerHTML='';
+  var B=$('podLiveBar');B.innerHTML='';var lb=liveBanner();if(lb)B.appendChild(lb);
+  var P=$('podPlat');P.innerHTML='';var pc=platformChips();if(pc){P.appendChild(h('span',{cls:'muted',style:'font-weight:800;font-size:13px',text:'Хаанаас сонсох, үзэх:'}));P.appendChild(pc)}
+  var A=$('podAdd');A.innerHTML='';if(editMode){A.appendChild(addBtn('Шинэ анги нэмэх',function(){openEditor('pod',null)}));A.appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Платформын линкүүд',onclick:function(){editList('podlinks')}}))}
+  var F=$('podFilter');F.innerHTML='';[['all','Бүгд']].concat(Object.keys(PODTOPIC).map(function(k){return [k,PODTOPIC[k][0]]})).forEach(function(o){F.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(podTopic===o[0]),text:o[1],onclick:function(){podTopic=o[0];renderPodcast()}}))});
+  var list=PODS.filter(function(x){return podTopic==='all'||x.topic===podTopic});
+  $('podEmpty').hidden=!!list.length;
+  list.forEach(function(x){W.appendChild(podCard(x))});
+  var Q=$('podAsk');Q.innerHTML='';Q.appendChild(askBox());
+}
+function renderLive(){
+  var S=$('liveStage');if(!S)return;S.innerHTML='';
+  var E=$('liveEdit');E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Дамжуулалтын хуваарь засах / нэмэх',onclick:function(){editList('podlive')}}));
+  var LM=MATCHES.filter(function(m){return m.status==='live'});if(LM.length){var lg=h('div',{cls:'mgrid',style:'margin-bottom:12px'});LM.forEach(function(m){lg.appendChild(matchRow(m))});S.appendChild(lg)}
+  var L=liveNow();
+  if(L){S.appendChild(h('div',{cls:'livecard on'},[h('div',{cls:'chips'},[h('span',{cls:'livedot',text:'LIVE'}),h('b',{text:L[0]})]),L[2]?playerEl(L[2],L[0]):h('p',{cls:'muted',style:'margin:0',text:'Дамжуулалтын линк удахгүй нэмэгдэнэ.'}),L[4]?h('p',{style:'margin:0',text:L[4]}):null]))}
+  var Y=$('liveYT'),ch=ytChan(),c=(window.TPE_CONFIG&&TPE_CONFIG.CONTACT)||{};
+  if(Y){Y.hidden=!!L||!ch;
+    if(ch&&!Y.firstChild){var sub=ytChanUrl();Y.appendChild(h('div',{cls:'livecard',style:'margin-top:0'},[h('div',{cls:'chips'},[h('span',{cls:'livedot',text:'YouTube LIVE'}),h('b',{text:'Coach Jack-ийн суваг'})]),
+      ytFrame('https://www.youtube.com/embed/live_stream?channel='+ch+'&autoplay=1&mute=1','YouTube шууд дамжуулалт'),
+      h('p',{cls:'muted',style:'margin:0;font-size:14px',text:'YouTube дээр шууд дамжуулалт эхлэхэд энд автоматаар гарч ирнэ, линк хуулах шаардлагагүй. "This video is unavailable" гэж харагдвал одоогоор шууд дамжуулалт явагдаагүй байна. Хуудсаа refresh хийж шалгаарай.'}),
+      h('div',{cls:'chips'},[sub?h('a',{cls:'btn line small',href:sub+(/\?/.test(sub)?'&':'?')+'sub_confirmation=1',target:'_blank',rel:'noopener',text:'▶ Сувагт бүртгүүлэх (мэдэгдэл авах)'}):null,c.facebook?h('a',{cls:'btn line small',href:c.facebook,target:'_blank',rel:'noopener',text:'Facebook'}):null])]))}}
+  if(!L&&!ch)S.appendChild(h('div',{cls:'livecard'},[h('div',{cls:'chips'},[h('span',{cls:'livedot off',text:'OFF AIR'}),h('b',{text:'Одоогоор шууд дамжуулалт алга'})]),h('p',{cls:'muted',style:'margin:0',text:'Тэмцээн, спортын наадам, өглөөний дасгалын шууд дамжуулалт эхлэхэд энд гарч ирнэ.'})]));
+  var U=$('liveSched');U.innerHTML='';var up=PODLIVE.filter(function(r){return r[3]==='soon'});
+  if(up.length)U.appendChild(h('ol',{cls:'tl'},up.map(function(r){return h('li',{},[h('b',{text:(r[1]?r[1]+' · ':'')+r[0]}),r[4]?h('span',{cls:'muted',text:r[4]}):null])})));
+  else U.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Дараагийн шууд дамжуулалтын хуваарийг удахгүй зарлана.'}));
+  var R=$('liveReplay');R.innerHTML='';var reps=PODS.filter(function(x){return x.type==='replay'&&!x.soon});
+  $('liveReplayEmpty').hidden=!!reps.length;reps.forEach(function(x){R.appendChild(podCard(x))});
+}
+function openPod(id){
+  var x=PODS.filter(function(s){return s.id===id})[0];if(!x)return;var tp=PODTOPIC[x.topic]||PODTOPIC.move;
+  openSheet(function(p){
+    $('sheetEyebrow').textContent=[PODTYPE[x.type]||'Подкаст',podNum(x)].filter(Boolean).join(' · ');
+    p.appendChild(h('h2',{id:'sheetTitle',text:x.t,style:'font-size:28px'}));
+    var er=editRow('pod',x,openPod);if(er)p.appendChild(er);
+    p.appendChild(h('div',{cls:'chips'},[h('span',{cls:'tag',style:'background:transparent;border:1.5px solid '+tp[1],text:tp[0]}),x.soon?h('span',{cls:'tag',style:'background:var(--gold-soft);color:#1c1c1c',text:'Удахгүй'}):null,podMeta(x)?h('span',{cls:'muted',style:'font-size:14px;font-weight:700',text:podMeta(x)}):null]));
+    var pl=x.soon?null:playerEl(x.url,x.t);
+    p.appendChild(pl?h('div',{cls:'box'},[pl]):h('div',{cls:'pic',style:'aspect-ratio:16/7;width:100%;border-radius:14px;overflow:hidden;--cc:'+tp[1]},[podPic(x)]));
+    if(x.soon)p.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Энэ анги удахгүй гарна. Гармагц энд тоглуулагч гарч ирнэ.'}));
+    if(x.sum)p.appendChild(h('p',{cls:'lede',text:x.sum}));
+    if(x.notes&&x.notes.length){var bx=h('div',{cls:'box'},[h('h3',{text:'Энэ ангид'})]);x.notes.forEach(function(b){if(b[0]==='p')bx.appendChild(h('p',{style:'margin:0',text:b[1]}));else if(b[0]==='h')bx.appendChild(h('h3',{text:b[1]}));else bx.appendChild(h(b[0],{cls:'cues'},b[1].map(function(l){return h('li',{text:l})})))});p.appendChild(bx)}
+    var at=attView(x.att);if(at){at.querySelector('h3').textContent='Нэмэлт материал, линк ('+(x.att||[]).length+')';p.appendChild(at)}
+    var pc=platformChips();if(pc)p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Бусад газраас сонсох'}),pc]));
+    p.appendChild(askBox());
   });
 }
 
@@ -3054,9 +3563,20 @@ function exportAssign(){var rows=[['Огноо','Даалгавар','Анги',
 
 /* ---------- site CMS: every static text + lists, owner edits ---------- */
 var SITE={},TXT={};
-var DEF={how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice(),foods:FOODS.slice(),pals:PALS.slice(),wbdim:WBDIM.slice(),wblv:WBLV.slice()};
+COMPS.length=0;DEFCOMPS.forEach(function(x){COMPS.push(x)});
+YTLISTS.length=0;
+PODLINKS.length=0;podDefLinks().forEach(function(x){PODLINKS.push(x)});
+var DEF={ytlists:[],comps:DEFCOMPS.slice(),podlive:[],podlinks:PODLINKS.slice(),how:HOW.slice(),tips:TIPS.slice(),primevar:PRIMEVAR.slice(),primerule:PRIMERULE.slice(),prime:PRIME.slice(),foods:FOODS.slice(),pals:PALS.slice(),wbdim:WBDIM.slice(),wblv:WBLV.slice()};
 var DEFWBS=WBS.map(function(x){return {n:x.n,w:x.w,pe:x.pe,g:x.g.slice()}});
 var LISTS={
+  ytlists:{title:'YouTube: тоглуулах жагсаалтууд',note:'YouTube дээр playlist нээгээд Share → Copy хийсэн линкийг (…list=PL…) буулгана. Жагсаалт Public эсвэл Unlisted байх ёстой.',fields:[['t','Гарчиг (жишээ: UBAC тоглолтууд)'],['url','Playlist линк'],['note','Тайлбар',1]],
+    toRow:function(x){return {t:x[0],url:x[1],note:x[2]}},fromRow:function(r){return [r.t||'',r.url||'',r.note||'']},arr:YTLISTS},
+  comps:{title:'Тэмцээнүүд (лиг, аварга шалгаруулалт)',keepId:true,note:'Тэмцээнийг хасвал түүний тоглолтууд хадгалагдсан хэвээр үлдэнэ. Онооны дүрэм нь хүснэгтийг яаж бодохыг шийднэ.',fields:[['n','Нэр (жишээ: UBAC U19 волейбол, охид)'],['sport','Спорт',[['vb','Волейбол'],['bb','Сагсан бөмбөг'],['fb','Хөл бөмбөг'],['tt','Ширээний теннис'],['tn','Теннис'],['ch','Шатар']]],['season','Улирал (жишээ: 2026–27)'],['div','Ангилал (U19, охид, хөвгүүд…)'],['rule','Онооны дүрэм',[['vb','Волейбол (3/2/1 оноо)'],['bb','Сагс (хожил 2, хожигдол 1)'],['fb','Хожил 3, тэнцээ 1']]]],
+    toRow:function(x){return {id:x.id,n:x.n,sport:x.sport,season:x.season,div:x.div,rule:x.rule}},fromRow:function(r){return {id:r.id||slug(),n:r.n||'Тэмцээн',sport:r.sport||'vb',season:r.season||'',div:r.div||'',rule:r.rule||'fb'}},arr:COMPS},
+  podlive:{title:'Шууд дамжуулалт: хуваарь',note:'Төлөв "Одоо шууд" болгосон эхний мөр нь хуудсан дээр тоглуулагчтай гарна. Дууссаны дараа "Дууссан" болгож, бичлэгийг подкастын анги (төрөл: Шууд дамжуулалтын бичлэг) болгон нэмээрэй.',fields:[['title','Нэр (жишээ: UBAC U19 волейбол: TAS – ...)'],['when','Хэзээ (жишээ: 11/05 Пүрэв 17:00)'],['url','Дамжуулалтын линк (YouTube, Facebook)'],['st','Төлөв',[['soon','Удахгүй'],['live','Одоо шууд'],['done','Дууссан (нуух)']]],['note','Тайлбар, хаана',1]],
+    toRow:function(x){return {title:x[0],when:x[1],url:x[2],st:x[3],note:x[4]}},fromRow:function(r){return [r.title||'',r.when||'',r.url||'',r.st||'soon',r.note||'']},arr:PODLIVE},
+  podlinks:{title:'Подкаст: сонсох платформууд',note:'Линкгүй мөр хуудсан дээр харагдахгүй.',fields:[['n','Платформ'],['url','Линк (https://…)']],
+    toRow:function(x){return {n:x[0],url:x[1]}},fromRow:function(r){return [r.n||'',/^https:\/\//.test(r.url||'')?r.url:'']},arr:PODLINKS},
   how:{title:'Хэрхэн явагддаг: алхмууд',fields:[['when','Хэзээ'],['title','Гарчиг'],['text','Тайлбар',1]],
     toRow:function(x){return {when:x[0],title:x[1],text:x[2]}},fromRow:function(r){return [r.when||'',r.title||'',r.text||'']},arr:HOW},
   tips:{title:'Өдрийн дадлууд (нүүр хуудас)',fields:[['topic','Сэдэв'],['text','Дадал',1]],
@@ -3174,11 +3694,171 @@ function setAuthed(on){
 }
 [].forEach.call(document.querySelectorAll('[data-login]'),function(b){b.addEventListener('click',function(){openLogin(b.dataset.login)})});
 
+/* ---------- beta: feedback button, inbox, weekly updates ---------- */
+var UPDATES=[
+ {date:'2026-10-25',title:'Бета хувилбар нээгдлээ',text:'Сайт туршилтын (бета) хувилбараар ажиллаж эхэллээ. Та бүхний саналаар долоо хоног бүр сайжирна.\nХуудас бүрийн баруун доод буланд "💬 Санал өгөх" товч нэмэгдлээ. Нэвтрээгүй эцэг эхчүүд ч санал илгээж болно.\nСурагч, эцэг эхэд зориулсан "Сайтыг хэрхэн ашиглах" заавар нэмэгдлээ.\n"Подкаст ба шууд" цэс "Podcast & Broadcast" болж нэрээ солилоо.'}
+];
+DEF.updates=UPDATES.slice();
+LISTS.updates={title:'Юу шинэчлэгдэв: шинэчлэлүүд',note:'Огноог 2026-10-25 хэлбэрээр бичнэ. Хамгийн сүүлийн огноотой нь дээр харагдана. "Юу өөрчлөгдсөн" хэсэгт мөр бүрт нэг өөрчлөлт бичнэ.',
+  fields:[['date','Огноо'],['title','Гарчиг'],['text','Юу өөрчлөгдсөн (мөр бүрт нэг)',2]],
+  toRow:function(x){return {date:x.date,title:x.title,text:x.text}},fromRow:function(r){return {date:r.date||'',title:r.title||'',text:r.text||''}},arr:UPDATES};
+function updDay(s){return String(s||'').replace(/-/g,'.')}
+function renderUpdates(){
+  var W=$('updOut');if(!W||!UPDATES)return;W.innerHTML='';var E=$('updEdit');
+  if(E){E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Шинэчлэл нэмэх / засах',onclick:function(){editList('updates')}}))}
+  var list=UPDATES.slice().sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+  if(!list.length){W.appendChild(h('p',{cls:'muted',text:'Одоогоор шинэчлэл алга.'}));return}
+  var wk=ymd(new Date(Date.now()-7*864e5));
+  list.forEach(function(u){var ls=lines(u.text||'');
+    W.appendChild(h('article',{cls:'upd'},[h('div',{cls:'chips'},[h('span',{cls:'when',text:updDay(u.date)}),String(u.date||'')>=wk?h('span',{cls:'tag g',text:'Шинэ'}):null]),
+      h('h3',{text:u.title||'Шинэчлэл'}),ls.length>1?h('ul',{},ls.map(function(t){return h('li',{text:t})})):ls.length?h('p',{text:ls[0]}):null]))});
+}
+
+var FBTYPE={bug:['🐞','Алдаа','Ажиллахгүй эсвэл буруу харагдаж байна','var(--orange)'],idea:['💡','Санаа','Ийм зүйл нэмбэл гоё','var(--teal)'],confusing:['🤔','Ойлгомжгүй','Юу хийхээ мэдэхгүй байна','#a16207'],like:['❤️','Таалагдсан','Энэ хэсэг гоё байна','#15803d']};
+var FBWHO={parent:'Эцэг эх',student:'Сурагч',teacher:'Багш',other:'Бусад'};
+var FBST={'new':'Шинэ',doing:'Хийж байна',done:'Хийсэн',skip:'Хийхгүй'};
+var FB=[],MYFB=[],fbFilter='new',fbLast=0;
+function fbMs(t){return t&&t.toMillis?t.toMillis():typeof t==='number'?t:Date.now()}
+function fbDt(ms){var d=new Date(ms);return ymd(d)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes())}
+function fbCut(s,n){s=String(s||'');return s.length>n?s.slice(0,n-1)+'…':s}
+function fbView(){var v=(location.hash||'').slice(1);return VIEWS.indexOf(v)<0?'home':v}
+function fbViewName(v){var a=document.querySelector('nav.tabs [data-go="'+v+'"]');return a?((a.querySelector('b')||a).textContent||'').trim():v}
+function fbDev(){var ua=navigator.userAgent||'';var os=/iPhone|iPad|iPod/.test(ua)?'iPhone/iPad':/Android/.test(ua)?'Android':/Mac/.test(ua)?'Mac':/Windows/.test(ua)?'Windows':/CrOS/.test(ua)?'Chromebook':/Linux/.test(ua)?'Linux':'Бусад';
+  var br=/Edg\//.test(ua)?'Edge':/CriOS|Chrome\//.test(ua)?'Chrome':/FxiOS|Firefox\//.test(ua)?'Firefox':/Safari\//.test(ua)?'Safari':'';return (os+' '+br).trim()+' · '+window.innerWidth+'px'}
+function openFeedback(){
+  var type='',page=fbView(),guest=!(ME&&MYROLE&&ME.emailVerified);
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Санал өгөх · Бета';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Таны санал сайтыг сайжруулна'}));
+    p.appendChild(h('p',{cls:'lede',text:'Юу ажиллахгүй байна, юу ойлгомжгүй байна, юу нэмбэл гоё вэ? Товчхон бичээрэй. Жак багш долоо хоног бүр уншиж, сайжруулна.'}));
+    var st=h('p',{cls:'status',role:'status'});
+    var tb=h('div',{cls:'fbtypes',role:'group','aria-labelledby':'fbq1'});
+    Object.keys(FBTYPE).forEach(function(k){var t=FBTYPE[k];var b=h('button',{type:'button',cls:'fbtype','aria-pressed':'false',onclick:function(){type=k;[].forEach.call(tb.children,function(x){x.setAttribute('aria-pressed',String(x===b))})}},[h('span',{cls:'e','aria-hidden':'true',text:t[0]}),h('b',{text:t[1]}),h('small',{text:t[2]})]);tb.appendChild(b)});
+    p.appendChild(h('div',{cls:'ff'},[h('span',{id:'fbq1',text:'1. Ямар санал вэ?'}),tb]));
+    var ta=h('textarea',{id:'fb-text',rows:'5',maxlength:'2000',placeholder:'Жишээ: Утсан дээр "Бэлтгэлийн тэмдэглэл"-ийн товч хэт жижиг байна.'});
+    p.appendChild(h('label',{for:'fb-text',cls:'ff'},['2. Санаагаа бичээрэй',ta]));
+    if(guest){
+      p.appendChild(fSelect('fb-who','3. Та хэн бэ?',[['','— Сонгоно уу —'],['parent','Эцэг эх'],['student','Сурагч'],['teacher','Багш'],['other','Бусад']],''));
+      p.appendChild(fText('fb-contact','Хариу авах бол утас эсвэл имэйл (заавал биш)','',{ph:'9911 2233 эсвэл нэр@gmail.com'}));
+    }else p.appendChild(h('p',{cls:'muted',style:'font-size:13px',text:'Таны нэр, анги автоматаар хавсарна. Санаа тань хэрэгжвэл дараа нэвтрэхэд танд мэдэгдэнэ.'}));
+    var hp=h('input',{type:'text',id:'fb-web',tabindex:'-1',autocomplete:'off'});p.appendChild(h('div',{cls:'hp','aria-hidden':'true'},[hp]));
+    p.appendChild(h('p',{cls:'muted',style:'font-size:12.5px',text:'Хуудас: '+fbViewName(page)+' · '+fbDev()}));
+    var send=h('button',{type:'button',cls:'btn gold',text:'Илгээх',onclick:go});
+    p.appendChild(h('div',{cls:'editrow'},[send,h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+    function err(t){st.className='status err';st.textContent=t}
+    p.addEventListener('input',function(){if(st.className==='status err')st.textContent=''});p.addEventListener('change',function(){if(st.className==='status err')st.textContent=''});
+    tb.addEventListener('click',function(){if(st.className==='status err')st.textContent=''});
+    function go(){
+      var txt=ta.value.trim();
+      if(!type)return err('Ямар санал болохыг сонгоно уу.');
+      if(txt.length<3)return err('Санаагаа бичнэ үү.');
+      if(guest&&!val('fb-who'))return err('Та хэн болохоо сонгоно уу.');
+      if(hp.value){closeSheet();return}
+      if(Date.now()-fbLast<20000)return err('Түр хүлээгээд дахин илгээнэ үү.');
+      if(!db){var em=(window.TPE_CONFIG&&TPE_CONFIG.CONTACT&&TPE_CONFIG.CONTACT.email)||'';if(em)location.href='mailto:'+em+'?subject='+encodeURIComponent('Tomujin PE санал: '+FBTYPE[type][1])+'&body='+encodeURIComponent(txt);return}
+      var d={type:type,text:txt.slice(0,2000),page:page,dev:fbDev().slice(0,160),status:'new',at:{__sv:'time'}};
+      if(guest){d.uid='';d.who=val('fb-who');var c=val('fb-contact').slice(0,120);if(c)d.contact=c}
+      else{d.uid=ME.uid;d.who=isStaff()?'teacher':'student';d.email=String(ME.email||'').toLowerCase();d.name=String((MYPROFILE&&MYPROFILE.name)||ME.name||'').slice(0,80);d.classId=myClass()}
+      send.disabled=true;st.className='status';st.textContent='Илгээж байна…';
+      db.batch([{op:'set',path:'feedback/'+slug(),data:d}]).then(function(){fbLast=Date.now();thanks()},function(){send.disabled=false;err('Илгээж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.')});
+    }
+    function thanks(){
+      openSheet(function(q){
+        $('sheetEyebrow').textContent='Санал өгөх · Бета';
+        q.appendChild(h('h2',{id:'sheetTitle',text:'Баярлалаа! 🙌'}));
+        q.appendChild(h('p',{cls:'lede',text:'Таны санал Жак багшид очлоо. Долоо хоног бүр саналуудыг уншиж, сайтыг сайжруулна.'+(guest?'':' Таны санаа хэрэгжвэл нэвтрэхэд тань мэдэгдэл гарна.')}));
+        q.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',text:'Юу шинэчлэгдсэнийг харах',onclick:function(){closeSheet();show('updates')}}),h('button',{type:'button',cls:'btn line',text:'Хаах',onclick:closeSheet})]));
+      });
+    }
+  });
+}
+function startFbSubs(){
+  MYFB=[];renderFbDone();if(!ME||!db||!ME.emailVerified||!MYROLE)return;
+  unsubs.push(db.collection('feedback').onSnapshot(function(s){MYFB=s.docs.map(function(d){var x=d.data();x.id=d.id;return x});renderFbDone()},function(){},{where:[['uid','==',ME.uid]]}));
+  if(MYROLE==='admin')unsubs.push(db.collection('feedback').onSnapshot(function(s){FB=s.docs.map(function(d){var x=d.data();x.id=d.id;x.ms=fbMs(x.at);return x});renderFeedback();renderEditBar()},function(){},{orderBy:['at','desc'],limit:500}));
+  else FB=[];
+}
+function renderFbDone(){
+  var W=$('fbDone');if(!W)return;W.innerHTML='';
+  var x=(MYFB||[]).filter(function(f){return f.status==='done'&&!f.seen})[0];W.hidden=!x;if(!x)return;
+  W.appendChild(h('div',{cls:'wrap'},[h('span',{cls:'e','aria-hidden':'true',text:'🎉'}),
+    h('div',{cls:'bd'},[h('b',{text:'Таны санал хэрэгжлээ!'}),h('span',{text:'Таны бичсэн: "'+fbCut(x.text,90)+'"'}),h('span',{text:x.reply?'Жак багш: '+x.reply:'Таны саналын дагуу сайтыг сайжрууллаа. Баярлалаа!'})]),
+    h('button',{type:'button',cls:'btn gold small',text:'Баярлалаа ✓',onclick:function(){x.seen=true;renderFbDone();if(db)db.doc('feedback/'+x.id).update({seen:true}).catch(function(){})}})]));
+}
+function fbChip(){var n=(FB||[]).filter(function(x){return x.status==='new'}).length;
+  return h('button',{type:'button',cls:'chip','aria-pressed':String(n>0),text:'💬 Санал'+(n?' · '+n+' шинэ':''),onclick:function(){show('feedback')}})}
+function setFb(x,data,st){if(!db)return Promise.reject();return db.doc('feedback/'+x.id).update(data).then(function(){if(st){st.className='status';st.textContent='Хадгалагдлаа.'}},function(){if(st){st.className='status err';st.textContent='Хадгалж чадсангүй.'}throw 0})}
+function addUpdateLine(line){
+  line=String(line||'').trim();if(!line)return Promise.resolve();
+  var today=ymd(new Date()),title='Таны саналаар сайжруулсан';
+  var rows=UPDATES.map(LISTS.updates.toRow);var hit=rows.filter(function(r){return r.date===today&&r.title===title})[0];
+  if(hit)hit.text=(hit.text?hit.text+'\n':'')+line;else rows.unshift({date:today,title:title,text:line});
+  return saveSite('updates',{items:rows.map(function(r){return {date:String(r.date||''),title:String(r.title||''),text:String(r.text||'')}})});
+}
+function fbDoneSheet(x){
+  var st=h('p',{cls:'status',role:'status'});
+  openSheet(function(p){
+    $('sheetEyebrow').textContent='Санал хүсэлт';
+    p.appendChild(h('h2',{id:'sheetTitle',text:'Хийсэн гэж тэмдэглэх'}));
+    p.appendChild(h('div',{cls:'fbcard',style:'--fc:'+(FBTYPE[x.type]||FBTYPE.idea)[3]},[h('p',{cls:'txt',text:x.text})]));
+    var f=h('form',{cls:'edform'});f.addEventListener('submit',function(e){e.preventDefault()});
+    var help=x.uid?'Тэр хүн дараа нэвтрэхдээ "Таны санал хэрэгжлээ" гэсэн мэдэгдэлтэй хамт үүнийг харна.':'Энэ хүн нэвтрэлгүй илгээсэн тул сайт дээр мэдэгдэл очихгүй. '+(x.contact?'Холбоо барих: '+x.contact:'Холбоо барих мэдээлэл үлдээгээгүй.');
+    f.appendChild(fText('fd-reply','Хэрэглэгчид хэлэх үг',x.reply||'Таны саналаар ',{area:1,rows:3,help:help}));
+    f.appendChild(fText('fd-upd','"Юу шинэчлэгдэв" хэсэгт бичих өгүүлбэр',x.type==='like'?'':(x.reply||''),{area:1,rows:2,help:'Хоосон орхивол нэмэхгүй. Нэг өдрийн өөрчлөлтүүд нэг дор цуглана.'}));
+    var r=f.querySelector('#fd-reply'),u=f.querySelector('#fd-upd'),touched=false;
+    u.addEventListener('input',function(){touched=true});r.addEventListener('input',function(){if(!touched&&x.type!=='like'){var t=r.value.replace(/^Таны саналаар\s*/,'');u.value=t.charAt(0).toUpperCase()+t.slice(1)}});
+    f.appendChild(h('div',{cls:'editrow'},[
+      h('button',{type:'button',cls:'btn gold',text:'Хадгалах',onclick:function(){var rep=r.value.trim();if(rep==='Таны саналаар')rep='';
+        setFb(x,{status:'done',reply:rep.slice(0,500),doneAt:Date.now(),seen:false},st).then(function(){return addUpdateLine(u.value)}).then(function(){closeSheet()},function(){})}}),
+      h('button',{type:'button',cls:'btn line',text:'Болих',onclick:closeSheet}),st]));
+    p.appendChild(f);
+  });
+}
+function exportFb(){var rows=[['Огноо','Төрөл','Төлөв','Хэн','Нэр','Анги','Имэйл','Хуудас','Санал','Хариу','Холбоо барих','Төхөөрөмж']];
+  FB.slice().sort(function(a,b){return a.ms-b.ms}).forEach(function(x){rows.push([fbDt(x.ms),(FBTYPE[x.type]||['',''])[1],FBST[x.status]||x.status,FBWHO[x.who]||'',x.name||'',className(x.classId)||'',x.email||'',fbViewName(x.page),x.text,x.reply||'',x.contact||'',x.dev||''])});
+  downloadCSV('sanal-huselt.csv',rows)}
+function renderFeedback(){
+  var W=$('fbOut');if(!W||!FB)return;W.innerHTML='';
+  if(MYROLE!=='admin'){W.appendChild(h('p',{cls:'muted',text:'Энэ хэсэг зөвхөн админд харагдана.'}));return}
+  var cnt={'new':0,doing:0,done:0,skip:0},wk=Date.now()-7*864e5,week=0;FB.forEach(function(x){cnt[x.status]=(cnt[x.status]||0)+1;if(x.ms>=wk)week++});
+  W.appendChild(h('div',{cls:'fbstats'},[['Энэ 7 хоногт',week],['Шинэ',cnt['new']],['Хийж байна',cnt.doing],['Хийсэн',cnt.done],['Нийт',FB.length]].map(function(s){return h('div',{cls:'fbstat'},[h('b',{text:String(s[1])}),h('span',{text:s[0]})])})));
+  var chips=h('div',{cls:'chips'});
+  [['new','Шинэ'],['doing','Хийж байна'],['done','Хийсэн'],['skip','Хийхгүй'],['all','Бүгд']].forEach(function(f){chips.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(fbFilter===f[0]),text:f[1]+' ('+(f[0]==='all'?FB.length:cnt[f[0]]||0)+')',onclick:function(){fbFilter=f[0];renderFeedback()}}))});
+  if(FB.length)chips.appendChild(h('button',{type:'button',cls:'btn line small',text:'⬇ Excel-ээр татах',onclick:exportFb}));
+  W.appendChild(chips);
+  var list=FB.filter(function(x){return fbFilter==='all'||x.status===fbFilter});
+  if(!list.length){W.appendChild(h('p',{cls:'muted',text:FB.length?'Энэ ангилалд санал алга.':'Одоогоор санал ирээгүй байна. Сурагч, эцэг эхчүүдэд "💬 Санал өгөх" товчийг танилцуулаарай.'}));return}
+  list.forEach(function(x){var t=FBTYPE[x.type]||FBTYPE.idea;var st=h('span',{cls:'status',role:'status'});
+    var who=[FBWHO[x.who]||'',x.name||'',className(x.classId)||''].filter(Boolean).join(' · ');
+    var acts=h('div',{cls:'editrow'});
+    [['new','Шинэ'],['doing','Хийж байна']].forEach(function(s){acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status===s[0]),text:s[1],onclick:function(){setFb(x,{status:s[0]},st).catch(function(){})}}))});
+    acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status==='done'),text:'✓ Хийсэн',onclick:function(){fbDoneSheet(x)}}));
+    acts.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(x.status==='skip'),text:'Хийхгүй',onclick:function(){setFb(x,{status:'skip'},st).catch(function(){})}}));
+    acts.appendChild(h('button',{type:'button',cls:'btn line small danger',text:'🗑',title:'Устгах','aria-label':'Устгах',onclick:function(){if(confirm('Энэ саналыг устгах уу?'))db.doc('feedback/'+x.id).delete().catch(function(){st.className='status err';st.textContent='Устгаж чадсангүй.'})}}));
+    acts.appendChild(st);
+    W.appendChild(h('article',{cls:'fbcard',style:'--fc:'+t[3]},[
+      h('div',{cls:'meta'},[h('span',{cls:'tag',text:t[0]+' '+t[1]}),h('span',{cls:'tag '+(x.status==='done'?'ok':x.status==='new'?'g':''),text:FBST[x.status]||x.status}),h('span',{text:fbDt(x.ms)}),who?h('span',{text:'· '+who}):null,h('span',{text:'· '+fbViewName(x.page)})]),
+      h('p',{cls:'txt',text:x.text}),
+      x.contact?h('p',{cls:'muted',style:'font-size:13px',text:'Холбоо барих: '+x.contact}):null,
+      x.reply?h('p',{cls:'rep',text:'Таны хариу: '+x.reply+(x.uid?(x.seen?' · уншсан ✓':' · хараахан уншаагүй'):'')}):null,
+      h('p',{cls:'muted',style:'font-size:12px',text:x.dev||''}),acts]))});
+}
+function initBeta(){
+  var n=$('betaNote'),seen=false;try{seen=localStorage.getItem('tpe-beta-ok')==='1'}catch(e){}
+  if(n)n.hidden=seen;
+  function ok(){if(n)n.hidden=true;try{localStorage.setItem('tpe-beta-ok','1')}catch(e){}}
+  if($('betaOk'))$('betaOk').addEventListener('click',ok);
+  if($('betaGuide'))$('betaGuide').addEventListener('click',function(){ok();show('guide')});
+  if($('fbFab'))$('fbFab').addEventListener('click',openFeedback);
+  [].forEach.call(document.querySelectorAll('[data-fb]'),function(b){b.addEventListener('click',openFeedback)});
+}
+
 /* ---------- routing ---------- */
-var VIEWS=['myclubs','today','tests','home','how','clubs','stories','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming'];
-var PUBVIEWS=['home','how','clubs','stories','priming'];
+var VIEWS=['myclubs','today','tests','home','how','clubs','stories','matches','table','podcast','youtube','live','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming','guide','updates','feedback'];
+var PUBVIEWS=['home','how','clubs','stories','matches','table','podcast','youtube','live','priming','guide','updates'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
+  if(v==='feedback'&&AUTHED&&MYROLE!=='admin')v='home';
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   [].forEach.call(document.querySelectorAll('nav.tabs .mg'),function(g){g.classList.toggle('on',!!g.querySelector('[aria-current]'));g.classList.remove('open')});if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('nav.tabs'))document.activeElement.blur();
@@ -3190,7 +3870,7 @@ bindGo(document.querySelector('header'));
 document.addEventListener('click',function(){[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')[].forEach.call(document.querySelectorAll('nav.tabs .mg.open'),function(x){x.classList.remove('open')})});bindGo(document.querySelector('main'));
 $('q').addEventListener('input',function(){fQ=this.value;renderLib()});
-var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderClubReg();renderStories();renderTeams();renderTop();renderPrimeTeaser();renderPriming();applyTexts();initCalc();initPlan();
+var DL=null;tagTexts();applyCMS();renderHome();renderWB();renderFilters();renderLib();renderArts();renderLessons();renderClasses();renderHow();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderPrimeTeaser();renderPriming();renderUpdates();applyTexts();initCalc();initPlan();initBeta();
 setInterval(function(){if(!$('v-clubs').hidden&&$('sheet').hidden)renderClubReg();if(!$('v-myclubs').hidden&&$('sheet').hidden)renderMyClubs()},30000);
 DL={save:function(o){return new Promise(function(res){var b=new Blob([o.data],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);res()})}};renderPlan();
 fbInit();
