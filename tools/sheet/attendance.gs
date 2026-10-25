@@ -6,8 +6,8 @@
  *
  * Who may use it: only the owner's verified school account. Every request carries the person's
  * Firebase sign-in token; this script asks Google to check it before reading or writing anything.
- * What it returns: student ID, first and last name, grade, class (10A...), school email and the
- * attendance marks. It never returns phone numbers, photos, parents' data or anything from other tabs.
+ * What it returns: student ID, first and last name, grade, class (10A...), house, school email, the
+ * attendance marks and the week labels of row 1 (P1W8...). It never returns phone numbers, photos, parents' data or anything from other tabs.
  * What it writes: one attendance cell (or a list of them) on a "PE n" tab, found by student ID and
  * by the date in row 3. Only the school's own codes are accepted. Nothing else in the sheet changes.
  *
@@ -19,7 +19,7 @@ var TAB_RE = /^PE \d+$/;
 var HEAD_ROW = 3, FIRST_ROW = 4;
 // I (present), Kh (late, counts as present), T (absent), Ch (excused), O-bar (sick), in Cyrillic
 var CODES = ['\u0418', '\u0425', '\u0422', '\u0427', '\u04e8'];
-var H_ID = 'ID', H_FIRST = '\u041d\u044d\u0440', H_LAST = '\u041e\u0432\u043e\u0433', H_CLASS = '\u0410\u043d\u0433\u0438', H_MAIL = '\u0418-\u041c\u044d\u0439\u043b';
+var H_ID = 'ID', H_FIRST = '\u041d\u044d\u0440', H_LAST = '\u041e\u0432\u043e\u0433', H_CLASS = '\u0410\u043d\u0433\u0438', H_MAIL = '\u0418-\u041c\u044d\u0439\u043b', H_HOUSE = '\u0425\u0430\u0443\u0441';
 
 function doPost(e) {
   var out;
@@ -50,6 +50,7 @@ function checkToken_(token) {
 }
 
 function handle_(q, ss) {
+  if (q.action === 'summary') return summary_(ss);
   if (q.action === 'tabs') return { ok: true, tabs: ss.getSheets().map(function (s) { return s.getName(); }).filter(function (n) { return TAB_RE.test(n); }) };
   if (!TAB_RE.test(String(q.tab || ''))) throw new Error('bad-tab');
   var sh = ss.getSheetByName(q.tab);
@@ -67,13 +68,15 @@ function handle_(q, ss) {
 function layout_(sh, tz) {
   var lastCol = sh.getLastColumn();
   var head = sh.getRange(HEAD_ROW, 1, 1, lastCol).getValues()[0];
-  var c = {}, good = [], odd = [], last = '', gap = 0;
+  var top = sh.getRange(1, 1, 1, lastCol).getValues()[0];   // week labels (P1W1 ...) above the first day of each week
+  var c = {}, good = [], odd = [], last = '', gap = 0, wk = '', weeks = {};
   head.forEach(function (h, i) {
     if (h instanceof Date) {
       // dates run left to right; one that is not after the previous date (for example a 2025 date
       // in the middle of November 2026) is a header mistake: it is reported and never written to
       var iso = Utilities.formatDate(h, tz, 'yyyy-MM-dd');
-      if (iso > last) { good.push({ col: i + 1, iso: iso }); last = iso; gap = 0; }
+      var lab = String(top[i] || '').trim(); if (/^P\d+W\d+$/.test(lab)) wk = lab;
+      if (iso > last) { good.push({ col: i + 1, iso: iso }); last = iso; gap = 0; if (wk) weeks[iso] = wk; }
       else { gap++; odd.push({ col: i + 1, iso: iso, after: last, want: addDays_(last, gap) }); }
       return;
     }
@@ -82,10 +85,11 @@ function layout_(sh, tz) {
     else if (k === H_FIRST && !c.first) c.first = i + 1;
     else if (k === H_LAST && !c.last) c.last = i + 1;
     else if (k === H_MAIL && !c.mail) c.mail = i + 1;
+    else if (k === H_HOUSE && !c.house) c.house = i + 1;
     else if (k === H_CLASS) { if (!c.grade) c.grade = i + 1; else if (!c.cls) c.cls = i + 1; }
   });
   if (!c.id || !c.first) throw new Error('bad-header');
-  return { c: c, dates: good, odd: odd, lastCol: lastCol };
+  return { c: c, dates: good, odd: odd, lastCol: lastCol, weeks: weeks };
 }
 
 // the day this column most likely stands for (the header formulas add 1 day per column)
@@ -104,11 +108,37 @@ function read_(sh, tz) {
       students.push({
         id: id, first: first, last: L.c.last ? String(r[L.c.last - 1]).trim() : '',
         grade: L.c.grade ? String(r[L.c.grade - 1]).trim() : '', cls: L.c.cls ? String(r[L.c.cls - 1]).trim() : '',
+        house: L.c.house ? String(r[L.c.house - 1]).trim() : '',
         email: L.c.mail ? String(r[L.c.mail - 1]).trim().toLowerCase() : '', m: m
       });
     });
   }
-  return { ok: true, tab: sh.getName(), dates: L.dates.map(function (d) { return d.iso; }), odd: L.odd, students: students, codes: CODES };
+  return { ok: true, tab: sh.getName(), dates: L.dates.map(function (d) { return d.iso; }), odd: L.odd, weeks: L.weeks, students: students, codes: CODES };
+}
+
+/* One call for the teacher home: per class how many students, how many marks, present share, last
+   lesson day, and the students absent (T) two or more times in the last 28 days. No other personal data. */
+function summary_(ss) {
+  var tz = ss.getSpreadsheetTimeZone(), today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  var from = addDays_(today, -28), out = [], watch = [], weeks = {};
+  ss.getSheets().forEach(function (sh) {
+    if (!TAB_RE.test(sh.getName())) return;
+    var r = read_(sh, tz), by = {};
+    Object.keys(r.weeks || {}).forEach(function (d) { weeks[d] = r.weeks[d]; });
+    r.students.forEach(function (x) {
+      var k = x.cls || x.grade || '?', s = by[k] || (by[k] = { cls: k, n: 0, present: 0, marked: 0, absent: 0, excused: 0, sick: 0, last: '', today: 0 });
+      s.n++; var a4 = 0;
+      Object.keys(x.m).forEach(function (d) {
+        if (d > today) return;
+        var v = x.m[d]; s.marked++; if (d > s.last) s.last = d; if (d === today) s.today++;
+        if (v === CODES[0] || v === CODES[1]) s.present++; else if (v === CODES[2]) { s.absent++; if (d >= from) a4++; }
+        else if (v === CODES[3]) s.excused++; else if (v === CODES[4]) s.sick++;
+      });
+      if (a4 >= 2) watch.push({ tab: r.tab, id: x.id, first: x.first, last: x.last, cls: k, absent: a4 });
+    });
+    Object.keys(by).sort().forEach(function (k) { var s = by[k]; s.tab = r.tab; s.pct = s.marked ? Math.round(s.present / s.marked * 100) : null; out.push(s); });
+  });
+  return { ok: true, today: today, week: weeks[today] || '', weeks: weeks, classes: out, watch: watch };
 }
 
 /* marks: [{id, code}] for one date. code '' clears the cell. Returns what was written. */

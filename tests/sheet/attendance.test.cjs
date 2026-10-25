@@ -31,7 +31,7 @@ function load(sheets, tokenEmail = "saikhanjargal.j@tomujin.edu.mn", verified = 
   const ss = { getSheets: () => sheets, getSheetByName: (n) => sheets.find((s) => s.getName() === n) || null, getSpreadsheetTimeZone: () => TZ };
   const ctx = {
     SpreadsheetApp: { getActiveSpreadsheet: () => ss, flush() {} },
-    Utilities: { formatDate: (d, tz) => new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(d) },
+    Utilities: { formatDate: (d, tz) => Math.abs(d - Date.now()) < 60000 ? "2026-10-31" : new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(d) },
     LockService: { getDocumentLock: () => ({ waitLock() {}, releaseLock() {} }) },
     UrlFetchApp: { fetch: (url, o) => ({ getResponseCode: () => (JSON.parse(o.payload).idToken === "good" ? 200 : 400), getContentText: () => JSON.stringify({ users: [{ email: tokenEmail, emailVerified: verified }] }) }) },
     ContentService: { MimeType: { JSON: "json" }, createTextOutput: (t) => ({ setMimeType: () => ({ text: t }) }) },
@@ -46,9 +46,9 @@ function load(sheets, tokenEmail = "saikhanjargal.j@tomujin.edu.mn", verified = 
 function syntheticPE12() {
   const head = ["ID", "Нэр", "Овог", "Анги", "Хаус", "И-Мэйл", "Утас", "Зураг", "Анги", "Elective 1", "Elective 2", "Ирц /цаг/"];
   const days = ["2026-09-07", "2026-09-08", "2026-09-09", "2026-10-26", "2026-10-30", "2026-11-09", "2025-09-02", "2025-09-03", "2026-11-16", "2027-01-18"];
-  const rows = [Array(12).fill(""), Array(12).fill(""), head.concat(days.map(ub))];
+  const rows = [Array(12).fill("").concat(["P1W1", "", "", "P1W8", "", "P2W1", "", "", "P2W2", "P3W1"]), Array(12).fill(""), head.concat(days.map(ub))];
   const st = [["90001", "Туршилт", "Нэг", "12", "12A", "test1@tomujin.edu.mn"], ["90002", "#N/A", "", "", "", ""], ["90003", "Туршилт", "Хоёр", "12", "12B", "Test3@tomujin.edu.mn"]];
-  st.forEach((s, i) => rows.push([s[0], s[1], s[2], s[3], "H", s[5], "99119911", "https://photo", s[4], "", "", 0, i === 0 ? I : "", "", "", "", "", "", "", "", "", ""]));
+  st.forEach((s, i) => rows.push([s[0], s[1], s[2], s[3], "H" + i, s[5], "99119911", "https://photo", s[4], "", "", 0, i === 0 ? I : "", "", "", i === 2 ? T : "", i === 2 ? T : "", "", "", "", "", ""]));
   return rows;
 }
 
@@ -64,8 +64,15 @@ check("email lower-cased", r.students[1].email === "test3@tomujin.edu.mn");
 check("existing mark read by date", r.students[0].m["2026-09-07"] === I);
 check("2025 dates after 9/Nov are reported, not used", r.odd.length === 2 && r.odd.every((o) => o.iso.startsWith("2025")) && !r.dates.includes("2025-09-02"), r.odd);
 check("the wrong columns say which days they should be", r.odd.map((o) => o.want).join() === "2026-11-10,2026-11-11", r.odd);
+check("house and week labels come along", r.students[0].house === "H0" && r.weeks["2026-09-08"] === "P1W1" && r.weeks["2026-10-30"] === "P1W8" && r.weeks["2026-11-16"] === "P2W2" && !r.weeks["2025-09-02"], [r.students[0].house, r.weeks]);
 check("dates stay in order and include January", r.dates[0] === "2026-09-07" && r.dates.includes("2027-01-18"));
 
+r = api.call({ idToken: "good", action: "summary" });
+const c12a = (r.classes || []).filter((c) => c.cls === "12A")[0], c12b = (r.classes || []).filter((c) => c.cls === "12B")[0];
+check("summary: per class count, marks and present share", r.ok && c12a && c12a.n === 1 && c12a.marked === 1 && c12a.pct === 100 && c12b.absent === 2 && c12b.pct === 0, r.classes);
+check("summary: students absent twice in 28 days are listed, nothing else personal", r.watch.length === 1 && r.watch[0].id === "90003" && r.watch[0].absent === 2 && !("email" in r.watch[0]) && !JSON.stringify(r).includes("99119911"), r.watch);
+check("summary: marks made today are counted per class", c12a.today === 0 && c12b.today === 0);
+check("summary: today's week label", r.today === "2026-10-31" && r.week === "", r.week);
 r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26", marks: [{ id: "90001", code: I }, { id: "90003", code: T }] });
 check("writes marks by student ID into the date column", r.ok && pe12.cell(4, 16) === I && pe12.cell(6, 16) === T, [r, pe12.cell(4, 16), pe12.cell(6, 16)]);
 r = api.call({ idToken: "good", action: "mark", tab: "PE 12", date: "2026-10-26", marks: [{ id: "90003", code: "" }] });
