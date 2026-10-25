@@ -278,6 +278,67 @@ async def pickleball(pg):
     await pg.screenshot(path=SHOT + "pb_library.png")
 
 
+async def pe_attendance(pg):
+    """Class attendance written to the school's Sheet (preview: made-up students)."""
+    await pg.clock.set_fixed_time("2026-10-21T10:00:00+08:00")
+    await as_role(pg, "student", hash="patt", reset=True)
+    check("PA students cannot open class attendance", not await pg.is_visible("#v-patt") and await pg.locator("nav [data-go=patt]").is_hidden())
+    await as_role(pg, "admin", hash="patt")
+    check("PA owner sees the menu link", await pg.locator("nav [data-go=patt]").count() == 1 and not await pg.locator("nav [data-go=patt]").get_attribute("hidden"))
+    tabs = await pg.locator("#pattOut > .chips").first.locator("button.chip").all_text_contents()
+    check("PA tabs PE 6 ... PE 12 from the Sheet", tabs == ["PE 6", "PE 7", "PE 8", "PE 9", "PE 10", "PE 11", "PE 12"], tabs)
+    await pg.locator("#pattOut button.chip", has_text="PE 12").click(); await pg.wait_for_timeout(400)
+    cls = await pg.locator("#pattOut .chips").nth(1).locator("button").all_text_contents()
+    check("PA class filter 12A / 12B / 12C", cls == ["Бүгд", "12A", "12B", "12C"], cls)
+    check("PA date starts on today", await pg.input_value("#pa-date") == "2026-10-21")
+    note = await pg.text_content("#pattOut .crstep")
+    check("PA wrong header dates are named with the real days", "11/10" in note and "1/19" in note and "2025" in note, note)
+    await pg.locator("#pattOut .chips button", has_text="12B").click(); await pg.wait_for_timeout(200)
+    rows = pg.locator("#pattOut .pa-row")
+    check("PA class filter shows only 12B", await rows.count() == 8)
+    first = rows.first; sid = await first.get_attribute("data-id")
+    async def mark_of(i, d="2026-10-21"):
+        return await pg.evaluate("([id,d])=>{var s=__tpeStore()['mocksheet/PE 12'].students.filter(x=>x.id===id)[0];return s.m[d]||''}", [i, d])
+    await first.locator("button", has_text="Ирсэн").click(); await pg.wait_for_timeout(400)
+    check("PA one tap writes И to the Sheet", await mark_of(sid) == "И" and "Sheet-д хадгалагдлаа" in await pg.text_content("#pa-msg"))
+    await pg.locator(f".pa-row[data-id='{sid}'] button", has_text="Ирсэн").click(); await pg.wait_for_timeout(400)
+    check("PA tapping again clears the cell", await mark_of(sid) == "")
+    await pg.evaluate("()=>{window.__tpeSheetFail=true}")
+    await pg.locator(f".pa-row[data-id='{sid}'] button", has_text="Тасалсан").click(); await pg.wait_for_timeout(400)
+    msg = await pg.text_content("#pa-msg")
+    check("PA failed write says so and the screen goes back", "ороогүй" in msg and await mark_of(sid) == "" and await pg.locator(f".pa-row[data-id='{sid}'] button[aria-pressed=true]").count() == 0, msg)
+    await pg.evaluate("()=>{window.__tpeSheetHold=true}")
+    await pg.locator(f".pa-row[data-id='{sid}'] button", has_text="Хоцорсон").click(); await pg.wait_for_timeout(150)
+    check("PA buttons wait while the Sheet is saving", await pg.locator(f".pa-row[data-id='{sid}'] button").first.is_disabled())
+    await pg.evaluate("()=>window.__tpeSheetRelease()"); await pg.wait_for_timeout(300)
+    check("PA late (Х) saved", await mark_of(sid) == "Х")
+    n0 = await pg.evaluate("()=>window.__tpeSheetWrites||0")
+    await pg.click("#pa-bulk"); await pg.wait_for_timeout(200)
+    pv = await pg.text_content("#pa-preview")
+    check("PA bulk shows who changes, before writing", "7 сурагч (12B)" in pv and await pg.evaluate("()=>window.__tpeSheetWrites||0") == n0, pv)
+    await pg.screenshot(path=SHOT + "pa_bulk_preview.png")
+    await pg.click("#pa-bulk-ok"); await pg.wait_for_timeout(400)
+    marks = await pg.evaluate("()=>__tpeStore()['mocksheet/PE 12'].students.filter(x=>x.cls==='12B').map(x=>x.m['2026-10-21']||'')")
+    check("PA bulk writes in one request; the late mark stays", marks.count("И") == 7 and marks.count("Х") == 1 and await pg.evaluate("()=>window.__tpeSheetWrites") == n0 + 1, marks)
+    other = await pg.evaluate("()=>__tpeStore()['mocksheet/PE 12'].students.filter(x=>x.cls==='12A').map(x=>x.m['2026-10-21']||'').join('')")
+    check("PA bulk does not touch other classes", other == "", other)
+    row = await pg.locator(f".pa-row[data-id='{sid}'] small").text_content()
+    st = await pg.evaluate("(id)=>{var s=__tpeStore()['mocksheet/PE 12'].students.filter(x=>x.id===id)[0];return Object.values(s.m).filter(v=>v==='И'||v==='Х').length*2}", sid)
+    check("PA hours = (И + Х) × 2, like the Sheet", f"{st} цаг" in row, (row, st))
+    await pg.screenshot(path=SHOT + "pa_marked.png")
+    await pg.select_option("#pa-date", "2026-10-26"); await pg.wait_for_timeout(200)
+    r0 = pg.locator("#pattOut .pa-row").first
+    check("PA future day: only 'Чөлөөтэй' can be set, no bulk", await r0.locator("button", has_text="Ирсэн").is_disabled() and not await r0.locator("button", has_text="Чөлөөтэй").is_disabled() and await pg.locator("#pa-bulk").count() == 0)
+    await pg.locator("#pattOut summary", has_text="Тохиргоо").click()
+    await pg.fill("#pa-url", "https://evil.example.com/x")
+    await pg.locator("#pattOut button", has_text="Хадгалах").click(); await pg.wait_for_timeout(200)
+    check("PA settings refuse a non-Apps-Script address", "script.google.com" in await pg.locator("#pattOut details .status").last.text_content() and await store_get(pg, "private/peatt") is None)
+    await pg.fill("#pa-url", "https://script.google.com/macros/s/AKfyc-test_123/exec")
+    await pg.locator("#pattOut button", has_text="Хадгалах").click(); await pg.wait_for_timeout(300)
+    check("PA script address saved owner-only (private/peatt)", (await store_get(pg, "private/peatt") or {}).get("url", "").endswith("/exec"))
+    check("PA copy-code button for installing the script", await pg.locator("#pattOut button", has_text="Кодыг хуулах").count() == 1)
+
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
@@ -299,7 +360,7 @@ async def main():
     sys.exit(1 if bad else 0)
 
 
-EXTRA = [feedback, attendance, home_header, pickleball]
+EXTRA = [feedback, attendance, home_header, pickleball, pe_attendance]
 
 if __name__ == "__main__":
     asyncio.run(main())

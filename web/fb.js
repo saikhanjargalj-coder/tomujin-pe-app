@@ -144,6 +144,8 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
       return current;
     },
     async reset(email) { await sendPasswordResetEmail(auth, email.trim()); },
+    // Sign-in token for the attendance Sheet script, which checks it with Google before doing anything.
+    idToken() { return auth.currentUser ? auth.currentUser.getIdToken() : Promise.reject(new Error("bad-token")); },
     async signOut() { await signOut(auth); }
   };
   ready();

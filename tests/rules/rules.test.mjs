@@ -230,6 +230,15 @@ await test("F7 owner marks 'Хийхгүй' with a reason; the sender reads it a
   await assertSucceeds(updateDoc(doc(stu(1), "feedback/e4"), { seen: true }));
   await assertFails(updateDoc(doc(stu(1), "feedback/e4"), { status: "new", seen: true }));
 });
+await test("P1 private settings (attendance Sheet script address): owner only", async () => {
+  await seed((db) => setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }));
+  await assertSucceeds(setDoc(doc(owner(), "private/peatt"), { url: "https://script.google.com/macros/s/x/exec", sheet: "", at: 1 }));
+  await assertSucceeds(getDoc(doc(owner(), "private/peatt")));
+  await assertFails(getDoc(doc(teacher(), "private/peatt")));
+  await assertFails(getDoc(doc(stu(1), "private/peatt")));
+  await assertFails(getDoc(doc(guest(), "private/peatt")));
+  await assertFails(setDoc(doc(teacher(), "private/peatt"), { url: "https://evil" }));
+});
 
 /* ---------------- club attendance ---------------- */
 await test("A1 only the owner marks attendance (with history); student and teacher cannot", async () => {

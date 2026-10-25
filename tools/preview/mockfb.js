@@ -156,8 +156,41 @@
   /* test hooks: __tpeNotify() replays a live update to every open listener, __tpeStore() reads the test data */
   window.__tpeNotify = function () { notify(); };
   window.__tpeStore = function () { return store; };
+  /* Stand-in for the school's attendance Sheet (PE 6 ... PE 12) with made-up students.
+     Test hooks: __tpeSheetFail = the next write is refused; __tpeSheetHold = writes wait for __tpeSheetRelease(). */
+  var FN = ["Анар", "Батзориг", "Билгүүн", "Гэрэл", "Дөлгөөн", "Есүй", "Жавхлан", "Заяа", "Ивээл", "Лхам", "Мөнх", "Номин", "Оюу", "Пүрэв", "Сараа", "Тэмүүлэн", "Ууганаа", "Хулан", "Цэцэг", "Чинзориг", "Шинэ", "Энхжин"];
+  var LN = ["Бат", "Дорж", "Ганбаатар", "Сүх", "Энх", "Төмөр", "Болд", "Нямаа"];
+  function schoolDays() { var out = [], d = new Date("2026-09-07T00:00:00Z"), e = new Date("2027-06-11T00:00:00Z"); while (d <= e) { var w = d.getUTCDay(); if (w > 0 && w < 6) out.push(d.toISOString().slice(0, 10)); d = new Date(d.getTime() + 864e5); } return out; }
+  function sheetTab(tab) {
+    var k = "mocksheet/" + tab; if (store[k]) return store[k];
+    var g = +tab.split(" ")[1], secs = g >= 12 ? ["A", "B", "C"] : g >= 10 ? ["A", "B"] : [""], st = [], n = 0, td = ymd(Date.now());
+    var dates = schoolDays().filter(function (d) { return !/^2026-11-1[0-3]$|^2027-01-(19|2[0-2])$/.test(d); });
+    secs.forEach(function (sc, si) { var size = g >= 10 ? 8 : 6; for (var i = 0; i < size; i++) { n++; var id = String(30000 + g * 100 + n), m = {};
+      dates.forEach(function (d, di) { var w = new Date(d + "T00:00:00Z").getUTCDay(); if (d < td && w === ((g + si) % 5) + 1) m[d] = (i + di) % 11 === 0 ? "Т" : (i + di) % 13 === 0 ? "Ч" : (i + di) % 17 === 0 ? "Х" : "И"; });
+      st.push({ id: id, first: FN[(n * 7 + g) % FN.length], last: LN[(n + g) % LN.length], grade: String(g), cls: sc ? g + sc : "", email: "student" + id + "@tomujin.edu.mn", m: m }); } });
+    var odd = []; ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2027-01-19", "2027-01-20", "2027-01-21", "2027-01-22"].forEach(function (w, i) { odd.push({ col: 0, iso: "2025-09-0" + (2 + i % 4), want: w }); });
+    store[k] = { dates: dates, odd: odd, students: st };
+    return store[k];
+  }
+  function sheetCall(q) {
+    var TABS = ["PE 6", "PE 7", "PE 8", "PE 9", "PE 10", "PE 11", "PE 12"];
+    if (role !== "admin") return wait().then(function () { throw new Error("not-allowed"); });
+    if (q.action === "tabs") return wait({ ok: true, tabs: TABS });
+    if (TABS.indexOf(q.tab) < 0) return wait().then(function () { throw new Error("bad-tab"); });
+    var t = sheetTab(q.tab);
+    if (q.action === "read") return wait(JSON.parse(JSON.stringify({ ok: true, tab: q.tab, dates: t.dates, odd: t.odd, students: t.students })));
+    if (q.action === "mark") {
+      if (window.__tpeSheetFail) { window.__tpeSheetFail = false; return wait().then(function () { throw new Error("offline"); }); }
+      if (t.dates.indexOf(q.date) < 0) return wait().then(function () { throw new Error("no-date-column"); });
+      var go = function () { q.marks.forEach(function (w) { var s = t.students.filter(function (x) { return x.id === w.id; })[0]; if (s) { if (w.code) s.m[q.date] = w.code; else delete s.m[q.date]; } }); persist(); window.__tpeSheetWrites = (window.__tpeSheetWrites || 0) + 1; return { ok: true }; };
+      if (window.__tpeSheetHold) return new Promise(function (res) { window.__tpeSheetRelease = function () { window.__tpeSheetHold = false; res(go()); }; });
+      return wait().then(go);
+    }
+    return wait().then(function () { throw new Error("bad-action"); });
+  }
   var listeners = [];
   window.TPE = {
+    sheet: sheetCall, idToken: function () { return Promise.resolve("preview"); },
     configured: true, user: null, role: null, domain: "tomujin.edu.mn", db: db, preview: true,
     onAuth: function (cb) { listeners.push(cb); setTimeout(function () { window.TPE.user = user; window.TPE.role = ROLE[role]; cb(user, ROLE[role]); }, 60); },
     signIn: function () { return Promise.reject({ code: "tpe/preview" }); }, signUp: function () { return Promise.reject({ code: "tpe/preview" }); },

@@ -261,6 +261,9 @@ service cloud.firestore {
       allow create, update: if isOwner() && shortStr('text', 2000);
     }
 
+    // Owner-only settings that should not be public (for example the attendance Sheet script address).
+    match /private/{id} { allow read, write: if isOwner(); }
+
     // Fitness results imported for students who have not signed up yet (doc id = school email).
     // Only the owner writes; the student reads their own once signed in; teachers read.
     match /pending/{email} {
