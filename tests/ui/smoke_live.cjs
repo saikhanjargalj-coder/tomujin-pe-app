@@ -12,13 +12,13 @@ const BASE = process.argv[2] || "https://tomujin-pe.web.app/";
     pg.on("pageerror", (e) => errs.push(label + " " + e.message));
     pg.on("console", (m) => { if (m.type() === "error" && !/favicon|Failed to load resource/.test(m.text())) errs.push(label + " console: " + m.text()); });
     for (const v of ["home", "clubs", "guide", "updates", "podcast", "matches"]) {
-      await pg.goto(BASE + "#" + v, { waitUntil: "networkidle" });
+      await pg.goto(BASE + "#" + v, { waitUntil: "load" });
       await pg.waitForTimeout(1500);
       const shown = await pg.evaluate(() => [...document.querySelectorAll("section.view")].filter((s) => !s.hidden).map((s) => s.id).join(","));
       const wide = await pg.evaluate(() => document.documentElement.scrollWidth);
       out.push(`${label} #${v}: ${shown} width=${wide}${wide > w ? " (SIDEWAYS SCROLL)" : ""}`);
     }
-    await pg.goto(BASE + "#clubs", { waitUntil: "networkidle" }); await pg.waitForTimeout(2000);
+    await pg.goto(BASE + "#clubs", { waitUntil: "load" }); await pg.waitForTimeout(2000);
     const cr = await pg.textContent("#crOut");
     out.push(`${label} clubs: ${/нээгдэнэ|нээлттэй|хаагдсан/i.test(cr) ? "registration block ok" : "REGISTRATION BLOCK MISSING"}; rows=${await pg.locator("#crOut .crrow").count()}; volleyball name=${cr.includes("Гар бөмбөг")}`);
     await pg.click("#acctBar >> text=Нэвтрэх"); await pg.waitForTimeout(400);
