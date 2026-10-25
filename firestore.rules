@@ -32,6 +32,8 @@ service cloud.firestore {
     match /classes/{id} { allow read: if true; allow write: if isOwner(); }
     match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
     match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    match /matches/{id} { allow read: if true; allow write: if isOwner() && shortStr('url', 2000) && shortStr('notes', 5000); }
+    match /podcast/{id} { allow read: if true; allow write: if isOwner() && shortStr('img', 900000) && shortStr('url', 2000); }
     // Daily assignments for classes: signed-in school users read, only the owner writes.
     match /assign/{id}  { allow read: if school(); allow write: if isOwner(); }
     // Site texts and lists (page headings, how-it-works, morning routine, daily tips).

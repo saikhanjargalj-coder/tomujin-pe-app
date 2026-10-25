@@ -17,6 +17,8 @@ window.TPE_CONFIG = {
   // It must match the email written in firestore.rules.
   ADMIN_EMAIL: "saikhanjargal.j@tomujin.edu.mn",
   ACADEMIC_YEAR: "2026-27",
+  // YouTube channel ID (starts with "UC"). The YouTube page plays all its uploads on the site.
+  YOUTUBE_CHANNEL_ID: "UCKOzHIQCjtLCyYj-cJrrRRw",
   // Home page: coach photo and contact footer. Leave "" to hide an item.
   COACH_PHOTO: "",   // full https link to a photo, e.g. "https://.../jack.jpg"
   CONTACT: {
