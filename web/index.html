@@ -1984,7 +1984,7 @@ function paKeep(k,v){try{if(v==null)localStorage.removeItem('tpe-patt-'+k);else 
 function paGet(k){try{return localStorage.getItem('tpe-patt-'+k)||''}catch(e){return ''}}
 function paStart(){
   if(MYROLE!=='admin'||!db)return;
-  unsubs.push(db.doc('private/peatt').onSnapshot(function(d){var x=d.exists?d.data():{};PATT.url=x.url||'';PATT.sheet=x.sheet||'';PATT.loaded=true;if(!$('v-patt').hidden)renderPatt()},function(){PATT.loaded=true}));
+  unsubs.push(db.doc('private/peatt').onSnapshot(function(d){var x=d.exists?d.data():{};var was=PATT.url;PATT.url=x.url||'';PATT.sheet=x.sheet||'';PATT.loaded=true;if(PATT.url!==was){PATT.sum=null;PATT.data={}}paRefresh()},function(){PATT.loaded=true}));
 }
 /* Summary of every PE class (one call): class list for the picker and the teacher home. */
 function paLoadSum(force){
