@@ -201,13 +201,16 @@ service cloud.firestore {
         allow delete: if (school() && isMe(uid)) || isOwner();
       }
       // Loading Form: the student sends it once; it cannot be edited or deleted afterwards (owner can remove mistakes).
+      // Optional "sleep" = hours slept last night (number 0–16).
       match /loading/{id} {
         allow read: if isMe(uid) || isTeacher();
         allow create: if school() && isMe(uid)
           && request.resource.data.uid == uid
           && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
           && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
-          && shortStr('note', 2000);
+          && shortStr('note', 2000)
+          && (!('sleep' in request.resource.data)
+              || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
         allow update: if false;
         allow delete: if isOwner();
       }
