@@ -102,9 +102,9 @@ async def main():
 
         # network: answer lost after the server saved -> verify says seat exists
         await pg.evaluate("window.__tpeLost=true")
-        await pg.locator("#crOut .club", has_text="Гандбол").locator("button", has_text="Суудал авах").click()
+        await pg.locator("#crOut .club", has_text="Гар бөмбөг").locator("button", has_text="Суудал авах").click()
         await pg.wait_for_timeout(1200)
-        hb = await pg.locator("#crOut .club", has_text="Гандбол").text_content()
+        hb = await pg.locator("#crOut .club", has_text="Гар бөмбөг").text_content()
         check("4 lost answer: checks the server and confirms the seat", "серверт бүртгэгдсэн" in hb or "Таны суудал" in hb, hb[:300])
         # offline -> clear 'unknown, check after reconnect' state, no fake seat
         await as_role(pg, "student", phase="p2", hash="clubs", reset=True)

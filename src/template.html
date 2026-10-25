@@ -2039,7 +2039,7 @@ var HOW=[
  ['Долоо хоног бүр','80 минутын хичээл','1 болон 6–12-р анги. Эхлээд суурь хөдөлгөөн (гүйх, үсрэх, шидэх, барих, тэнцвэр), дараа нь хүч, бүтэн биеийн дасгал, спортын тоглоом. Жилд 4 улирал: гадаа хөнгөн атлетик, заалны спорт, хэрэглээ, тусгал.'],
  ['Өдөр бүр','Өглөөний 20 минут ба дадал','Хичээл эхлэхийн өмнө Бие, оюунаа сэрээх. Нойр, хоол, дэлгэц, биеийн байрлал зэрэг өдөр тутмын дадлаа мэдлэгийн сангаас суралцаж, өөрөө хэрэгжүүлнэ.'],
  ['Бэлтгэл бүрийн дараа','Биеэ мэдрэх: бэлтгэлийн тэмдэглэл','Сурагч бүр ачаалал (хүндийн оноо × минут), биеийн мэдрэмж, тусгалаа тэмдэглэнэ. Ахлах ангийнхан өөрийн төлөвлөгөөгөөр бие даан бэлтгэл хийж сурдаг.'],
- ['Хичээлээс гадуур','Дугуйлан ба сургуулийн баг','Энэ улиралд өглөөний 5 дугуйлан: сагсан бөмбөг, гандбол, жиу-жицу, мини теннис, Functional strength training. Бусад сонирхлын бүлгийн танилцуулгыг "Дугуйлан" хэсгээс үзнэ. Сургуулийн багууд UBAC-ын тэмцээнд оролцож, өрсөлдөх, хамтран ажиллах туршлага хуримтлуулна.'],
+ ['Хичээлээс гадуур','Дугуйлан ба сургуулийн баг','Энэ улиралд өглөөний 5 дугуйлан: сагсан бөмбөг, гар бөмбөг, жиу-жицу, мини теннис, Functional strength training. Бусад сонирхлын бүлгийн танилцуулгыг "Дугуйлан" хэсгээс үзнэ. Сургуулийн багууд UBAC-ын тэмцээнд оролцож, өрсөлдөх, хамтран ажиллах туршлага хуримтлуулна.'],
  ['Улирал бүр','Ахиц ба тусгал','Сайн сайхан байдлын 4 хэмжээс, L1–L6 түвшин. Бусадтай харьцуулахгүй, өөрийн ахицаа харна. Төсөлд суурилсан суралцахуйгаар (PBL) өөрийн системээ өөрөө бүтээнэ.']
 ];
 function renderHow(){var W=$('howSteps');if(!W)return;W.innerHTML='';var E=$('howEdit');if(E){E.innerHTML='';if(editMode)E.appendChild(h('button',{type:'button',cls:'btn gold small',text:'✎ Алхмуудыг засах / нэмэх / хасах',onclick:function(){editList('how')}}))}HOW.forEach(function(x,i){W.appendChild(h('div',{cls:'step'},[h('span',{cls:'num',text:String(i+1)}),h('span',{cls:'when',text:x[0]}),h('h3',{text:x[1]}),h('p',{cls:'muted',style:'margin:0;font-size:14px',text:x[2]})]))})}
@@ -2063,7 +2063,7 @@ var CLUBDEF=[
 ];
 var clubCat='all';
 // Built-in intro clubs that run this term (key in CRCLUBS / club registration). A club the owner adds can set "act" too.
-var CLUBACT={basketball:'bb',tennis:'tn',functional:'fn'};
+var CLUBACT={basketball:'bb',volleyball:'hb',tennis:'tn',functional:'fn'};  // 'hb' = гар бөмбөг (id kept for saved seats)
 function clubActive(c){var k=c.act||CLUBACT[c.id];if(!k||typeof CRCLUBS==='undefined')return '';return CRCLUBS.some(function(x){return x.k===k})?k:''}
 function tapCard(cls,style,fn,kids){return h('div',{cls:cls,style:style,role:'button',tabindex:'0',onclick:fn,onkeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}}},kids)}
 function clubPic(c){
