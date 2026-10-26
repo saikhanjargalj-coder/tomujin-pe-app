@@ -1,4 +1,5 @@
-// Tests for "tell in advance" (students marking a coming PE lesson sick/excused) in tools/sheet/attendance.gs.
+// Tests for "tell in advance" in tools/sheet/attendance.gs: students only READ their own coming PE lessons;
+// their request lives on the site and only the teacher's approval writes Ө/Ч into the sheet.
 // Stand-in Google Sheet with made-up students only; a fake clock decides "today" and the time of day.
 //   node tests/sheet/away.test.cjs
 const fs = require("fs"), vm = require("vm"), path = require("path");
@@ -87,8 +88,6 @@ r = owner({ action: "absconf", set: { on: "yes", cutoff: "08:30", ahead: 0 } });
 check("owner settings: on must be yes/no and days ahead 1-60", !r.ok && r.error === "bad-conf", r);
 r = owner({ action: "absconf", set: { on: true, cutoff: "08:30", ahead: 21 } });
 check("owner switches it on (08:30, 21 days)", r.ok && r.absconf.on === true && r.absconf.cutoff === "08:30" && r.absconf.ahead === 21, r);
-r = owner({ action: "absconf" });
-check("owner reads the settings back", r.ok && r.absconf.on && r.absconf.ahead === 21, r);
 
 r = a1({ action: "me" });
 check("student sees own PE days: Mondays from today up to 21 days", r.ok && r.days.map((d) => d.date).join() === "2026-10-26,2026-11-02,2026-11-09,2026-11-16", r.days);
@@ -96,7 +95,8 @@ check("a one-off Wednesday mark does not make Wednesday a PE day", !r.days.some(
 check("student sees own class and name only", r.me.cls === "10A" && r.me.first === "Туршилт" && r.me.last === "Нэг" && r.me.tab === "PE 10", r.me);
 const txt = JSON.stringify(r);
 check("nothing about other students, no ID, phone or photo", !/Хоёр|Дөрөв|a2@|b1@|9010[2-4]|9020|99119911|photo/.test(txt) && !("id" in r.me), txt);
-check("today's lesson is still open before 08:30", r.days[0].open === true && r.days[0].code === "" && r.days[0].mine === false, r.days[0]);
+check("today's lesson can still be asked for before 08:30", r.days[0].open === true && r.days[0].code === "", r.days[0]);
+check("each day says only date, teacher's mark, open", Object.keys(r.days[0]).sort().join() === "code,date,open", r.days[0]);
 r = b1({ action: "me" });
 check("10B student sees Fridays", r.ok && r.days.map((d) => d.date).join() === "2026-10-30,2026-11-06,2026-11-13", r.days);
 r = b2({ action: "me" });
@@ -110,72 +110,44 @@ check("unverified email is refused", !r.ok && r.error === "bad-token", r);
 r = as("new7@tomujin.edu.mn")({ action: "me" });
 check("a class with no lessons marked yet: every school day in range is offered", r.ok && r.days.length === 16 && r.days[0].date === "2026-10-26", r.days && r.days.length);
 
-let before = pe10.writes.length;
-r = a1({ action: "away", date: "2026-10-26", kind: "sick", id: "90102" });
-check("student marks today's lesson sick: Ө in their own row", r.ok && r.code === OO && pe10.cell(A1, COL("2026-10-26")) === OO, r);
-check("…and never in the row they name", pe10.cell(A2, COL("2026-10-26")) === "", pe10.cell(A2, COL("2026-10-26")));
-const note = pe10.note(A1, COL("2026-10-26"));
-check("the cell gets a short note: from the site, reason, time; no free text", /^Tomujin PE: .*\(Өвчтэй\) · 2026-10-26 07:15$/.test(note), note);
-check("only that one cell and its note were written", pe10.writes.length - before === 2, pe10.writes.slice(before));
-r = a1({ action: "away", date: "2026-10-26", kind: "leave" });
-check("student can change sick to excused (Ч)", r.ok && pe10.cell(A1, COL("2026-10-26")) === CH && /\(Чөлөөтэй\)/.test(pe10.note(A1, COL("2026-10-26"))), r);
-before = pe10.writes.length;
-r = a1({ action: "away", date: "2026-10-27", kind: "sick" });
-check("a day without PE for the class is refused", !r.ok && r.error === "not-lesson-day", r);
-r = a1({ action: "away", date: "2026-10-19", kind: "sick" });
-check("a past lesson is refused", !r.ok && r.error === "not-lesson-day", r);
-r = a1({ action: "away", date: "2026-11-23", kind: "sick" });
-check("further ahead than 21 days is refused", !r.ok && r.error === "not-lesson-day", r);
-r = a1({ action: "away", date: "2026-11-02", kind: "late" });
-check("only sick or excused", !r.ok && r.error === "bad-code", r);
-r = a1({ action: "away", date: "02.11.2026", kind: "sick" });
-check("a malformed date is refused", !r.ok && r.error === "bad-date", r);
-check("refused requests write nothing", pe10.writes.length === before, pe10.writes.slice(before));
+// students can never write to the sheet
+const w0 = pe10.writes.length;
+for (const a of ["away", "unaway", "mark", "read", "summary", "tabs"]) {
+  r = a1({ action: a, tab: "PE 10", date: "2026-10-26", kind: "sick", marks: [{ id: "90101", code: OO, req: true }] });
+  check("student cannot use: " + a, !r.ok && r.error === "not-allowed", r);
+}
+check("…and nothing was written", pe10.writes.length === w0 && pe10.cell(A1, COL("2026-10-26")) === "", pe10.writes.slice(w0));
 
-r = owner({ action: "mark", tab: "PE 10", date: "2026-11-02", marks: [{ id: "90102", code: CH }] });
-r = a2({ action: "away", date: "2026-11-02", kind: "sick" });
-check("a mark the teacher made is never overwritten", !r.ok && r.error === "already-marked" && pe10.cell(A2, COL("2026-11-02")) === CH, r);
-r = a2({ action: "unaway", date: "2026-11-02" });
-check("…nor taken back by the student", !r.ok && r.error === "not-yours" && pe10.cell(A2, COL("2026-11-02")) === CH, r);
+// the teacher approves a request: the code goes in with a fixed note (never the student's comment)
+r = owner({ action: "mark", tab: "PE 10", date: "2026-11-02", marks: [{ id: "90101", code: OO, req: true }] });
+const note = pe10.note(A1, COL("2026-11-02"));
+check("approved request: Ө written with a short fixed note", r.ok && pe10.cell(A1, COL("2026-11-02")) === OO && /^Tomujin PE: .*баталсан \(Өвчтэй\) · 2026-10-26 07:15$/.test(note), [r, note]);
+r = owner({ action: "mark", tab: "PE 10", date: "2026-11-09", marks: [{ id: "90102", code: CH, req: true }] });
+check("approved request: Ч (Чөлөөтэй)", r.ok && pe10.cell(A2, COL("2026-11-09")) === CH && /\(Чөлөөтэй\)/.test(pe10.note(A2, COL("2026-11-09"))), r);
+const w1 = pe10.writes.length;
+r = owner({ action: "mark", tab: "PE 10", date: "2026-11-02", marks: [{ id: "90103", code: I, req: true }] });
+check("an approval can only be sick or excused", !r.ok && r.error === "bad-code" && pe10.writes.length === w1, r);
+r = owner({ action: "mark", tab: "PE 10", date: "2026-11-02", marks: [{ id: "90101", code: T }] });
+check("a later plain mark replaces it and removes the note", r.ok && pe10.cell(A1, COL("2026-11-02")) === T && pe10.note(A1, COL("2026-11-02")) === "", pe10.note(A1, COL("2026-11-02")));
+r = owner({ action: "mark", tab: "PE 10", date: "2026-11-16", marks: [{ id: "90103", code: T }] });
+check("a plain mark never adds a note", r.ok && pe10.note(A3, COL("2026-11-16")) === "");
+r = a1({ action: "me" });
+check("the student sees the teacher's marks", r.days.filter((d) => d.date === "2026-11-02")[0].code === T, r.days);
 
-r = a1({ action: "away", date: "2026-11-02", kind: "sick" });
-r = owner({ action: "read", tab: "PE 10" });
-const s1 = r.students.filter((s) => s.id === "90101")[0], s2 = r.students.filter((s) => s.id === "90102")[0];
-check("teacher's read shows which cells came from students", s1.req["2026-10-26"] === 1 && s1.req["2026-11-02"] === 1 && !s2.req["2026-11-02"], [s1.req, s2.req]);
 r = owner({ action: "summary" });
-check("teacher home: coming lessons students will miss, in date order", r.ok && r.away.map((x) => x.id + "@" + x.date + "=" + x.code).join() === "90101@2026-10-26=Ч,90101@2026-11-02=Ө", r.away);
-check("…with class and tab, no email", r.away[0].cls === "10A" && r.away[0].tab === "PE 10" && !("email" in r.away[0]), r.away[0]);
-const c10a = r.classes.filter((c) => c.cls === "10A")[0];
-check("a student's own mark for today is not \"attendance taken today\" and does not move the last lesson", c10a.today === 0 && c10a.last === "2026-10-19" && c10a.excused === 1, c10a);
-check("future requests are not counted in the class numbers", c10a.sick === 0, c10a);
+check("summary carries the settings, nothing about requests", r.ok && r.absconf.on === true && !("away" in r), Object.keys(r));
+r = owner({ action: "read", tab: "PE 10" });
+check("teacher's read has no request data (requests live on the site)", r.ok && !("req" in r.students[0]), Object.keys(r.students[0]));
 
 NOW = Date.parse("2026-10-26T08:31:00+08:00");
 r = a1({ action: "me" });
-check("after 08:30 today's lesson is closed, later ones stay open", r.ok && r.days[0].open === false && r.days[0].mine === true && r.days[1].open === true, r.days);
-r = a1({ action: "unaway", date: "2026-10-26" });
-check("after 08:30 today's mark cannot be taken back", !r.ok && r.error === "too-late" && pe10.cell(A1, COL("2026-10-26")) === CH, r);
-r = a3({ action: "away", date: "2026-10-26", kind: "sick" });
-check("after 08:30 a new mark for today is refused", !r.ok && r.error === "too-late" && pe10.cell(A3, COL("2026-10-26")) === "", r);
-NOW = Date.parse("2026-10-26T07:40:00+08:00");
-r = a1({ action: "unaway", date: "2026-10-26" });
-check("before 08:30 the student can take it back: cell and note cleared", r.ok && pe10.cell(A1, COL("2026-10-26")) === "" && pe10.note(A1, COL("2026-10-26")) === "", r);
-r = a1({ action: "unaway", date: "2026-11-09" });
-check("taking back an empty cell is refused", !r.ok && r.error === "not-yours", r);
+check("after 08:30 today's lesson is closed, later ones stay open", r.ok && r.days[0].open === false && r.days[1].open === true, r.days);
+NOW = Date.parse("2026-10-26T07:15:00+08:00");
 
-r = a3({ action: "away", date: "2026-11-09", kind: "sick" });
-r = owner({ action: "mark", tab: "PE 10", date: "2026-11-09", marks: [{ id: "90103", code: I }] });
-check("when the teacher writes over a student's mark, the note goes too", r.ok && pe10.cell(A3, COL("2026-11-09")) === I && pe10.note(A3, COL("2026-11-09")) === "", pe10.note(A3, COL("2026-11-09")));
-r = a3({ action: "unaway", date: "2026-11-09" });
-check("…and the student can no longer change it", !r.ok && r.error === "not-yours" && pe10.cell(A3, COL("2026-11-09")) === I, r);
-r = a3({ action: "me" });
-check("the student sees the teacher's mark", r.days.filter((d) => d.date === "2026-11-09")[0].code === I && !r.days.filter((d) => d.date === "2026-11-09")[0].mine, r.days);
-
-for (const a of ["read", "mark", "summary", "tabs"]) { r = a1({ action: a, tab: "PE 10", date: "2026-10-26", marks: [{ id: "90102", code: T }] }); check("student cannot use the teacher action: " + a, !r.ok && r.error === "not-allowed", r); }
 check("the Master tab is never touched", master.writes.length === 0);
-
 r = owner({ action: "absconf", set: { on: false, cutoff: "08:30", ahead: 21 } });
-r = a1({ action: "away", date: "2026-11-16", kind: "sick" });
-check("switched off: students can no longer mark", !r.ok && r.error === "away-off" && pe10.cell(A1, COL("2026-11-16")) === "", r);
+r = a1({ action: "me" });
+check("switched off: students get nothing", !r.ok && r.error === "away-off", r);
 
 const bad = results.filter((x) => !x[0]);
 console.log(`\n${results.length - bad.length}/${results.length} passed`);

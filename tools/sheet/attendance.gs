@@ -7,14 +7,15 @@
  * Who may use it: every request carries the person's Firebase sign-in token; this script asks Google
  * to check it before reading or writing anything.
  * - The owner's verified school account: read the PE tabs, write attendance, change the settings.
- * - A verified @tomujin.edu.mn student, only while the owner has switched "tell in advance" on:
- *   see their own coming PE lessons and mark ONE of them "sick" or "excused" in their OWN row, only in an
- *   empty cell, only from today (until the cut-off time) up to the set number of days ahead; and take that
- *   back. They never see anyone else's row and never change a mark the teacher made.
+ * - A verified @tomujin.edu.mn student, only while the owner has switched "tell in advance" on: READ their
+ *   own coming PE lessons (date, the teacher's mark if any, whether it can still be asked for). Students never
+ *   write to the sheet: their request (reason and comment) is kept on the site, and only when the teacher
+ *   approves it does the teacher's own call write "sick" or "excused" here.
  * What it returns: student ID, first and last name, grade, class (10A...), house, school email, the
  * attendance marks and the week labels of row 1 (P1W8...). It never returns phone numbers, photos, parents' data or anything from other tabs.
- * What it writes: attendance cells on "PE n" tabs, found by student ID (or the student's own email) and
- * by the date in row 3, plus a short note on cells a student filled from the site. Only the school's own codes are accepted.
+ * What it writes (owner only): attendance cells on "PE n" tabs, found by student ID and by the date in row 3,
+ * plus a short fixed note on a cell when it comes from an approved student request (never the student's comment).
+ * Only the school's own codes are accepted.
  *
  * This file is plain ASCII on purpose: Mongolian letters are written as \u escapes.
  */
@@ -27,10 +28,10 @@ var HEAD_ROW = 3, FIRST_ROW = 4;
 var CODES = ['\u0418', '\u0425', '\u0422', '\u0427', '\u04e8'];
 var H_ID = 'ID', H_FIRST = '\u041d\u044d\u0440', H_LAST = '\u041e\u0432\u043e\u0433', H_CLASS = '\u0410\u043d\u0433\u0438', H_MAIL = '\u0418-\u041c\u044d\u0439\u043b', H_HOUSE = '\u0425\u0430\u0443\u0441';
 // actions a student may call for themselves; everything else is the owner's only
-var STUDENT_ACTIONS = { me: 1, away: 1, unaway: 1 };
-// the note left on a cell a student filled from the site (the teacher sees it in the sheet)
+var STUDENT_ACTIONS = { me: 1 };
+// the note put on a cell written from an approved student request (anyone looking at the sheet sees why)
 var NOTE_TAG = 'Tomujin PE: ';
-var NOTE_TEXT = '\u0441\u0443\u0440\u0430\u0433\u0447 \u0441\u0430\u0439\u0442\u0430\u0430\u0440 \u0443\u0440\u044c\u0434\u0447\u0438\u043b\u0430\u043d \u043c\u044d\u0434\u044d\u0433\u0434\u0441\u044d\u043d';
+var NOTE_TEXT = '\u0441\u0443\u0440\u0430\u0433\u0447\u0438\u0439\u043d \u0443\u0440\u044c\u0434\u0447\u0438\u043b\u0441\u0430\u043d \u0445\u04af\u0441\u044d\u043b\u0442\u0438\u0439\u0433 \u0431\u0430\u0433\u0448 \u0431\u0430\u0442\u0430\u043b\u0441\u0430\u043d';
 var ABS_DEFAULT = { on: false, cutoff: '08:30', ahead: 21 };
 
 function doPost(e) {
@@ -126,24 +127,18 @@ function rowInfo_(L, r, sh) {
     email: L.c.mail ? String(r[L.c.mail - 1]).trim().toLowerCase() : ''
   };
 }
-// a cell a student filled from the site: our note and still "excused" or "sick" (a teacher's change wins)
-function isMine_(v, note) { return String(note || '').indexOf(NOTE_TAG) === 0 && (v === CODES[3] || v === CODES[4]); }
 
 function read_(sh, tz) {
   var L = layout_(sh, tz), n = sh.getLastRow() - FIRST_ROW + 1;
   var students = [];
   if (n > 0) {
-    var rng = sh.getRange(FIRST_ROW, 1, n, L.lastCol), v = rng.getValues(), notes = rng.getNotes();
-    v.forEach(function (r, ri) {
+    var v = sh.getRange(FIRST_ROW, 1, n, L.lastCol).getValues();
+    v.forEach(function (r) {
       var x = rowInfo_(L, r, sh);
       if (!x) return;
-      var m = {}, req = {};
-      L.dates.forEach(function (d) {
-        var s = String(r[d.col - 1]).trim();
-        if (s) m[d.iso] = s;
-        if (s && isMine_(s, notes[ri][d.col - 1])) req[d.iso] = 1;
-      });
-      x.m = m; x.req = req;
+      var m = {};
+      L.dates.forEach(function (d) { var s = String(r[d.col - 1]).trim(); if (s) m[d.iso] = s; });
+      x.m = m;
       students.push(x);
     });
   }
@@ -151,11 +146,10 @@ function read_(sh, tz) {
 }
 
 /* One call for the teacher home: per class how many students, how many marks, present share, last
-   lesson day, the students absent (T) two or more times in the last 28 days, and the coming lessons
-   students said in advance they will miss. No other personal data. */
+   lesson day and the students absent (T) two or more times in the last 28 days. No other personal data. */
 function summary_(ss) {
   var tz = ss.getSpreadsheetTimeZone(), today = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
-  var from = addDays_(today, -28), out = [], watch = [], weeks = {}, away = [];
+  var from = addDays_(today, -28), out = [], watch = [], weeks = {};
   ss.getSheets().forEach(function (sh) {
     if (!TAB_RE.test(sh.getName())) return;
     var r = read_(sh, tz), by = {};
@@ -165,23 +159,20 @@ function summary_(ss) {
       s.n++; var a4 = 0;
       Object.keys(x.m).forEach(function (d) {
         if (d > today) return;
-        // a student's own advance mark is not the teacher taking attendance: it does not move "last lesson" or "today"
-        var v = x.m[d]; s.marked++; if (!x.req[d]) { if (d > s.last) s.last = d; if (d === today) s.today++; }
+        var v = x.m[d]; s.marked++; if (d > s.last) s.last = d; if (d === today) s.today++;
         if (v === CODES[0] || v === CODES[1]) s.present++; else if (v === CODES[2]) { s.absent++; if (d >= from) a4++; }
         else if (v === CODES[3]) s.excused++; else if (v === CODES[4]) s.sick++;
       });
       if (a4 >= 2) watch.push({ tab: r.tab, id: x.id, first: x.first, last: x.last, cls: k, absent: a4 });
-      Object.keys(x.req).forEach(function (d) { if (d >= today) away.push({ tab: r.tab, id: x.id, first: x.first, last: x.last, cls: k, date: d, code: x.m[d] }); });
     });
     Object.keys(by).sort().forEach(function (k) { var s = by[k]; s.tab = r.tab; s.pct = s.marked ? Math.round(s.present / s.marked * 100) : null; out.push(s); });
   });
-  away.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
-  return { ok: true, today: today, week: weeks[today] || '', weeks: weeks, classes: out, watch: watch, away: away, absconf: absConf_() };
+  return { ok: true, today: today, week: weeks[today] || '', weeks: weeks, classes: out, watch: watch, absconf: absConf_() };
 }
 
-/* marks: [{id, code}] for one date. code '' clears the cell. Returns what was written.
-   When the teacher writes over a cell a student filled from the site, the student's note goes too:
-   from then on it is the teacher's mark and the student cannot take it back. */
+/* marks: [{id, code, req}] for one date. code '' clears the cell. Returns what was written.
+   req: true when the teacher approves a student's request ("sick" or "excused" only): the cell then gets a
+   short fixed note saying so. Any other write removes such a note, so it never sits on a different mark. */
 function mark_(sh, tz, iso, marks) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso))) throw new Error('bad-date');
   var L = layout_(sh, tz), col = L.col[iso] || 0;
@@ -195,12 +186,15 @@ function mark_(sh, tz, iso, marks) {
     var i = ids.indexOf(String(x.id).trim());
     if (i < 0 || !String(x.id).trim()) throw new Error('no-student:' + x.id);
     if (ids.indexOf(String(x.id).trim(), i + 1) >= 0) throw new Error('duplicate-student:' + x.id);
-    done.push({ row: FIRST_ROW + i, id: ids[i], code: code });
+    if (x.req && code !== CODES[3] && code !== CODES[4]) throw new Error('bad-code');
+    done.push({ row: FIRST_ROW + i, id: ids[i], code: code, req: !!x.req });
   });
+  var stamp = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd HH:mm');
   done.forEach(function (d) {
     var cell = sh.getRange(d.row, col);
-    if (String(cell.getNote() || '').indexOf(NOTE_TAG) === 0) cell.setNote('');
     cell.setValue(d.code);
+    if (d.req) cell.setNote(NOTE_TAG + NOTE_TEXT + ' (' + (d.code === CODES[4] ? '\u04e8\u0432\u0447\u0442\u044d\u0439' : '\u0427\u04e9\u043b\u04e9\u04e9\u0442\u044d\u0439') + ') \u00b7 ' + stamp);
+    else if (String(cell.getNote() || '').indexOf(NOTE_TAG) === 0) cell.setNote('');
   });
   SpreadsheetApp.flush();
   return { ok: true, date: iso, written: done.map(function (d) { return { id: d.id, code: d.code }; }) };
@@ -231,30 +225,7 @@ function student_(q, ss, email) {
   var conf = absConf_();
   if (!conf.on) throw new Error('away-off');
   var tz = ss.getSpreadsheetTimeZone();
-  if (q.action === 'me') return meOut_(findMe_(ss, tz, email), conf, tz);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(q.date))) throw new Error('bad-date');
-  var lock = LockService.getDocumentLock();
-  lock.waitLock(20000);
-  try {
-    var me = findMe_(ss, tz, email), day = myDays_(me, conf, tz).filter(function (d) { return d.date === q.date; })[0];
-    if (!day) throw new Error('not-lesson-day');
-    if (!day.open) throw new Error('too-late');
-    var cell = me.sh.getRange(me.row, day.col);
-    if (q.action === 'away') {
-      var code = q.kind === 'sick' ? CODES[4] : q.kind === 'leave' ? CODES[3] : '';
-      if (!code) throw new Error('bad-code');
-      if (day.code && !day.mine) throw new Error('already-marked');
-      cell.setValue(code);
-      cell.setNote(NOTE_TAG + NOTE_TEXT + ' (' + (code === CODES[4] ? '\u04e8\u0432\u0447\u0442\u044d\u0439' : '\u0427\u04e9\u043b\u04e9\u04e9\u0442\u044d\u0439') + ') \u00b7 ' + Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd HH:mm'));
-      SpreadsheetApp.flush();
-      return { ok: true, date: day.date, code: code };
-    }
-    if (!day.mine) throw new Error('not-yours');
-    cell.setValue('');
-    cell.setNote('');
-    SpreadsheetApp.flush();
-    return { ok: true, date: day.date, code: '' };
-  } finally { lock.releaseLock(); }
+  return meOut_(findMe_(ss, tz, email), conf, tz);
 }
 
 /* The student's own row, found by their verified school email. */
@@ -266,9 +237,9 @@ function findMe_(ss, tz, email) {
     var mails = sh.getRange(FIRST_ROW, L.c.mail, n, 1).getValues();
     for (var i = 0; i < n; i++) {
       if (String(mails[i][0]).trim().toLowerCase() !== email) continue;
-      var rng = sh.getRange(FIRST_ROW, 1, n, L.lastCol), vals = rng.getValues(), x = rowInfo_(L, vals[i], sh);
+      var vals = sh.getRange(FIRST_ROW, 1, n, L.lastCol).getValues(), x = rowInfo_(L, vals[i], sh);
       if (!x) continue;
-      return { sh: sh, L: L, i: i, row: FIRST_ROW + i, vals: vals, notes: rng.getNotes(), x: x, key: x.cls || x.grade };
+      return { sh: sh, L: L, i: i, row: FIRST_ROW + i, vals: vals, x: x, key: x.cls || x.grade };
     }
   }
   throw new Error('not-in-list');
@@ -292,16 +263,15 @@ function lessonWeekdays_(me, today) {
   return wd;
 }
 
-/* The student's PE lessons from today up to "ahead" days: what is in the cell, whether they filled it
-   from the site, and whether it can still be changed (today only until the cut-off time). */
+/* The student's PE lessons from today up to "ahead" days: the teacher's mark if any, and whether a request
+   can still be sent (today only until the cut-off time). */
 function myDays_(me, conf, tz) {
   var now = new Date(), today = Utilities.formatDate(now, tz, 'yyyy-MM-dd'), hm = Utilities.formatDate(now, tz, 'HH:mm');
   var wd = lessonWeekdays_(me, today), any = !Object.keys(wd).length, last = addDays_(today, conf.ahead), out = [];
   me.L.dates.forEach(function (d) {
     if (d.iso < today || d.iso > last) return;
     if (!any && !wd[weekday_(d.iso)]) return;
-    var v = String(me.vals[me.i][d.col - 1]).trim(), note = me.notes[me.i][d.col - 1];
-    out.push({ date: d.iso, col: d.col, code: v, mine: isMine_(v, note), open: d.iso > today || hm < conf.cutoff });
+    out.push({ date: d.iso, code: String(me.vals[me.i][d.col - 1]).trim(), open: d.iso > today || hm < conf.cutoff });
   });
   return out;
 }
@@ -310,6 +280,6 @@ function meOut_(me, conf, tz) {
   return {
     ok: true, today: Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd'), cutoff: conf.cutoff, ahead: conf.ahead,
     me: { first: me.x.first, last: me.x.last, cls: me.key, tab: me.sh.getName() },
-    days: myDays_(me, conf, tz).map(function (d) { return { date: d.date, code: d.code, mine: d.mine, open: d.open }; })
+    days: myDays_(me, conf, tz)
   };
 }

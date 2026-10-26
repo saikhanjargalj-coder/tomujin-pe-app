@@ -19,7 +19,7 @@ def check(name, cond, info=""):
 
 async def as_role(pg, role, phase="p1", hash="home", reset=False):
     await pg.goto(BASE + "#home")
-    await pg.evaluate("""([r,p,reset])=>{localStorage.setItem('tpe-preview-role',r);localStorage.setItem('tpe-preview-phase',p);if(reset)localStorage.removeItem('tpe-preview-db-v5');localStorage.setItem('tpe-beta-ok','1')}""", [role, phase, reset])
+    await pg.evaluate("""([r,p,reset])=>{localStorage.setItem('tpe-preview-role',r);localStorage.setItem('tpe-preview-phase',p);if(reset)localStorage.removeItem('tpe-preview-db-v6');localStorage.setItem('tpe-beta-ok','1')}""", [role, phase, reset])
     await pg.goto("about:blank")
     await pg.goto(BASE + "#" + hash)
     await pg.wait_for_timeout(800)

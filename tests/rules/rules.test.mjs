@@ -7,7 +7,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { initializeTestEnvironment, assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import {
-  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, writeBatch, runTransaction, serverTimestamp, increment
+  doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, writeBatch, runTransaction, serverTimestamp, increment, query, where
 } from "firebase/firestore";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -254,6 +254,44 @@ await test("P2 tell-in-advance switch: signed-in school users read, only the own
   await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { ahead: 90 })));
   await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { extra: "x" })));
   await assertFails(getDoc(doc(stu(1), "config/other")));
+});
+
+await test("R1 PE lesson request: a student files their own, with a reason; only they and the owner read it", async () => {
+  await seed((db) => setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }));
+  const ok = { uid: "s1", email: "s1@tomujin.edu.mn", name: "Бат", cls: "11B", tab: "PE 11", date: "2026-11-04", kind: "sick", reason: "Халуурч байна", status: "pending", at: serverTimestamp() };
+  await assertSucceeds(setDoc(doc(stu(1), "absreq/s1_2026-11-04"), ok));
+  await assertSucceeds(getDoc(doc(stu(1), "absreq/s1_2026-11-04")));
+  await assertSucceeds(getDocs(query(collection(stu(1), "absreq"), where("uid", "==", "s1"))));
+  await assertFails(getDocs(collection(stu(1), "absreq")));                       // not everyone's
+  await assertFails(getDoc(doc(stu(2), "absreq/s1_2026-11-04")));
+  await assertFails(getDoc(doc(teacher(), "absreq/s1_2026-11-04")));               // the comment is the owner's only
+  await assertFails(getDoc(doc(guest(), "absreq/s1_2026-11-04")));
+  await assertSucceeds(getDocs(collection(owner(), "absreq")));
+  const bad = (x, id = "s1_2026-11-05", who = stu(1)) => assertFails(setDoc(doc(who, "absreq/" + id), Object.assign({}, ok, { date: "2026-11-05" }, x)));
+  await bad({ status: "ok" });                                  // cannot approve itself
+  await bad({ reason: "" });                                    // a reason is needed
+  await bad({ reason: "x".repeat(301) });
+  await bad({ kind: "late" });
+  await bad({ uid: "s2" });                                     // only for yourself
+  await bad({ email: "s2@tomujin.edu.mn" });
+  await bad({}, "s1_2026-11-06");                               // the id matches the date
+  await bad({ tab: "Master" });
+  await bad({ extra: 1 });
+  await bad({ at: 1 });                                         // server time only
+  await bad({}, "s2_2026-11-05", stu(2));                       // another account cannot file for s1
+});
+await test("R2 PE lesson request: only the owner decides; the student withdraws only while it waits", async () => {
+  await seed((db) => setDoc(doc(db, "absreq/s1_2026-11-11"), { uid: "s1", email: "s1@tomujin.edu.mn", date: "2026-11-11", kind: "leave", reason: "Тэмцээн", status: "pending" }));
+  await assertFails(updateDoc(doc(stu(1), "absreq/s1_2026-11-11"), { status: "ok" }));
+  await assertFails(updateDoc(doc(stu(1), "absreq/s1_2026-11-11"), { reason: "өөр" }));
+  await assertFails(updateDoc(doc(teacher(), "absreq/s1_2026-11-11"), { status: "ok" }));
+  await assertFails(updateDoc(doc(owner(), "absreq/s1_2026-11-11"), { reason: "засав" }));   // the owner cannot rewrite the student's words
+  await assertSucceeds(updateDoc(doc(owner(), "absreq/s1_2026-11-11"), { status: "ok", decidedAt: 1 }));
+  await assertFails(deleteDoc(doc(stu(1), "absreq/s1_2026-11-11")));                         // decided: stays
+  await assertFails(setDoc(doc(stu(1), "absreq/s1_2026-11-11"), { uid: "s1", email: "s1@tomujin.edu.mn", name: "", cls: "11B", tab: "PE 11", date: "2026-11-11", kind: "sick", reason: "дахиад", status: "pending", at: serverTimestamp() }));
+  await seed((db) => setDoc(doc(db, "absreq/s1_2026-11-18"), { uid: "s1", email: "s1@tomujin.edu.mn", date: "2026-11-18", kind: "sick", reason: "Эмч", status: "pending" }));
+  await assertFails(deleteDoc(doc(stu(2), "absreq/s1_2026-11-18")));
+  await assertSucceeds(deleteDoc(doc(stu(1), "absreq/s1_2026-11-18")));
 });
 
 /* ---------------- club attendance ---------------- */

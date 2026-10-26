@@ -59,7 +59,7 @@ function paWrite(list,done){
   var tab=paTab(),j=PATT.data[tab],date=PATT.date,old={};
   list.forEach(function(w){var x=j.students.filter(function(s){return s.id===w.id})[0];if(x){old[w.id]=x.m[date]||'';if(w.code)x.m[date]=w.code;else delete x.m[date];PATT.busy[w.id]=1}});
   PATT.msg={t:'Sheet рүү бичиж байна…'};renderPatt();
-  paCall({action:'mark',tab:tab,date:date,marks:list}).then(function(){list.forEach(function(w){delete PATT.busy[w.id];var x=j.students.filter(function(s){return s.id===w.id})[0];if(x&&x.req)delete x.req[date]});PATT.sumAt=0;setTimeout(function(){paLoadSum(true)},400);PATT.msg={t:'✓ Sheet-д хадгалагдлаа ('+list.length+' сурагч, '+paMD(date)+').'};renderPatt();if(done)done()},
+  paCall({action:'mark',tab:tab,date:date,marks:list}).then(function(){list.forEach(function(w){delete PATT.busy[w.id]});PATT.sumAt=0;setTimeout(function(){paLoadSum(true)},400);PATT.msg={t:'✓ Sheet-д хадгалагдлаа ('+list.length+' сурагч, '+paMD(date)+').'};renderPatt();if(done)done()},
     function(e){list.forEach(function(w){var x=j.students.filter(function(s){return s.id===w.id})[0];if(x){if(old[w.id])x.m[date]=old[w.id];else delete x.m[date]}delete PATT.busy[w.id]});PATT.msg={t:paErr(e)+' Тэмдэглэгээ Sheet-д ороогүй, хуучнаараа үлдлээ.',err:1};renderPatt()});
 }
 function paSettings(){
@@ -113,7 +113,8 @@ function renderPatt(){
     var td=ymd(new Date()),list=j.students.filter(paIn).sort(function(a,b){return a.first.localeCompare(b.first)}),d=PATT.date,has=j.dates.indexOf(d)>=0,future=d>td;
     W.appendChild(h('div',{cls:'pa-head'},[h('h2',{id:'pa-title',text:paLabel(c)+' · Биеийн тамир'}),
       h('p',{cls:'muted',style:'margin:0',text:[list.length+' сурагч',c.pct!=null?'Ирц '+c.pct+'%':'',c.last?'Сүүлийн хичээл '+paMD(c.last):'',paTab()].filter(Boolean).join(' · ')})]));
-    var todo=list.filter(function(x){return !x.m[d]});
+    var todo=list.filter(function(x){return !x.m[d]}),asked=function(x){var r=typeof absFor==='function'?absFor(x.email,d):null;return !!r&&r.status!=='ok'};
+    var toP=todo.filter(function(x){return !asked(x)}),toA=todo.filter(asked);
     var ds=j.dates,ix=ds.indexOf(d);
     var date=h('input',{type:'date',id:'pa-date',min:ds[0]||null,max:ds[ds.length-1]||null,'aria-label':'Хичээлийн өдөр'});date.value=d;
     date.addEventListener('change',function(){if(date.value){PATT.date=date.value;PATT.bulk=false;PATT.msg=null;renderPatt()}});
@@ -129,18 +130,19 @@ function renderPatt(){
     else{
       if(!has)W.appendChild(h('p',{cls:'status err',role:'status',text:'Sheet-д '+paMD(d)+'-ний багана алга (амралтын өдөр эсвэл толгойн огноо буруу). Өөр өдөр сонгоно уу.'}));
       var n={};PACODE.forEach(function(k){n[k[0]]=0});var none=0;list.forEach(function(x){var v=x.m[d];if(v)n[v]=(n[v]||0)+1;else none++});
-      var told=list.filter(function(x){return x.req&&x.req[d]}).length;
-      W.appendChild(h('p',{cls:'muted',style:'margin:0',text:paMD(d)+' · '+PACODE.map(function(k){return k[1]+' '+n[k[0]]}).join(' · ')+' · Тэмдэглээгүй '+none+(told?' · Сурагч өөрөө мэдэгдсэн '+told:'')}));
+      var told=list.filter(function(x){return typeof absFor==='function'&&absFor(x.email,d)}).length;
+      W.appendChild(h('p',{cls:'muted',style:'margin:0',text:paMD(d)+' · '+PACODE.map(function(k){return k[1]+' '+n[k[0]]}).join(' · ')+' · Тэмдэглээгүй '+none+(told?' · Хүсэлт '+told:'')}));
       if(future&&has)W.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Энэ өдөр хараахан болоогүй. Урьдчилан мэдэгдсэн бол "Чөлөөтэй" эсвэл "Өвчтэй" тэмдэглэж болно.'}));
       if(PATT.bulk&&!future&&has)W.appendChild(h('div',{cls:'box',id:'pa-preview',style:'border:2px solid var(--gold)'},[h('h3',{text:'Sheet-д бичихийн өмнө шалгана уу · '+paLabel(c)+' · '+paMD(d)}),
-        h('p',{style:'margin:0',text:'"Ирсэн" (И) болно: '+todo.length+' сурагч.'}),h('p',{cls:'muted',style:'margin:0',text:todo.map(paName).join(', ')}),
+        h('p',{style:'margin:0',text:'"Ирсэн" (И) болно: '+toP.length+' сурагч.'}),h('p',{cls:'muted',style:'margin:0',text:toP.map(paName).join(', ')}),
+        toA.length?h('p',{style:'margin:0',id:'pa-bulk-absent',text:'Хүсэлт өгсөн ч батлагдаагүй → "Тасалсан" (Т): '+toA.length+' сурагч: '+toA.map(paName).join(', ')+'. Ирсэн бол доороос "Ирсэн" дарна уу, шалтгааныг нь хүлээж авбал эхлээд "Батлах" дарна.'}):null,
         h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Аль хэдийн тэмдэглэсэн '+(list.length-todo.length)+' сурагч өөрчлөгдөхгүй.'}),
-        h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',id:'pa-bulk-ok',text:'Батлах ('+todo.length+')',onclick:function(ev){ev.currentTarget.disabled=true;PATT.bulk=false;paWrite(todo.map(function(x){return {id:x.id,code:'И'}}))}}),
+        h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold',id:'pa-bulk-ok',text:'Батлах ('+todo.length+')',onclick:function(ev){ev.currentTarget.disabled=true;PATT.bulk=false;paWrite(toP.map(function(x){return {id:x.id,code:'И'}}).concat(toA.map(function(x){return {id:x.id,code:'Т'}})))}}),
           h('button',{type:'button',cls:'btn line',text:'Болих',onclick:function(){PATT.bulk=false;renderPatt()}})])]));
       if(PATT.msg)W.appendChild(h('p',{cls:'status'+(PATT.msg.err?' err':''),role:'status',id:'pa-msg',text:PATT.msg.t}));
       var box=h('div',{cls:'box',style:'padding:6px 14px'});
       list.forEach(function(x){var v=x.m[d]||'',busy=!!PATT.busy[x.id],t=paTot(x);
-        box.appendChild(h('div',{cls:'crrow pa-row','data-id':x.id},[h('div',{},[h('b',{text:paName(x)}),h('small',{cls:'muted',style:'display:block',text:[x.house,'ID '+x.id,t.h+' цаг',t.a?'Тасалсан '+t.a:'',t.e?'Чөлөөтэй '+t.e:'',t.s?'Өвчтэй '+t.s:''].filter(Boolean).join(' · ')}),x.req&&x.req[d]?h('span',{cls:'tag pa-told',text:'📩 Сурагч өөрөө урьдчилан мэдэгдсэн'}):null]),
+        box.appendChild(h('div',{cls:'crrow pa-row','data-id':x.id},[h('div',{},[h('b',{text:paName(x)}),h('small',{cls:'muted',style:'display:block',text:[x.house,'ID '+x.id,t.h+' цаг',t.a?'Тасалсан '+t.a:'',t.e?'Чөлөөтэй '+t.e:'',t.s?'Өвчтэй '+t.s:''].filter(Boolean).join(' · ')}),(function(){var r=typeof absFor==='function'?absFor(x.email,d):null;return r?h('ul',{cls:'cues pa-told',style:'margin:4px 0 0'},[absReqLine(r,false)]):null})()]),
           h('div',{cls:'chips'},PACODE.map(function(k){var no=!has||(future&&k[0]!=='Ч'&&k[0]!=='Ө');return h('button',{type:'button',cls:'chip','aria-pressed':String(v===k[0]),disabled:(busy||no)?'':null,title:k[1],'aria-label':paName(x)+': '+k[1],onclick:function(){paWrite([{id:x.id,code:v===k[0]?'':k[0]}])}},[h('b',{text:k[0]}),h('span',{cls:'pl',text:' '+k[1]})])}))]))});
       if(!list.length)box.appendChild(h('p',{cls:'muted',text:'Энэ ангид сурагч алга.'}));
       W.appendChild(box);
