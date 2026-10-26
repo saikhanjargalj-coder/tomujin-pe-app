@@ -160,6 +160,20 @@ service cloud.firestore {
         && request.resource.data.teachers is list
         && request.resource.data.teachers.size() <= 100;
     }
+    // ---------- students telling in advance they will miss a PE lesson ----------
+    // Whether it is on, the cut-off time and how far ahead, plus the sheet script address the site calls.
+    // The script itself checks every student request (own row, empty cell, real PE day, time limits).
+    match /config/absence {
+      allow read: if school();
+      allow write: if isOwner()
+        && request.resource.data.keys().hasOnly(['on', 'url', 'cutoff', 'ahead', 'at'])
+        && request.resource.data.on is bool
+        && request.resource.data.url is string
+        && request.resource.data.url.matches('^https://script[.]google[.]com/macros/s/[A-Za-z0-9_-]+/exec$')
+        && request.resource.data.cutoff is string
+        && request.resource.data.cutoff.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.ahead is int && request.resource.data.ahead >= 1 && request.resource.data.ahead <= 60;
+    }
     match /config/{other} { allow read, write: if false; }
 
     // ---------- people ----------

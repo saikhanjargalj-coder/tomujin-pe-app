@@ -365,6 +365,7 @@ body.editing [data-cms][data-off]{display:inline-block!important;opacity:.35}
 .pic .saved{position:absolute;right:8px;top:8px;background:var(--gold);color:#1c1c1c;border-radius:999px;font-size:12px;font-weight:900;padding:2px 7px}
 .acard{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--brand);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .acard.done{border-left-color:#15803d;opacity:.92}.acard.home{border-left-color:var(--gold)}
+.acard.aw-day.mine{border-left-color:#15803d}.aw-day .chips .btn{min-height:44px}.pa-told{background:var(--teal-soft);color:var(--brand-ink);margin-top:4px;align-self:flex-start}
 .aexgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .aex{display:flex;gap:8px;align-items:center;background:var(--tint);border:0;border-radius:10px;padding:6px;text-align:left;font:inherit;color:inherit;cursor:pointer}
 .aex .pic{width:52px;height:48px;flex:none;border-radius:8px;overflow:hidden;background:var(--surface)}.aex .pic svg{width:100%;height:100%}
@@ -494,6 +495,7 @@ footer{padding-bottom:96px}
       <div class="mg"><button type="button" class="mt" aria-expanded="false">Миний хэсэг</button><div class="dd">
         <a href="#myclubs" data-go="myclubs"><b>Миний дугуйлан</b><small>Суудал, хуваарь, ирц, хийсэн зүйл</small></a>
         <a href="#today" data-go="today"><b>Өнөөдрийн даалгавар</b><small>Ангид оноосон дасгал</small></a>
+        <a href="#away" data-go="away" hidden><b>Ирэхгүй гэж мэдэгдэх</b><small>Өвдсөн, чөлөө авсан бол урьдчилан</small></a>
         <a href="#classes" data-go="classes"><b>Ангиуд</b><small>Мэдэгдэл, оноосон дасгал, файл</small></a>
         <a href="#lessons" data-go="lessons"><b>Хичээлүүд</b><small>Хичээлийн төлөвлөгөө</small></a>
         <a href="#plan" data-go="plan"><b>Миний бэлтгэл</b><small>Бэлтгэлийн төлөвлөгөө, хадгалсан дасгал</small></a>
@@ -534,6 +536,7 @@ footer{padding-bottom:96px}
   </div>
   <div id="homeReg" hidden></div>
   <div class="members" id="homeToday"></div>
+  <div class="members" id="homeAway"></div>
   <div class="dims members" id="homeDims"></div>
   <div class="tip members" id="tip"></div>
   <section class="hsum guest" id="homeHow" aria-labelledby="hsumT">
@@ -853,6 +856,15 @@ footer{padding-bottom:96px}
     <p class="lede">Багшийн ангид чинь оноосон дасгалууд энд гарна. Хийж дуусаад "Хийж дууслаа" дараад, бэлтгэлийн тэмдэглэлээ бөглөөрэй.</p>
   </div>
   <div id="todayOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
+<section class="view" id="v-away" hidden aria-labelledby="awT">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow" data-cms="aw_eb">Биеийн тамирын хичээл</span>
+    <h1 id="awT" data-cms="aw_h">Хичээлдээ ирж чадахгүй бол</h1>
+    <p class="lede" data-cms="aw_p">Өвдсөн эсвэл чөлөө авсан бол энд урьдчилан мэдэгдээрэй. Жак багшийн ирцэд шууд бичигдэнэ. Бодлоо өөрчилбөл болиулж болно.</p>
+  </div>
+  <div id="awayOut" style="display:flex;flex-direction:column;gap:12px"></div>
 </section>
 
 <section class="view" id="v-tests" hidden>
@@ -1435,7 +1447,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderToday();renderTests();renderHomeToday();renderUpdates();renderFeedback();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderToday();renderTests();renderHomeToday();if(typeof absHome==='function')absHome();renderUpdates();renderFeedback();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -1964,7 +1976,7 @@ async function ensureProfile(){
   var prof={email:ME.email.toLowerCase(),name:pend.name||ME.name||ME.email.split('@')[0],classId:pend.classId||'',createdAt:Date.now()};
   await ref.set(prof).then(function(){MYPROFILE=prof;try{localStorage.removeItem('tpe-pending')}catch(e){}},function(){});
 }
-function stopSubs(){if(typeof crStop==='function')crStop();if(typeof PATT!=='undefined'){PATT.tabs=null;PATT.data={};PATT.url='';PATT.sheet='';PATT.loaded=false;PATT.msg=null;PATT.err=''}unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
+function stopSubs(){if(typeof crStop==='function')crStop();if(typeof absStop==='function')absStop();if(typeof PATT!=='undefined'){PATT.tabs=null;PATT.data={};PATT.url='';PATT.sheet='';PATT.loaded=false;PATT.msg=null;PATT.err=''}unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
 function startSubs(){
   stopSubs();if(!ME||!db)return;
   unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
@@ -2110,9 +2122,9 @@ async function fbInit(){
     setAuthed(!!(u&&u.emailVerified&&role));
     if(!u||!u.emailVerified){stopSubs();onPlansAuth()}
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
-    await ensureProfile();startSubs();startFbSubs();paStart();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
+    await ensureProfile();startSubs();startFbSubs();paStart();absStart();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
     [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!(role==='admin'||role==='teacher')});
-    [].forEach.call(document.querySelectorAll('nav [data-go=feedback],nav [data-go=patt]'),function(a){a.hidden=role!=='admin'});
+    [].forEach.call(document.querySelectorAll('nav [data-go=feedback],nav [data-go=patt]'),function(a){a.hidden=role!=='admin'});absMenu();
   });
 }
 
@@ -3231,13 +3243,14 @@ function menuItems(g){return [].filter.call(g.querySelectorAll('.dd a'),function
 function openMenu(g,focus,last){g.classList.remove('picked');g.classList.add('open');g.querySelector('.mt').setAttribute('aria-expanded','true');if(focus){var L=menuItems(g);if(L.length)(last?L[L.length-1]:L[0]).focus()}}
 function closeMenu(g,back){var was=g.classList.contains('open');g.classList.remove('open');g.querySelector('.mt').setAttribute('aria-expanded','false');if(back&&was)g.querySelector('.mt').focus()}
 function closeMenus(){MENUS.forEach(function(g){closeMenu(g)})}
-var VIEWS=['myclubs','today','tests','home','how','clubs','stories','matches','table','podcast','youtube','live','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming','guide','updates','feedback','patt'];
+var VIEWS=['myclubs','today','away','tests','home','how','clubs','stories','matches','table','podcast','youtube','live','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming','guide','updates','feedback','patt'];
 var PUBVIEWS=['home','how','clubs','stories','matches','table','podcast','youtube','live','priming','guide','updates'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
   if((v==='feedback'||v==='patt')&&AUTHED&&MYROLE!=='admin')v='home';
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   if(v==='patt'&&typeof renderPatt==='function')renderPatt();
+  if(v==='away'&&typeof renderAway==='function')renderAway();
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   var navFocus=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('nav.tabs .mg');
   [].forEach.call(document.querySelectorAll('nav.tabs .mg'),function(g){g.classList.toggle('on',!!g.querySelector('[aria-current]'));closeMenu(g)});

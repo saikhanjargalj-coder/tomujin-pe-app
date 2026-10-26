@@ -19,7 +19,7 @@ def check(name, cond, info=""):
 
 async def as_role(pg, role, phase="p1", hash="home", reset=False):
     await pg.goto(BASE + "#home")
-    await pg.evaluate("""([r,p,reset])=>{localStorage.setItem('tpe-preview-role',r);localStorage.setItem('tpe-preview-phase',p);if(reset)localStorage.removeItem('tpe-preview-db-v4');localStorage.setItem('tpe-beta-ok','1')}""", [role, phase, reset])
+    await pg.evaluate("""([r,p,reset])=>{localStorage.setItem('tpe-preview-role',r);localStorage.setItem('tpe-preview-phase',p);if(reset)localStorage.removeItem('tpe-preview-db-v5');localStorage.setItem('tpe-beta-ok','1')}""", [role, phase, reset])
     await pg.goto("about:blank")
     await pg.goto(BASE + "#" + hash)
     await pg.wait_for_timeout(800)
@@ -283,7 +283,8 @@ async def pe_attendance(pg):
     await pg.clock.set_fixed_time("2026-10-21T10:00:00+08:00")
     await as_role(pg, "student", hash="patt", reset=True)
     check("PA students cannot open class attendance", not await pg.is_visible("#v-patt") and await pg.locator("nav [data-go=patt]").is_hidden() and await pg.locator("#pattChip").count() == 0)
-    await as_role(pg, "admin", hash="home")
+    await pg.evaluate("()=>localStorage.setItem('tpe-preview-odd','1')")   # bring back the old header mistake for the warning check
+    await as_role(pg, "admin", hash="home", reset=True)
     await pg.set_viewport_size({"width": 1280, "height": 545})
     await pg.locator("nav .mt", has_text="Миний хэсэг").click(); await pg.wait_for_timeout(200)
     dd = pg.locator("nav .mg.open .dd")
@@ -361,10 +362,10 @@ async def pe_attendance(pg):
     await pg.locator("#pattOut [aria-label='Харах'] button", has_text="Өдөр").click(); await pg.wait_for_timeout(200)
     await pg.locator("#pattOut summary", has_text="Тохиргоо").click()
     await pg.fill("#pa-url", "https://evil.example.com/x")
-    await pg.locator("#pattOut button", has_text="Хадгалах").click(); await pg.wait_for_timeout(200)
-    check("PA settings refuse a non-Apps-Script address", "script.google.com" in await pg.locator("#pattOut details .status").last.text_content() and await store_get(pg, "private/peatt") is None)
+    await pg.click("#pa-save"); await pg.wait_for_timeout(200)
+    check("PA settings refuse a non-Apps-Script address", "script.google.com" in await pg.locator("#pattOut details:not(#abs-set) .status").last.text_content() and await store_get(pg, "private/peatt") is None)
     await pg.fill("#pa-url", "https://script.google.com/macros/s/AKfyc-test_123/exec")
-    await pg.locator("#pattOut button", has_text="Хадгалах").click(); await pg.wait_for_timeout(300)
+    await pg.click("#pa-save"); await pg.wait_for_timeout(300)
     check("PA script address saved owner-only (private/peatt)", (await store_get(pg, "private/peatt") or {}).get("url", "").endswith("/exec"))
     check("PA copy-code button for installing the script", await pg.locator("#pattOut button", has_text="Кодыг хуулах").count() == 1)
     # teacher home, after the school system's teacher page
@@ -381,6 +382,7 @@ async def pe_attendance(pg):
     await pg.screenshot(path=SHOT + "th_home.png", full_page=True)
     await pg.locator("#teachHome .clscard", has_text="11B").click(); await pg.wait_for_timeout(600)
     check("TH a class card opens its attendance", await pg.is_visible("#v-patt") and "11B" in await pg.text_content("#pa-title"))
+    await pg.evaluate("()=>localStorage.removeItem('tpe-preview-odd')")
     await as_role(pg, "teacher", hash="coach")
     check("TH read-only teacher gets the greeting but no Sheet numbers", await pg.locator("#teachHome").count() == 1 and await pg.locator("#teachHome .clscard").count() == 0 and "Жак багшид" in await pg.text_content("#teachHome .tcards"))
 

@@ -239,6 +239,22 @@ await test("P1 private settings (attendance Sheet script address): owner only", 
   await assertFails(getDoc(doc(guest(), "private/peatt")));
   await assertFails(setDoc(doc(teacher(), "private/peatt"), { url: "https://evil" }));
 });
+await test("P2 tell-in-advance switch: signed-in school users read, only the owner writes valid settings", async () => {
+  const good = { on: true, url: "https://script.google.com/macros/s/AKfy_x-1/exec", cutoff: "08:30", ahead: 21, at: 1 };
+  await assertSucceeds(setDoc(doc(owner(), "config/absence"), good));
+  await assertSucceeds(getDoc(doc(stu(1), "config/absence")));
+  await assertSucceeds(getDoc(doc(teacher(), "config/absence")));
+  await assertFails(getDoc(doc(guest(), "config/absence")));
+  await assertFails(getDoc(doc(as("g1", "someone@gmail.com"), "config/absence")));
+  await assertFails(getDoc(doc(as("s9", "s9@tomujin.edu.mn", false), "config/absence")));
+  await assertFails(setDoc(doc(stu(1), "config/absence"), good));
+  await assertFails(setDoc(doc(teacher(), "config/absence"), good));
+  await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { url: "https://evil.example/exec" })));
+  await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { cutoff: "8:30" })));
+  await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { ahead: 90 })));
+  await assertFails(setDoc(doc(owner(), "config/absence"), Object.assign({}, good, { extra: "x" })));
+  await assertFails(getDoc(doc(stu(1), "config/other")));
+});
 
 /* ---------------- club attendance ---------------- */
 await test("A1 only the owner marks attendance (with history); student and teacher cannot", async () => {

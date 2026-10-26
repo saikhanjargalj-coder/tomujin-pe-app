@@ -2,7 +2,7 @@
    Nothing here talks to the real site or the real database. */
 (function () {
   "use strict";
-  var KEY = "tpe-preview-db-v4", RKEY = "tpe-preview-role", TKEY = "tpe-preview-phase";
+  var KEY = "tpe-preview-db-v5", RKEY = "tpe-preview-role", TKEY = "tpe-preview-phase";
   var now = Date.now();
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { return null; } }
   var role = ls(RKEY) || "guest";
@@ -51,6 +51,9 @@
     ["s2", "s3", "s4", "s5"].forEach(function (u) { s["offers/tn-b/seats/" + u] = { status: "ok", at: { _ms: now - 864e5 * 5 } }; });
     s["offers/tn-b/seats/s3"].att = { "2026-11-10": "p", "2026-11-12": "a" };
     s["offers/tn-b/seats/s4/abs/2026-11-19"] = { reason: "Шүдний эмчид очно", at: { _ms: now - 864e5 } };
+    /* students may tell in advance that they will miss a PE lesson (the sheet script's own setting is "mockabs") */
+    s["config/absence"] = { on: true, url: "preview", cutoff: "08:30", ahead: 21, at: now };
+    s["mockabs"] = { on: true, cutoff: "08:30", ahead: 21 };
     return s;
   }
   var store;
@@ -164,29 +167,79 @@
   function sheetTab(tab) {
     var k = "mocksheet/" + tab; if (store[k]) return store[k];
     var g = +tab.split(" ")[1], secs = g >= 12 ? ["A", "B", "C"] : g >= 10 ? ["A", "B"] : [""], st = [], n = 0, td = ymd(Date.now());
-    var dates = schoolDays().filter(function (d) { return !/^2026-11-1[0-3]$|^2027-01-(19|2[0-2])$/.test(d); });
+    /* the real sheet's old header mistake (2025 dates after 9/Nov and 18/Jan) was fixed on 26 Oct 2026;
+       tests can bring it back with localStorage "tpe-preview-odd" = "1" to check the warning still works */
+    var oddOn = ls("tpe-preview-odd") === "1";
+    var dates = schoolDays().filter(function (d) { return !oddOn || !/^2026-11-1[0-3]$|^2027-01-(19|2[0-2])$/.test(d); });
     secs.forEach(function (sc, si) { var size = g >= 10 ? 8 : 6; for (var i = 0; i < size; i++) { n++; var id = String(30000 + g * 100 + n), m = {};
       dates.forEach(function (d, di) { var w = new Date(d + "T00:00:00Z").getUTCDay(); if (d < td && w === ((g + si) % 5) + 1) m[d] = (i + di) % 11 === 0 ? "Т" : (i + di) % 13 === 0 ? "Ч" : (i + di) % 17 === 0 ? "Х" : (i + di) % 19 === 0 ? "Ө" : "И"; });
-      st.push({ id: id, first: FN[(n * 7 + g) % FN.length], last: LN[(n + g) % LN.length], grade: String(g), cls: sc ? g + sc : "", house: ["Хандгай", "Мазаалай", "Ирвэс", "Хавтгай"][n % 4], email: "student" + id + "@tomujin.edu.mn", m: m }); } });
-    var odd = []; ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2027-01-19", "2027-01-20", "2027-01-21", "2027-01-22"].forEach(function (w, i) { odd.push({ col: 0, iso: "2025-09-0" + (2 + i % 4), want: w }); });
+      var me = g === 11 && sc === "B" && i === 0, req = {};
+      if (g === 12 && sc === "C" && i === 1) { var nx = dates.filter(function (d) { return d >= td && new Date(d + "T00:00:00Z").getUTCDay() === ((g + si) % 5) + 1; })[0]; if (nx) { m[nx] = "Ө"; req[nx] = 1; } }
+      st.push({ id: id, first: me ? "Тэмүүлэн" : FN[(n * 7 + g) % FN.length], last: me ? "Бат" : LN[(n + g) % LN.length], grade: String(g), cls: sc ? g + sc : "", house: ["Хандгай", "Мазаалай", "Ирвэс", "Хавтгай"][n % 4], email: me ? "bat.temuulen@tomujin.edu.mn" : "student" + id + "@tomujin.edu.mn", m: m, req: req }); } });
+    var odd = []; if (oddOn) ["2026-11-10", "2026-11-11", "2026-11-12", "2026-11-13", "2027-01-19", "2027-01-20", "2027-01-21", "2027-01-22"].forEach(function (w, i) { odd.push({ col: 0, iso: "2025-09-0" + (2 + i % 4), want: w }); });
     var weeks = {}, terms = [["2026-09-07", 1], ["2026-11-09", 2], ["2027-01-18", 3], ["2027-03-29", 4]];
     dates.forEach(function (d) { var t = terms.filter(function (x) { return x[0] <= d; }).pop(); if (!t) return; var w = Math.floor((new Date(d + "T00:00:00Z") - new Date(t[0] + "T00:00:00Z")) / (7 * 864e5)) + 1; weeks[d] = "P" + t[1] + "W" + w; });
     store[k] = { dates: dates, odd: odd, weeks: weeks, students: st };
     return store[k];
   }
+  /* the same rules as the real script for a student's own coming lessons (test hook: __tpeClock = "now" in ms) */
+  function clock() { return window.__tpeClock || Date.now(); }
+  function hm(ms) { return new Date(ms + 8 * 3600e3).toISOString().slice(11, 16); }
+  function addD(iso, n) { return new Date(Date.parse(iso + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10); }
+  function findMe(TABS) {
+    var em = (user && user.email || "").toLowerCase();
+    for (var i = 0; i < TABS.length; i++) { var t = sheetTab(TABS[i]), x = t.students.filter(function (s) { return s.email === em; })[0]; if (x) return { tab: TABS[i], t: t, x: x, key: x.cls || x.grade }; }
+    return null;
+  }
+  function myDays(me) {
+    var conf = store["mockabs"], now = clock(), td = ymd(now), wd = {}, weeks = {}, nw = 0, rows = me.t.students.filter(function (s) { return (s.cls || s.grade) === me.key; });
+    for (var j = me.t.dates.length - 1; j >= 0; j--) { var d = me.t.dates[j]; if (d > td) continue; if (d < addD(td, -112)) break;
+      var cnt = rows.filter(function (s) { return s.m[d]; }).length; if (!cnt || cnt * 2 < rows.length) continue;
+      var w = addD(d, -((new Date(d + "T00:00:00Z").getUTCDay() + 6) % 7)); if (!weeks[w]) { if (nw === 3) break; weeks[w] = 1; nw++; } wd[new Date(d + "T00:00:00Z").getUTCDay()] = 1; }
+    var any = !Object.keys(wd).length, last = addD(td, conf.ahead);
+    return me.t.dates.filter(function (d) { return d >= td && d <= last && (any || wd[new Date(d + "T00:00:00Z").getUTCDay()]); }).map(function (d) {
+      var v = me.x.m[d] || "", mine = !!(me.x.req && me.x.req[d]) && (v === "Ч" || v === "Ө"); return { date: d, code: v, mine: mine, open: d > td || hm(now) < conf.cutoff }; });
+  }
+  function studentCall(q, TABS) {
+    var fail = function (c) { return wait().then(function () { throw new Error(c); }); }, conf = store["mockabs"];
+    if (!user || !/@tomujin\.edu\.mn$/.test(user.email)) return fail("not-allowed");
+    if (!conf.on) return fail("away-off");
+    var me = findMe(TABS); if (!me) return fail("not-in-list");
+    var days = myDays(me);
+    if (q.action === "me") return wait(JSON.parse(JSON.stringify({ ok: true, today: ymd(clock()), cutoff: conf.cutoff, ahead: conf.ahead, me: { first: me.x.first, last: me.x.last, cls: me.key, tab: me.tab }, days: days })));
+    if (window.__tpeSheetFail) { window.__tpeSheetFail = false; return fail("offline"); }
+    var d = days.filter(function (x) { return x.date === q.date; })[0];
+    if (!d) return fail("not-lesson-day");
+    if (!d.open) return fail("too-late");
+    me.x.req = me.x.req || {};
+    if (q.action === "away") {
+      var code = q.kind === "sick" ? "Ө" : q.kind === "leave" ? "Ч" : ""; if (!code) return fail("bad-code");
+      if (d.code && !d.mine) return fail("already-marked");
+      me.x.m[q.date] = code; me.x.req[q.date] = 1; persist(); window.__tpeSheetWrites = (window.__tpeSheetWrites || 0) + 1; return wait({ ok: true, date: q.date, code: code });
+    }
+    if (!d.mine) return fail("not-yours");
+    delete me.x.m[q.date]; delete me.x.req[q.date]; persist(); window.__tpeSheetWrites = (window.__tpeSheetWrites || 0) + 1; return wait({ ok: true, date: q.date, code: "" });
+  }
   function sheetCall(q) {
     var TABS = ["PE 6", "PE 7", "PE 8", "PE 9", "PE 10", "PE 11", "PE 12"];
+    if (q.action === "me" || q.action === "away" || q.action === "unaway") return studentCall(q, TABS);
     if (role !== "admin") return wait().then(function () { throw new Error("not-allowed"); });
+    if (q.action === "absconf") {
+      if (q.set) { var s = q.set; if (typeof s.on !== "boolean" || !/^([01]\d|2[0-3]):[0-5]\d$/.test(s.cutoff) || !(s.ahead >= 1 && s.ahead <= 60)) return wait().then(function () { throw new Error("bad-conf"); }); store["mockabs"] = { on: s.on, cutoff: s.cutoff, ahead: s.ahead }; persist(); }
+      return wait({ ok: true, absconf: JSON.parse(JSON.stringify(store["mockabs"])) });
+    }
     if (q.action === "tabs") return wait({ ok: true, tabs: TABS });
     if (q.action === "summary") {
-      var td = ymd(Date.now()), from = new Date(Date.parse(td + "T00:00:00Z") - 28 * 864e5).toISOString().slice(0, 10), out = [], watch = [], weeks = {};
+      var td = ymd(Date.now()), from = new Date(Date.parse(td + "T00:00:00Z") - 28 * 864e5).toISOString().slice(0, 10), out = [], watch = [], weeks = {}, away = [];
       TABS.forEach(function (tab) { var t = sheetTab(tab), by = {}; Object.keys(t.weeks).forEach(function (d) { weeks[d] = t.weeks[d]; });
         t.students.forEach(function (x) { var k = x.cls || x.grade, c = by[k] || (by[k] = { cls: k, n: 0, present: 0, marked: 0, absent: 0, excused: 0, sick: 0, last: "", today: 0 }), a4 = 0; c.n++;
-          Object.keys(x.m).forEach(function (d) { if (d > td) return; var v = x.m[d]; c.marked++; if (d > c.last) c.last = d; if (d === td) c.today++;
+          Object.keys(x.m).forEach(function (d) { if (d > td) return; var v = x.m[d]; c.marked++; if (!(x.req && x.req[d])) { if (d > c.last) c.last = d; if (d === td) c.today++; }
             if (v === "И" || v === "Х") c.present++; else if (v === "Т") { c.absent++; if (d >= from) a4++; } else if (v === "Ч") c.excused++; else if (v === "Ө") c.sick++; });
-          if (a4 >= 2) watch.push({ tab: tab, id: x.id, first: x.first, last: x.last, cls: k, absent: a4 }); });
+          if (a4 >= 2) watch.push({ tab: tab, id: x.id, first: x.first, last: x.last, cls: k, absent: a4 });
+          Object.keys(x.req || {}).forEach(function (d) { if (d >= td) away.push({ tab: tab, id: x.id, first: x.first, last: x.last, cls: k, date: d, code: x.m[d] }); }); });
         Object.keys(by).sort().forEach(function (k) { var c = by[k]; c.tab = tab; c.pct = c.marked ? Math.round(c.present / c.marked * 100) : null; out.push(c); }); });
-      return wait(JSON.parse(JSON.stringify({ ok: true, today: td, week: weeks[td] || "", weeks: weeks, classes: out, watch: watch })));
+      away.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+      return wait(JSON.parse(JSON.stringify({ ok: true, today: td, week: weeks[td] || "", weeks: weeks, classes: out, watch: watch, away: away, absconf: store["mockabs"] })));
     }
     if (TABS.indexOf(q.tab) < 0) return wait().then(function () { throw new Error("bad-tab"); });
     var t = sheetTab(q.tab);
@@ -194,7 +247,7 @@
     if (q.action === "mark") {
       if (window.__tpeSheetFail) { window.__tpeSheetFail = false; return wait().then(function () { throw new Error("offline"); }); }
       if (t.dates.indexOf(q.date) < 0) return wait().then(function () { throw new Error("no-date-column"); });
-      var go = function () { q.marks.forEach(function (w) { var s = t.students.filter(function (x) { return x.id === w.id; })[0]; if (s) { if (w.code) s.m[q.date] = w.code; else delete s.m[q.date]; } }); persist(); window.__tpeSheetWrites = (window.__tpeSheetWrites || 0) + 1; return { ok: true }; };
+      var go = function () { q.marks.forEach(function (w) { var s = t.students.filter(function (x) { return x.id === w.id; })[0]; if (s) { if (w.code) s.m[q.date] = w.code; else delete s.m[q.date]; if (s.req) delete s.req[q.date]; } }); persist(); window.__tpeSheetWrites = (window.__tpeSheetWrites || 0) + 1; return { ok: true }; };
       if (window.__tpeSheetHold) return new Promise(function (res) { window.__tpeSheetRelease = function () { window.__tpeSheetHold = false; res(go()); }; });
       return wait().then(go);
     }

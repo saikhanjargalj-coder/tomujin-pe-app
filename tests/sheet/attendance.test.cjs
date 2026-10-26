@@ -10,10 +10,10 @@ function check(name, cond, info) { results.push([!!cond, name]); console.log((co
 const ub = (iso) => new Date(iso + "T00:00:00+08:00");
 
 function fakeSheet(name, rows) {
-  const g = rows.map((r) => r.slice());
+  const g = rows.map((r) => r.slice()), notes = {};
   const width = () => Math.max(...g.map((r) => r.length));
   return {
-    writes: [],
+    writes: [], notes,
     getName: () => name,
     getLastColumn: width,
     getLastRow: () => { let n = g.length; while (n > 0 && g[n - 1].every((x) => x === "" || x == null)) n--; return n; },
@@ -21,6 +21,9 @@ function fakeSheet(name, rows) {
       const self = this;
       return {
         getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => (g[r - 1 + i] || [])[c - 1 + j] ?? "")),
+        getNotes: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => notes[(r + i) + ":" + (c + j)] || "")),
+        getNote: () => notes[r + ":" + c] || "",
+        setNote: (v) => { if (v) notes[r + ":" + c] = v; else delete notes[r + ":" + c]; self.writes.push([r, c, "note", v]); },
         setValue: (v) => { while (g.length < r) g.push([]); g[r - 1][c - 1] = v; self.writes.push([r, c, v]); }
       };
     },
@@ -33,6 +36,7 @@ function load(sheets, tokenEmail = "saikhanjargal.j@tomujin.edu.mn", verified = 
     SpreadsheetApp: { getActiveSpreadsheet: () => ss, flush() {} },
     Utilities: { formatDate: (d, tz) => Math.abs(d - Date.now()) < 60000 ? "2026-10-31" : new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(d) },
     LockService: { getDocumentLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: () => null, setProperty() {} }) },
     UrlFetchApp: { fetch: (url, o) => ({ getResponseCode: () => (JSON.parse(o.payload).idToken === "good" ? 200 : 400), getContentText: () => JSON.stringify({ users: [{ email: tokenEmail, emailVerified: verified }] }) }) },
     ContentService: { MimeType: { JSON: "json" }, createTextOutput: (t) => ({ setMimeType: () => ({ text: t }) }) },
     Date
