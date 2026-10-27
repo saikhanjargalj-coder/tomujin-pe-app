@@ -2084,6 +2084,7 @@ function renderCoach(){
   var recent=LOADS.filter(function(x){return coachClass==='all'||x.classId===coachClass}).slice(0,15);
   if(recent.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бэлтгэлийн тэмдэглэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},recent.map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:ubDay(d.getTime())}),h('td',{text:x.name||''}),h('td',{cls:'num',text:'Оноо '+x.rpe}),h('td',{cls:'num',text:x.min+' мин'}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:(x.sore>=4?'⚠ ':'')+(SOREL[x.sore]||'')}),h('td',{cls:'muted',text:x.note||''})])}))])])]));
   if(MYROLE==='admin')W.appendChild(rolesBox());
+  if(MYROLE==='admin'&&typeof exportBox==='function')W.appendChild(exportBox());
 }
 function openStudent(u){
   openSheet(function(p){

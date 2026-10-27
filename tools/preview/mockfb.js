@@ -167,6 +167,16 @@
         return ops;
       });
     },
+    /* one-time reads for the owner's data export (like the real rules: staff only) */
+    list: function (path) {
+      if (role !== "admin" && role !== "teacher") return deny();
+      return wait(kids(path).map(function (k) { return { id: k.split("/").pop(), path: k, data: revive(store[k]) }; }));
+    },
+    groupList: function (name) {
+      if (role !== "admin" && role !== "teacher") return deny();
+      return wait(Object.keys(store).filter(function (k) { var p = k.split("/"); return p.length >= 2 && p.length % 2 === 0 && p[p.length - 2] === name; })
+        .map(function (k) { return { id: k.split("/").pop(), path: k, data: revive(store[k]) }; }));
+    },
     group: function (name, o, next) {
       var f = function () { next(query(Object.keys(store).filter(function (k) { var p = k.split("/"); return p.length >= 2 && p[p.length - 2] === name; }), o)); };
       subs.push(f); setTimeout(f); return function () { var i = subs.indexOf(f); if (i >= 0) subs.splice(i, 1); };

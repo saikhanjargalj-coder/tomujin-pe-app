@@ -6,7 +6,7 @@ import {
   sendEmailVerification, sendPasswordResetEmail, signOut, updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, getDocFromServer, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
+  getFirestore, doc, getDoc, getDocFromServer, getDocsFromServer, setDoc, deleteDoc, collection, collectionGroup, onSnapshot, addDoc,
   query, where, orderBy, limit, writeBatch, runTransaction, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -95,6 +95,14 @@ if (!C.firebase || !C.firebase.apiKey || String(C.firebase.apiKey).indexOf("PAST
         });
         return ops;
       });
+    },
+    // One-time read of a whole collection (or of every collection with this name: groupList) straight from the
+    // server, never the local cache. Used by the owner's data export; firestore.rules still decide what is readable.
+    list(path) {
+      return getDocsFromServer(collection(fs, path)).then((qs) => qs.docs.map((d) => ({ id: d.id, path: d.ref.path, data: d.data() })));
+    },
+    groupList(name) {
+      return getDocsFromServer(collectionGroup(fs, name)).then((qs) => qs.docs.map((d) => ({ id: d.id, path: d.ref.path, data: d.data() })));
     },
     group(name, o, next, err) {
       return onSnapshot(build(collectionGroup(fs, name), o), (qs) => next(snapWrap(qs)), err || (() => {}));
