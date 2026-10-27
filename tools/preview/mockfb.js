@@ -63,6 +63,8 @@
   try { store = JSON.parse(ls(KEY) || "null"); } catch (e) { store = null; }
   if (!store) store = seedData();
   store["site/clubreg"] = Object.assign({}, store["site/clubreg"] || {}, regTimes(phase));
+  /* Strava club box (the owner sets the real club link in edit mode) */
+  if (!store["site/strava"]) store["site/strava"] = { club: { name: "Tomujin PE", url: "https://www.strava.com/clubs/tomujin-pe-preview", text: "", embed: "" }, coach: {} };
   var subs = [];
   function persist() { ls(KEY, JSON.stringify(store)); }
   function notify() { persist(); subs.slice().forEach(function (f) { try { f(); } catch (e) { console.error(e); } }); }
@@ -255,9 +257,27 @@
     }
     return wait().then(function () { throw new Error("bad-action"); });
   }
+  /* Stand-in for strava-fn: "connecting" just marks the link, activities are made up (last 30 days).
+     Test hooks: __tpeStravaFail = next call fails with that error code ("busy", "not-linked"...). */
+  function stravaActs() {
+    var t = Date.now(), d = 864e5, A = [
+      [0.15, "Өглөөний гүйлт", "Run", 1860, 5200, 151], [1.4, "Заалны хүч", "WeightTraining", 2700, 0, 0], [2.3, "Нарантуул хүртэл дугуй", "Ride", 3300, 14100, 128],
+      [3.5, "Сагсны бэлтгэл", "Basketball", 4500, 0, 162], [5.2, "Зайсан руу алхалт", "Hike", 5400, 6800, 118], [6.3, "Интервал гүйлт", "Run", 2100, 6100, 164],
+      [9.1, "Тэнхлэг, суналт", "Yoga", 1500, 0, 0], [12.2, "Урт гүйлт", "Run", 3600, 9800, 146], [16.4, "Волейбол", "Volleyball", 3900, 0, 140], [24, "Тэшүүр", "IceSkate", 2400, 0, 0]];
+    return A.map(function (a, i) { return { id: String(17000000000 + i * 7919), n: a[1], sp: a[2], t: t - a[0] * d, mv: a[3], el: a[3] + 120, d: a[4], up: a[4] ? 40 : 0, hr: a[5] || null, mhr: a[5] ? a[5] + 22 : null }; });
+  }
+  function stravaCall(path) {
+    var uid = user && user.uid, k = "users/" + uid + "/strava/link";
+    if (!uid) return wait().then(function () { throw new Error("bad-token"); });
+    if (window.__tpeStravaFail) { var c = window.__tpeStravaFail; window.__tpeStravaFail = null; return wait().then(function () { if (c === "not-linked") apply([{ op: "delete", path: k }]); throw new Error(c); }); }
+    if (path === "/start") return wait().then(function () { apply([{ op: "set", path: k, data: { on: true, at: Date.now(), all: true } }]); return { linked: true }; });
+    if (path === "/disconnect") return wait().then(function () { apply([{ op: "delete", path: k }]); return { ok: true }; });
+    if (path === "/activities") return new Promise(function (res, rej) { setTimeout(function () { if (!store[k]) return rej(new Error("not-linked")); res({ items: stravaActs(), at: Date.now() }); }, 400); });
+    return wait().then(function () { throw new Error("not-found"); });
+  }
   var listeners = [];
   window.TPE = {
-    sheet: sheetCall, idToken: function () { return Promise.resolve("preview"); },
+    sheet: sheetCall, strava: stravaCall, idToken: function () { return Promise.resolve("preview"); },
     configured: true, user: null, role: null, domain: "tomujin.edu.mn", db: db, preview: true,
     onAuth: function (cb) { listeners.push(cb); setTimeout(function () { window.TPE.user = user; window.TPE.role = ROLE[role]; cb(user, ROLE[role]); }, 60); },
     signIn: function () { return Promise.reject({ code: "tpe/preview" }); }, signUp: function () { return Promise.reject({ code: "tpe/preview" }); },

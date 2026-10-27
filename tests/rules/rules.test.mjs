@@ -348,6 +348,29 @@ await test("U5 members-only content: unverified, other domain and guests are ref
   await assertFails(getDoc(doc(guest(), "ex/e1")));
   await assertSucceeds(getDoc(doc(guest(), "site/clubreg")));
 });
+await test("U7 Strava: link flag only for its student, server collections closed, log link checked", async () => {
+  await seed((db) => Promise.all([
+    setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }),
+    setDoc(doc(db, "users/s1/strava/link"), { on: true, at: 1, all: true }),
+    setDoc(doc(db, "stravaTokens/s1"), { athleteId: "777", access: "A", refresh: "R", expiresAt: 1, at: 1 }),
+    setDoc(doc(db, "stravaCache/s1"), { at: 1, items: [] }),
+    setDoc(doc(db, "stravaState/abc"), { uid: "s1", at: 1 })]));
+  await assertSucceeds(getDoc(doc(stu(1), "users/s1/strava/link")));
+  await assertFails(getDoc(doc(stu(2), "users/s1/strava/link")));
+  await assertFails(getDoc(doc(teacher(), "users/s1/strava/link")));          // Strava stays with its owner
+  await assertFails(setDoc(doc(stu(1), "users/s1/strava/link"), { on: true })); // only the server writes it
+  for (const p of ["stravaTokens/s1", "stravaCache/s1", "stravaState/abc"]) {
+    await assertFails(getDoc(doc(stu(1), p)));
+    await assertFails(getDoc(doc(owner(), p)));
+    await assertFails(setDoc(doc(stu(1), p), { at: 2 }));
+  }
+  const L = { uid: "s1", rpe: 6, min: 40, at: 1 };
+  await assertSucceeds(setDoc(doc(stu(1), "users/s1/loading/sv1"), Object.assign({}, L, { strava: "https://www.strava.com/activities/12345678901" })));
+  await assertSucceeds(setDoc(doc(stu(1), "users/s1/loading/sv2"), Object.assign({}, L, { strava: "https://strava.app.link/AbC123xyz" })));
+  await assertFails(setDoc(doc(stu(1), "users/s1/loading/sv3"), Object.assign({}, L, { strava: "https://evil.example/activities/1" })));
+  await assertFails(setDoc(doc(stu(1), "users/s1/loading/sv4"), Object.assign({}, L, { strava: "javascript:alert(1)" })));
+  await assertFails(setDoc(doc(stu(1), "users/s1/loading/sv5"), Object.assign({}, L, { strava: 123 })));
+});
 await test("U6 only the owner edits site content", async () => {
   await assertFails(setDoc(doc(stu(1), "site/texts"), { t: { x: "hack" } }));
   await assertSucceeds(setDoc(doc(owner(), "site/texts"), { t: { x: "ok" } }));

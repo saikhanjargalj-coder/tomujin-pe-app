@@ -458,6 +458,23 @@ footer{padding-bottom:96px}
 .upd{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
 .upd .when{font-size:12.5px;font-weight:800;color:var(--teal);letter-spacing:.04em}
 .upd ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+/* Strava (orange is Strava's own colour, used only for Strava buttons and links) */
+.stvbox{display:flex;flex-direction:column;gap:12px}.stvbox h3{margin:0}
+.btn.stvbtn{background:#fc5200;color:#fff;border-color:#fc5200;font-weight:800}.btn.stvbtn:hover{background:#e04800;border-color:#e04800}.btn.stvbtn[disabled]{opacity:.7}
+a.stvlink{color:var(--orange);font-weight:800;font-size:13.5px;text-decoration:none;white-space:nowrap}a.stvlink:hover{text-decoration:underline}
+.stvpow{margin:0;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.stvrules{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14.5px}
+.stvhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stvlist{display:flex;flex-direction:column;gap:8px}
+.stvact{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:10px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:5px solid #fc5200;border-radius:12px;padding:10px 12px}
+.stvwhen{display:flex;flex-direction:column;align-items:center;line-height:1.15}.stvwhen b{font-size:17px;font-variant-numeric:tabular-nums}.stvwhen small{font-size:11.5px;color:var(--muted);font-weight:700}
+.stvmain{display:flex;flex-direction:column;gap:2px;min-width:0}.stvsport{font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--orange)}
+.stvname{overflow-wrap:anywhere}.stvnums{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums}.stvnums b{color:var(--fg)}
+.stvdo{display:flex;justify-content:flex-end}
+.stvframe{width:100%;max-width:560px;border:0;border-radius:12px;background:var(--surface)}
+.stvgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.stvph{display:flex;flex-direction:column;gap:6px;min-width:0}
+.stvfrom{border-left:5px solid #fc5200}
+@media (max-width:560px){.stvact{grid-template-columns:48px minmax(0,1fr)}.stvdo{grid-column:1/-1;justify-content:stretch}.stvdo .btn,.stvdo .tag{flex:1;text-align:center}}
 </style>
 
 <header class="bar">
@@ -501,6 +518,7 @@ footer{padding-bottom:96px}
         <a href="#lessons" data-go="lessons"><b>Хичээлүүд</b><small>Хичээлийн төлөвлөгөө</small></a>
         <a href="#plan" data-go="plan"><b>Миний бэлтгэл</b><small>Бэлтгэлийн төлөвлөгөө, хадгалсан дасгал</small></a>
         <a href="#log" data-go="log"><b>Бэлтгэлийн тэмдэглэл</b><small>Хичээлийн дараа 1 минутад бөглөнө</small></a>
+        <a href="#strava" data-go="strava"><b>Миний Strava</b><small>Гүйлт, дугуй, бэлтгэлээ харах</small></a>
         <a href="#tests" data-go="tests"><b>Үнэлгээ</b><small>Тестийн дүн, ахиц</small></a>
         <a href="#coach" data-go="coach" hidden><b>Багшийн самбар</b><small>Сурагчдын тэмдэглэл, ахиц</small></a>
         <a href="#feedback" data-go="feedback" hidden><b>Санал хүсэлт</b><small>Хэрэглэгчдийн санал, хариу</small></a>
@@ -886,6 +904,15 @@ footer{padding-bottom:96px}
   <div id="logOut" style="display:flex;flex-direction:column;gap:14px"></div>
 </section>
 
+<section class="view" id="v-strava" hidden aria-labelledby="stvT">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Strava · Гүйлт · Дугуй · Бэлтгэл</span>
+    <h1 id="stvT">Миний Strava</h1>
+    <p class="lede">Strava-гаа холбоод сургуулиас гадуурх гүйлт, дугуй, бэлтгэлүүдээ энд хараарай. Аль нэгийг нь нэг товчоор бэлтгэлийн тэмдэглэлдээ оруулна. Таны Strava-г зөвхөн та өөрөө харна.</p>
+  </div>
+  <div id="stravaOut" style="display:flex;flex-direction:column;gap:14px"></div>
+</section>
+
 <section class="view" id="v-coach" hidden>
   <div style="display:flex;flex-direction:column;gap:8px">
     <span class="eyebrow">Зөвхөн багш нарт</span>
@@ -1165,7 +1192,7 @@ function renderContact(){
   var C=(window.TPE_CONFIG||{}),K=C.CONTACT||{},ok=function(u){return /^https:\/\//i.test(u||'')?u:''};
   var ph=$('coachPh');if(ph&&ok(C.COACH_PHOTO)&&!ph.querySelector('img')){ph.innerHTML='';ph.appendChild(h('img',{src:C.COACH_PHOTO,alt:'Жак багш'}))}
   var F=$('footLinks');if(!F)return;F.innerHTML='';
-  [[K.email,'Имэйл','mailto:'+K.email,K.email],[K.phone,'Утас','tel:'+String(K.phone||'').replace(/[^\d+]/g,''),K.phone],[ok(K.facebook),'Facebook',K.facebook,''],[ok(K.instagram),'Instagram',K.instagram,''],[ok(K.youtube),'YouTube',K.youtube,'']].forEach(function(r){
+  [[K.email,'Имэйл','mailto:'+K.email,K.email],[K.phone,'Утас','tel:'+String(K.phone||'').replace(/[^\d+]/g,''),K.phone],[ok(K.facebook),'Facebook',K.facebook,''],[ok(K.instagram),'Instagram',K.instagram,''],[ok(K.youtube),'YouTube',K.youtube,''],[ok(K.strava),'Strava',K.strava,'']].forEach(function(r){
     if(!r[0])return;var a=h('a',{href:r[2]},[h('b',{text:r[1]}),r[3]?h('span',{text:r[3]}):null]);if(/^https/.test(r[2])){a.target='_blank';a.rel='noopener'}F.appendChild(a)});
 }
 function renderHome(){
@@ -1448,7 +1475,7 @@ function applyCMS(){
   ROSTERS=merge('roster',[]).sort(function(a,b){return String(b.season||'').localeCompare(String(a.season||''))});
   STORIES=merge('story',[]).sort(function(a,b){return (a.order||99)-(b.order||99)||String(b.year||'').localeCompare(String(a.year||''))});
 }
-function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderToday();renderTests();renderHomeToday();if(typeof absHome==='function')absHome();renderUpdates();renderFeedback();applyTexts()}
+function rerenderAll(){applyCMS();document.body.classList.toggle('editing',!!editMode);renderWB();renderCalcEdit();fillPals();fillFoods();if(typeof renderCalc==='function'&&$('fSel')&&$('fSel').options.length)try{renderCalc()}catch(e){}renderHow();renderPrimeTeaser();renderPriming();renderEditBar();renderHome();renderLib();renderArts();renderLessons();renderClasses();renderClubs();renderClubReg();renderMyClubs();renderStories();renderTeams();renderPodcast();renderLive();renderYT();renderTicker();renderMatches();renderTables();renderTop();renderToday();renderTests();renderHomeToday();if(typeof absHome==='function')absHome();renderUpdates();renderFeedback();if($('v-strava')&&!$('v-strava').hidden&&typeof renderStrava==='function')renderStrava();applyTexts()}
 
 /* attachments */
 function attKind(a){if(a.url&&!a.asset)return 'link';var t=a.type||'';return /^image/.test(t)?'photo':/^video/.test(t)?'video':t==='application/pdf'?'pdf':'file'}
@@ -1977,7 +2004,7 @@ async function ensureProfile(){
   var prof={email:ME.email.toLowerCase(),name:pend.name||ME.name||ME.email.split('@')[0],classId:pend.classId||'',createdAt:Date.now()};
   await ref.set(prof).then(function(){MYPROFILE=prof;try{localStorage.removeItem('tpe-pending')}catch(e){}},function(){});
 }
-function stopSubs(){if(typeof crStop==='function')crStop();if(typeof absStop==='function')absStop();if(typeof PATT!=='undefined'){PATT.tabs=null;PATT.data={};PATT.url='';PATT.sheet='';PATT.loaded=false;PATT.msg=null;PATT.err=''}unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
+function stopSubs(){if(typeof crStop==='function')crStop();if(typeof absStop==='function')absStop();if(typeof stvStop==='function')stvStop();if(typeof PATT!=='undefined'){PATT.tabs=null;PATT.data={};PATT.url='';PATT.sheet='';PATT.loaded=false;PATT.msg=null;PATT.err=''}unsubs.forEach(function(u){try{u()}catch(e){}});unsubs=[]}
 function startSubs(){
   stopSubs();if(!ME||!db)return;
   unsubs.push(db.collection('users/'+ME.uid+'/loading').onSnapshot(function(s){MYLOADS=s.docs.map(function(d){var x=d.data();x.id=d.id;return x}).sort(function(a,b){return b.at-a.at});renderLog()},null,{orderBy:['at','desc'],limit:200}));
@@ -2013,7 +2040,7 @@ function weeklyBars(list,weeks){
 }
 var LOGFROM=null; // {aid,title,min} when the log is opened from an assignment
 var LOGFID='',LOGMSG=null,LOGBUSY=false; // form id kept until saved; last message kept across redraws
-var LOGF=['lf-rpe','lf-min','lf-feel','lf-sore','lf-sleep','lf-note'];
+var LOGF=['lf-rpe','lf-min','lf-feel','lf-sore','lf-sleep','lf-note','lf-stv'];
 function renderLog(){
   var W=$('logOut');if(!W)return;
   // live updates redraw this page; keep what the student has typed so far
@@ -2031,10 +2058,12 @@ function renderLog(){
   var pick=[['','— Сонгоно уу —']];
   var f=h('form',{cls:'box edform',novalidate:''},[h('h3',{text:'Өнөөдрийн бэлтгэл'}),
     from?h('div',{cls:'crstep',id:'lf-from'},[h('b',{text:'Даалгавар: '+(from.title||'')}),h('span',{text:from.min?'Төлөвлөсөн хугацаа: '+from.min+' мин. Доор өөрийн бодитоор хөдөлсөн минутаа бичнэ.':'Доор өөрийн бодитоор хөдөлсөн минутаа бичнэ.'}),h('button',{type:'button',cls:'btn line small',style:'align-self:flex-start',text:'Даалгавартай холбохгүй',onclick:function(){LOGFROM=null;renderLog()}})]):null,
+    LOGSTV?h('div',{cls:'crstep stvfrom',id:'lf-stvfrom'},[h('b',{text:'Strava: '+(LOGSTV.n||stvSport(LOGSTV.sp))+' · '+ubDay(LOGSTV.t)}),h('span',{text:stvSport(LOGSTV.sp)+', Strava-д '+LOGSTV.min+' мин хөдөлсөн. Минутыг бөглөлөө, бусдыг нь өөрөө сонгоно.'}),h('button',{type:'button',cls:'btn line small',style:'align-self:flex-start',text:'Strava-тай холбохгүй',onclick:function(){LOGSTV=null;renderLog()}})]):null,
     h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'* тэмдэгтэй асуултад заавал хариулна. Зөв буруу хариулт гэж байхгүй, өөрийн мэдрэмжээ бичээрэй.'}),
     h('div',{cls:'fgrid'},[fSelect('lf-rpe','Хэр хүнд байсан бэ? (1–10 оноо) *',pick.concat(RPEL.slice(1).map(function(x,i){return [String(i+1),x]})),''),fText('lf-min','Бодитоор хөдөлсөн хугацаа (мин) *','',{type:'number',min:1,max:300,ph:'жишээ: 45'}),fSelect('lf-feel','Биеийн мэдрэмж *',pick.concat(FEELL.slice(1).map(function(x,i){return [String(i+1),x]})),''),fSelect('lf-sore','Булчингийн өвдөлт *',pick.concat(SOREL.slice(1).map(function(x,i){return [String(i+1),x]})),'')]),
     fSelect('lf-sleep','Өнгөрсөн шөнө хэдэн цаг унтсан бэ? (заавал биш)',[['','— Бичихгүй —']].concat([5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,11.5,12].map(function(n){return [String(n),n+' цаг']})).concat([['4','5-аас бага'],['13','12-оос их']]),''),
     fText('lf-note','Нэг өгүүлбэр: юу сурав, юу мэдрэв? (заавал биш)','',{area:1,rows:2}),
+    LOGSTV?null:fText('lf-stv','Strava холбоос (заавал биш)','',{type:'url',ph:'https://www.strava.com/activities/…',help:'Strava дээр бэлтгэлээ нээгээд Share → Copy link. Нээлттэй биш бэлтгэлийг багш харахгүй байж болно.'}),
     h('div',{cls:'editrow'},[h('button',{type:'submit',cls:'btn gold',id:'lf-send',text:'Илгээх',disabled:LOGBUSY?'':null}),st])]);
   function bad(id,on){var e=$(id);if(e){if(on)e.setAttribute('aria-invalid','true');else e.removeAttribute('aria-invalid')}}
   f.addEventListener('change',function(e){if(e.target&&e.target.id)bad(e.target.id,false)});
@@ -2045,22 +2074,26 @@ function renderLog(){
     if(!rpe)miss.push('хэр хүнд байсан');if(!minRaw)miss.push('хугацаа');if(!feel)miss.push('биеийн мэдрэмж');if(!sore)miss.push('булчингийн өвдөлт');
     if(miss.length){say('Бөглөөгүй: '+miss.join(', ')+'.',true);var first=f.querySelector('[aria-invalid=true]');if(first)first.focus();return}
     if(!(min>=1&&min<=300)){say('Хугацааг 1–300 минутаар бичнэ үү.',true);$('lf-min').focus();return}
+    var stv=LOGSTV?stvUrl(LOGSTV.id):stvNorm(val('lf-stv'));if(stv===null){bad('lf-stv',true);say('Strava холбоос буруу байна. https://www.strava.com/activities/… эсвэл https://strava.app.link/… хэлбэртэй байна.',true);$('lf-stv').focus();return}
     var doc={uid:ME.uid,rpe:rpe,min:min,load:rpe*min,feel:feel,sore:sore,note:val('lf-note').slice(0,500),classId:(MYPROFILE&&MYPROFILE.classId)||'',name:(MYPROFILE&&MYPROFILE.name)||ME.name||'',at:Date.now()};
     var sl=val('lf-sleep');if(sl)doc.sleep=+sl;
+    if(stv)doc.strava=stv;
     if(from){doc.aid=from.aid;if(from.min)doc.planMin=+from.min}
     btn.disabled=true;LOGBUSY=true;say('Илгээж байна…');var id=LOGFID;
     var slow=setTimeout(function(){say('Сүлжээ удаан байна. Хуудсаа бүү хаагаарай, холболт сэргэмэгц илгээнэ.')},10000);
-    db.doc('users/'+ME.uid+'/loading/'+id).set(doc).then(function(){clearTimeout(slow);LOGBUSY=false;LOGFROM=null;LOGFID='';
+    db.doc('users/'+ME.uid+'/loading/'+id).set(doc).then(function(){clearTimeout(slow);LOGBUSY=false;LOGFROM=null;LOGSTV=null;LOGFID='';
       LOGF.forEach(function(k){var e=$(k);if(e)e.value=''});
       LOGMSG={t:'✓ Хадгалагдлаа. Ачаалал: '+doc.rpe+' × '+doc.min+' = '+doc.load+'.',err:false};renderLog()},
       function(){clearTimeout(slow);LOGBUSY=false;var b=$('lf-send');if(b)b.disabled=false;say('Хадгалж чадсангүй. Бичсэн зүйл тань энд хэвээр байна, дахин "Илгээх" дарна уу.',true)})});
   LOGF.forEach(function(id){var e=f.querySelector('#'+id);if(e&&keep[id]!=null)e.value=keep[id]});
+  if(LOGSTV){var mi=f.querySelector('#lf-min');if(mi&&!mi.value)mi.value=String(LOGSTV.min)}
   W.appendChild(f);
+  var sb=typeof stvLogBox==='function'?stvLogBox():null;if(sb)W.appendChild(sb);
   if(!isStaff())W.appendChild(streakBox());
   var wk=MYLOADS.filter(function(x){return weekKey(x.at)===weekKey(Date.now())}).reduce(function(a,x){return a+x.load},0);
   W.appendChild(h('div',{cls:'big3'},[kpi(String(wk),'Энэ долоо хоногийн ачаалал','хүндийн оноо × минут',true),kpi(String(MYLOADS.length),'Нийт бүртгэл',''),kpi(MYLOADS.length?(MYLOADS.slice(0,5).reduce(function(a,x){return a+x.rpe},0)/Math.min(5,MYLOADS.length)).toFixed(1):'—','Сүүлийн 5 удаагийн дундаж оноо','')]));
   W.appendChild(h('div',{cls:'box'},[h('h3',{text:'8 долоо хоногийн ачаалал'}),weeklyBars(MYLOADS,8),h('p',{cls:'muted',style:'font-size:13px',text:'Ачаалал долоо хоногт огцом (≈ 1.5 дахин илүү) нэмэгдвэл гэмтэх, ядрах эрсдэл өсдөг. Аажмаар нэм.'})]));
-  if(MYLOADS.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бүртгэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('thead',{},[h('tr',{},['Огноо','Оноо','Мин','Ачаалал','Мэдрэмж','Нойр','Тэмдэглэл'].map(function(x){return h('th',{text:x})}))]),h('tbody',{},MYLOADS.slice(0,20).map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:ubDay(d.getTime())}),h('td',{cls:'num',text:String(x.rpe)}),h('td',{cls:'num',text:String(x.min)}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:FEELL[x.feel]||''}),h('td',{cls:'num',text:sleepTxt(x.sleep)}),h('td',{cls:'muted',text:x.note||''})])}))])])]));
+  if(MYLOADS.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бүртгэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('thead',{},[h('tr',{},['Огноо','Оноо','Мин','Ачаалал','Мэдрэмж','Нойр','Тэмдэглэл','Strava'].map(function(x){return h('th',{text:x})}))]),h('tbody',{},MYLOADS.slice(0,20).map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:ubDay(d.getTime())}),h('td',{cls:'num',text:String(x.rpe)}),h('td',{cls:'num',text:String(x.min)}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:FEELL[x.feel]||''}),h('td',{cls:'num',text:sleepTxt(x.sleep)}),h('td',{cls:'muted',text:x.note||''}),h('td',{},[stvLogLink(x)])])}))])])]));
 }
 
 /* ---------- teacher dashboard ---------- */
@@ -2082,7 +2115,7 @@ function renderCoach(){
     return h('tr',{},[h('td',{},[h('button',{type:'button',cls:'exlink',text:u.name||u.email,onclick:function(){openStudent(u)}})]),h('td',{text:c?c.name:'—'}),h('td',{cls:'num',text:String(wl)}),h('td',{cls:'num',text:L.length?(L.slice(0,5).reduce(function(a,x){return a+x.rpe},0)/Math.min(5,L.length)).toFixed(1):'—'}),h('td',{cls:'num',text:last?(last.getMonth()+1)+'/'+last.getDate():'—'}),h('td',{cls:'num',text:wavg+(wbs.length?' ('+wbs.length+')':'')}),h('td',{},[h('button',{type:'button',cls:'btn line small',text:'Дэлгэрэнгүй',onclick:function(){openStudent(u)}})])])}))]);
   W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сурагчид ('+list.length+')'}),list.length?h('div',{cls:'scroll'},[tbl]):h('p',{cls:'muted',text:'Одоогоор бүртгүүлсэн сурагч алга. Сурагчид сургуулийн имэйлээрээ "Анх удаа бүртгүүлэх" хэсгээр бүртгүүлнэ.'})]));
   var recent=LOADS.filter(function(x){return coachClass==='all'||x.classId===coachClass}).slice(0,15);
-  if(recent.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бэлтгэлийн тэмдэглэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},recent.map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:ubDay(d.getTime())}),h('td',{text:x.name||''}),h('td',{cls:'num',text:'Оноо '+x.rpe}),h('td',{cls:'num',text:x.min+' мин'}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:(x.sore>=4?'⚠ ':'')+(SOREL[x.sore]||'')}),h('td',{cls:'muted',text:x.note||''})])}))])])]));
+  if(recent.length)W.appendChild(h('div',{cls:'box'},[h('h3',{text:'Сүүлийн бэлтгэлийн тэмдэглэлүүд'}),h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},recent.map(function(x){var d=new Date(x.at);return h('tr',{},[h('td',{cls:'num',text:ubDay(d.getTime())}),h('td',{text:x.name||''}),h('td',{cls:'num',text:'Оноо '+x.rpe}),h('td',{cls:'num',text:x.min+' мин'}),h('td',{cls:'num',text:String(x.load)}),h('td',{text:(x.sore>=4?'⚠ ':'')+(SOREL[x.sore]||'')}),h('td',{cls:'muted',text:x.note||''}),h('td',{},[stvLogLink(x)])])}))])])]));
   if(MYROLE==='admin')W.appendChild(rolesBox());
 }
 function openStudent(u){
@@ -2123,7 +2156,7 @@ async function fbInit(){
     setAuthed(!!(u&&u.emailVerified&&role));
     if(!u||!u.emailVerified){stopSubs();onPlansAuth()}
     if(u&&!u.emailVerified){renderAccount();renderLog();openVerify();return}
-    await ensureProfile();startSubs();startFbSubs();paStart();absStart();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
+    await ensureProfile();startSubs();startFbSubs();paStart();absStart();if(typeof stvStart==='function')stvStart();renderAccount();renderEditBar();renderLog();renderCoach();rerenderAll();
     [].forEach.call(document.querySelectorAll('[data-go=coach]'),function(a){a.hidden=!(role==='admin'||role==='teacher')});
     [].forEach.call(document.querySelectorAll('nav [data-go=feedback],nav [data-go=patt]'),function(a){a.hidden=role!=='admin'});absMenu();
   });
@@ -2882,8 +2915,8 @@ function exportResults(cid){var studs=Object.keys(USERS).filter(function(u){retu
   studs.forEach(function(u){PERIODS.forEach(function(p){var r=RESALL.filter(function(x){return x.uid===u&&x.per===p[0]})[0];if(!r)return;rows.push([USERS[u].name,USERS[u].email,className(USERS[u].classId),p[1]].concat(TESTS.map(function(t){return r.v&&r.v[t.id]!=null?(isTime(t)?mmss(r.v[t.id]):r.v[t.id]):''})).concat([r.lv?(avgLv(r.lv)||''):'']))})});
   downloadCSV('unelgee-'+(className(cid)||'buh')+'.csv',rows)}
 function sleepTxt(v){return typeof v==='number'?(v<5?'<5':v>12?'>12':String(v))+' ц':'—'}
-function exportLoads(){var rows=[['Огноо','Сурагч','Анги','Хүндийн оноо','Минут','Ачаалал','Мэдрэмж','Булчин өвдөлт','Нойр (цаг)','Тэмдэглэл']];
-  LOADS.slice().sort(function(a,b){return a.at-b.at}).forEach(function(x){rows.push([ymd(new Date(x.at)),x.name,className(x.classId),x.rpe,x.min,x.load,x.feel,x.sore,typeof x.sleep==='number'?x.sleep:'',x.note])});downloadCSV('beltgeliin-temdeglel.csv',rows)}
+function exportLoads(){var rows=[['Огноо','Сурагч','Анги','Хүндийн оноо','Минут','Ачаалал','Мэдрэмж','Булчин өвдөлт','Нойр (цаг)','Тэмдэглэл','Strava']];
+  LOADS.slice().sort(function(a,b){return a.at-b.at}).forEach(function(x){rows.push([ymd(new Date(x.at)),x.name,className(x.classId),x.rpe,x.min,x.load,x.feel,x.sore,typeof x.sleep==='number'?x.sleep:'',x.note,x.strava||''])});downloadCSV('beltgeliin-temdeglel.csv',rows)}
 function exportAssign(){var rows=[['Огноо','Даалгавар','Анги','Сурагч','Хийсэн']];assignList().forEach(function(a){var c=doneCount(a);c[3].forEach(function(u){rows.push([a.date,a.title,className(USERS[u].classId),USERS[u].name||USERS[u].email,c[2][u]?'Тийм':'Үгүй'])})});downloadCSV('daalgavar-guitsetgel.csv',rows)}
 
 /* ---------- site CMS: every static text + lists, owner edits ---------- */
@@ -3244,7 +3277,7 @@ function menuItems(g){return [].filter.call(g.querySelectorAll('.dd a'),function
 function openMenu(g,focus,last){g.classList.remove('picked');g.classList.add('open');g.querySelector('.mt').setAttribute('aria-expanded','true');if(focus){var L=menuItems(g);if(L.length)(last?L[L.length-1]:L[0]).focus()}}
 function closeMenu(g,back){var was=g.classList.contains('open');g.classList.remove('open');g.querySelector('.mt').setAttribute('aria-expanded','false');if(back&&was)g.querySelector('.mt').focus()}
 function closeMenus(){MENUS.forEach(function(g){closeMenu(g)})}
-var VIEWS=['myclubs','today','away','tests','home','how','clubs','stories','matches','table','podcast','youtube','live','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming','guide','updates','feedback','patt'];
+var VIEWS=['myclubs','today','away','strava','tests','home','how','clubs','stories','matches','table','podcast','youtube','live','wellbeing','library','learn','plan','calc','lessons','classes','log','coach','priming','guide','updates','feedback','patt'];
 var PUBVIEWS=['home','how','clubs','stories','matches','table','podcast','youtube','live','priming','guide','updates'];
 function show(v){if(VIEWS.indexOf(v)<0)v='home';
   if(!AUTHED&&PUBVIEWS.indexOf(v)<0){PENDING=v;v='home';if(show.ready&&window.TPE&&TPE.configured&&!TPE.user)openLogin('in')}
@@ -3252,6 +3285,7 @@ function show(v){if(VIEWS.indexOf(v)<0)v='home';
 VIEWS.forEach(function(x){$('v-'+x).hidden=x!==v});
   if(v==='patt'&&typeof renderPatt==='function')renderPatt();
   if(v==='away'&&typeof renderAway==='function')renderAway();
+  if((v==='strava'||v==='log')&&typeof stvOnShow==='function')stvOnShow(v);
   [].forEach.call(document.querySelectorAll('nav.tabs a'),function(a){if(a.dataset.go===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   var navFocus=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('nav.tabs .mg');
   [].forEach.call(document.querySelectorAll('nav.tabs .mg'),function(g){g.classList.toggle('on',!!g.querySelector('[aria-current]'));closeMenu(g)});

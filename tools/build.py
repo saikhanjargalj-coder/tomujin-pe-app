@@ -14,7 +14,7 @@ SRC = ROOT / "src"
 t = (SRC / "template.html").read_text(encoding="utf-8")
 parts = ["var WBEN=" + json.dumps(json.loads((SRC / "wb_en.json").read_text(encoding="utf-8")), ensure_ascii=False) + ";"]
 parts.append("var PASCRIPT=" + json.dumps((ROOT / "tools" / "sheet" / "attendance.gs").read_text(encoding="ascii")) + ";")
-for name in ["wb_mn.js", "data.js", "data2.js", "core.js", "content.js", "calc.js", "clubreg.js", "peatt.js", "away.js"]:
+for name in ["wb_mn.js", "data.js", "data2.js", "core.js", "content.js", "calc.js", "clubreg.js", "peatt.js", "away.js", "strava.js"]:
     parts.append((SRC / name).read_text(encoding="utf-8"))
 data = "\n".join(parts).replace(
     "if(typeof module!=='undefined')module.exports={rawJoints:rawJoints,solvePoses:solvePoses,JI:JI};", "")

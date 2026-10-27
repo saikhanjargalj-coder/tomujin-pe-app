@@ -26,6 +26,10 @@ window.TPE_CONFIG = {
     phone: "",       // e.g. "+976 9911 2233"
     facebook: "https://www.facebook.com/share/1Lfghqh6Nn/",    // e.g. "https://facebook.com/..."
     instagram: "https://www.instagram.com/jacks.journey1",   // e.g. "https://instagram.com/..."
-    youtube: "https://youtube.com/@saikhanjargal1"      // e.g. "https://youtube.com/@..."
-  }
+    youtube: "https://youtube.com/@saikhanjargal1",     // e.g. "https://youtube.com/@..."
+    strava: ""       // your Strava profile, e.g. "https://www.strava.com/athletes/12345"
+  },
+  // Strava: each student connects their own Strava ("Миний Strava"). Set true only after the steps in STRAVA.md
+  // (Strava API app, Firebase Blaze plan, strava-fn deployed). Until then the page says "coming soon".
+  STRAVA_ON: false
 };

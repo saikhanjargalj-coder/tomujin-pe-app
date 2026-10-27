@@ -249,10 +249,19 @@ service cloud.firestore {
           && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
           && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
           && shortStr('note', 2000)
+          // Optional link to the student's own Strava activity (pasted, or picked from "Миний Strava").
+          && (!('strava' in request.resource.data)
+              || (request.resource.data.strava is string && request.resource.data.strava.size() <= 200
+                  && request.resource.data.strava.matches('https://(www[.])?strava[.]com/activities/[0-9]{1,20}|https://strava[.]app[.]link/[A-Za-z0-9_-]{1,40}')))
           && (!('sleep' in request.resource.data)
               || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
         allow update: if false;
         allow delete: if isOwner();
+      }
+      // "Strava connected" flag. Only the student reads it (teachers do not); only the server writes it.
+      match /strava/{doc} {
+        allow read: if isMe(uid);
+        allow write: if false;
       }
       // Wellbeing self-check: the student keeps their current level up to date; no deleting.
       match /wellbeing/{strand} {
@@ -300,6 +309,12 @@ service cloud.firestore {
 
     // Owner-only settings that should not be public (for example the attendance Sheet script address).
     match /private/{id} { allow read, write: if isOwner(); }
+
+    // Strava (strava-fn). Tokens, sign-in attempts and the short activity copy are for the server only:
+    // no one can read them from the site, not even the owner. Strava data is shown only to its owner.
+    match /stravaTokens/{uid} { allow read, write: if false; }
+    match /stravaState/{id}   { allow read, write: if false; }
+    match /stravaCache/{uid}  { allow read, write: if false; }
 
     // Fitness results imported for students who have not signed up yet (doc id = school email).
     // Only the owner writes; the student reads their own once signed in; teachers read.
