@@ -64,6 +64,8 @@
   if (!store) store = seedData();
   store["site/clubreg"] = Object.assign({}, store["site/clubreg"] || {}, regTimes(phase));
   /* Strava club box (the owner sets the real club link in edit mode) */
+  /* one teacher note on Bat (teachers only) */
+  if (!store["tnotes/n1"]) store["tnotes/n1"] = { uid: "s1", lid: "", text: "Гүйлтэнд ахиц сайн. Хүчний дасгалд нуруугаа шулуун байлгахыг сануулах.", at: now - 864e5 * 3 };
   if (!store["site/strava"]) store["site/strava"] = { club: { name: "Tomujin PE", url: "https://www.strava.com/clubs/tomujin-pe-preview", text: "", embed: "" }, coach: {} };
   var subs = [];
   function persist() { ls(KEY, JSON.stringify(store)); }
@@ -134,7 +136,9 @@
       return {
         set: function (d) {
           /* like the real rules: a training log entry can be created once, never overwritten */
-          if (/\/loading\/[^/]+$/.test(path) && store[path]) return deny();
+          if (/\/loading\/[^/]+$/.test(path) && store[path] && role !== "admin") return deny();
+          /* like the real rules: teacher notes are written by the owner only */
+          if (/^tnotes\//.test(path) && role !== "admin") return deny();
           if (!regCheck([{ op: "set", path: path, data: d }], user && user.uid) || !absCheck([{ op: "set", path: path, data: d }])) return deny();
           /* test hooks: __tpeFailSet = the next write is refused; __tpeHold = writes wait until __tpeRelease() */
           if (window.__tpeFailSet) { window.__tpeFailSet = false; return wait().then(deny); }
@@ -151,7 +155,7 @@
     collection: function (path) {
       return {
         onSnapshot: function (next, err, o) { var f = function () { next(query(kids(path), o)); }; subs.push(f); setTimeout(f); return function () { var i = subs.indexOf(f); if (i >= 0) subs.splice(i, 1); }; },
-        add: function (d) { return wait(apply([{ op: "set", path: path + "/a" + Date.now().toString(36), data: d }])); }
+        add: function (d) { if (path === "tnotes" && role !== "admin") return deny(); return wait(apply([{ op: "set", path: path + "/a" + Date.now().toString(36), data: d }])); }
       };
     },
     batch: function (ops) { if (window.__tpeFailSet && ops.some(function (o) { return /^absreq\//.test(o.path); })) { window.__tpeFailSet = false; return wait().then(deny); } return regCheck(ops, user && user.uid) && absCheck(ops) ? wait(apply(ops)) : deny(); },

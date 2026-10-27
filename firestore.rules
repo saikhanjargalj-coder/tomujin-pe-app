@@ -255,7 +255,15 @@ service cloud.firestore {
                   && request.resource.data.strava.matches('https://(www[.])?strava[.]com/activities/[0-9]{1,20}|https://strava[.]app[.]link/[A-Za-z0-9_-]{1,40}')))
           && (!('sleep' in request.resource.data)
               || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
-        allow update: if false;
+        // Only the owner corrects a wrong answer (same checks; the entry stays the student's and is marked edited).
+        allow update: if isOwner()
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
+          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
+          && request.resource.data.editedAt is number
+          && shortStr('note', 2000)
+          && (!('sleep' in request.resource.data)
+              || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
         allow delete: if isOwner();
       }
       // "Strava connected" flag. Only the student reads it (teachers do not); only the server writes it.
@@ -309,6 +317,19 @@ service cloud.firestore {
 
     // Owner-only settings that should not be public (for example the attendance Sheet script address).
     match /private/{id} { allow read, write: if isOwner(); }
+
+    // Teacher notes about a student or one of their log entries: teachers read, only the owner writes.
+    // Students never read them (not even their own).
+    match /tnotes/{id} {
+      allow read: if isTeacher();
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly(['uid', 'lid', 'text', 'at', 'edited'])
+        && request.resource.data.uid is string && request.resource.data.uid.size() >= 1 && request.resource.data.uid.size() <= 128
+        && request.resource.data.lid is string && request.resource.data.lid.size() <= 80
+        && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 2000
+        && request.resource.data.at is number;
+      allow delete: if isOwner();
+    }
 
     // Strava (strava-fn). Tokens, sign-in attempts and the short activity copy are for the server only:
     // no one can read them from the site, not even the owner. Strava data is shown only to its owner.

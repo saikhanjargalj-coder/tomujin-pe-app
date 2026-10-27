@@ -167,13 +167,15 @@ function paHome(){
     h('div',{cls:'chips'},[owner?h('button',{type:'button',cls:'btn gold small',text:'📋 Ирц бүртгэх',onclick:function(){show('patt')}}):null,h('a',{cls:'btn line small',href:PAADMIN+'/t/schedule',target:'_blank',rel:'noopener',text:'Хуваарь ↗'})])]));
   var cls=(sum&&sum.classes)||[],tot={p:0,m:0,today:0,tc:0};cls.forEach(function(c){tot.p+=c.present;tot.m+=c.marked;tot.today+=c.today||0;if(c.today)tot.tc++});
   var wkLoads=LOADS.filter(function(x){return weekKey(x.at)===weekKey(Date.now())}),who7={};wkLoads.forEach(function(x){who7[x.uid]=1});
-  function card(t,v,sub,ic,tone){return h('div',{cls:'tcard'},[h('div',{cls:'tc-h'},[h('span',{text:t}),h('i',{cls:'tc-ic '+tone,'aria-hidden':'true',text:ic})]),h('b',{cls:'tc-v',text:v}),h('small',{cls:'muted',text:sub})])}
+  /* a card with somewhere to go is a button that opens the detail behind its number */
+  function card(t,v,sub,ic,tone,go,goTxt){var kids=[h('div',{cls:'tc-h'},[h('span',{text:t}),h('i',{cls:'tc-ic '+tone,'aria-hidden':'true',text:ic})]),h('b',{cls:'tc-v',text:v}),h('small',{cls:'muted',text:sub})];
+    if(!go)return h('div',{cls:'tcard'},kids);kids.push(h('span',{cls:'tc-go','aria-hidden':'true',text:(goTxt||'Дэлгэрэнгүй')+' ›'}));return h('button',{type:'button',cls:'tcard',onclick:go},kids)}
   var sheetOk=owner&&!!sum;
   W.appendChild(h('div',{cls:'tcards'},[
-    card('Өнөөдрийн ирц',sheetOk?String(tot.today):'—',sheetOk?(tot.today?tot.tc+' ангид тэмдэглэсэн':'Өнөөдөр ирц бүртгээгүй'):(owner?'Sheet-ээс уншиж байна…':'Зөвхөн Жак багшид'),'✓','p'),
-    card('Ирцийн хувь',sheetOk&&tot.m?Math.round(tot.p/tot.m*100)+'%':'—','Бүх анги · И + Х','◎','t'),
-    card('Анхаарах сурагч',sheetOk?String(sum.watch.length):'—','Сүүлийн 4 долоо хоногт 2+ удаа тасалсан','!','g'),
-    card('Бэлтгэлийн тэмдэглэл',String(wkLoads.length),'Энэ 7 хоногт · '+Object.keys(who7).length+' сурагч','✎','o')]));
+    card('Өнөөдрийн ирц',sheetOk?String(tot.today):'—',sheetOk?(tot.today?tot.tc+' ангид тэмдэглэсэн':'Өнөөдөр ирц бүртгээгүй'):(owner?'Sheet-ээс уншиж байна…':'Зөвхөн Жак багшид'),'✓','p',owner?function(){show('patt')}:null,'Ирц бүртгэх'),
+    card('Ирцийн хувь',sheetOk&&tot.m?Math.round(tot.p/tot.m*100)+'%':'—','Бүх анги · И + Х','◎','t',sheetOk?function(){cxAttendance(sum)}:null,'Ангиар харах'),
+    card('Анхаарах сурагч',sheetOk?String(sum.watch.length):'—','Сүүлийн 4 долоо хоногт 2+ удаа тасалсан','!','g',sheetOk?function(){cxWatch(sum)}:null,'Жагсаалт'),
+    card('Бэлтгэлийн тэмдэглэл',String(wkLoads.length),'Энэ 7 хоногт · '+Object.keys(who7).length+' сурагч','✎','o',function(){cxWeek()},'Бүгдийг харах')]));
   if(sheetOk&&cls.length){
     W.appendChild(h('h3',{style:'margin:6px 0 0',text:'Миний ангиуд'}));
     W.appendChild(h('div',{cls:'clsgrid'},cls.map(function(c){var k=c.tab+'|'+c.cls;

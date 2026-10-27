@@ -371,6 +371,27 @@ await test("U7 Strava: link flag only for its student, server collections closed
   await assertFails(setDoc(doc(stu(1), "users/s1/loading/sv4"), Object.assign({}, L, { strava: "javascript:alert(1)" })));
   await assertFails(setDoc(doc(stu(1), "users/s1/loading/sv5"), Object.assign({}, L, { strava: 123 })));
 });
+await test("U8 teacher notes: teachers read, owner writes, students never see; owner corrects a log entry", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }),
+    setDoc(doc(db, "tnotes/n1"), { uid: "s1", lid: "", text: "сайн", at: 1 }),
+    setDoc(doc(db, "users/s1/loading/e1"), { uid: "s1", rpe: 6, min: 450, load: 2700, at: 1 })]));
+  await assertSucceeds(getDoc(doc(teacher(), "tnotes/n1")));
+  await assertSucceeds(getDoc(doc(owner(), "tnotes/n1")));
+  await assertFails(getDoc(doc(stu(1), "tnotes/n1")));
+  await assertFails(getDocs(query(collection(stu(1), "tnotes"), where("uid", "==", "s1"))));
+  await assertFails(setDoc(doc(teacher(), "tnotes/n2"), { uid: "s1", lid: "", text: "x", at: 2 }));
+  await assertFails(setDoc(doc(stu(1), "tnotes/n3"), { uid: "s1", lid: "", text: "x", at: 2 }));
+  await assertSucceeds(setDoc(doc(owner(), "tnotes/n4"), { uid: "s1", lid: "e1", text: "Өвдөгийг асуух", at: 2 }));
+  await assertFails(setDoc(doc(owner(), "tnotes/n5"), { uid: "s1", lid: "", text: "", at: 2 }));
+  await assertFails(setDoc(doc(owner(), "tnotes/n6"), { uid: "s1", lid: "", text: "x", at: 2, extra: 1 }));
+  await assertSucceeds(deleteDoc(doc(owner(), "tnotes/n4")));
+  const fixd = { uid: "s1", rpe: 6, min: 45, load: 270, at: 1, editedAt: 5 };
+  await assertFails(setDoc(doc(stu(1), "users/s1/loading/e1"), fixd));      // the student cannot change it afterwards
+  await assertFails(setDoc(doc(teacher(), "users/s1/loading/e1"), fixd));   // other teachers only read
+  await assertFails(setDoc(doc(owner(), "users/s1/loading/e1"), Object.assign({}, fixd, { min: 0 })));
+  await assertFails(setDoc(doc(owner(), "users/s1/loading/e1"), Object.assign({}, fixd, { uid: "s2" })));
+  await assertSucceeds(setDoc(doc(owner(), "users/s1/loading/e1"), fixd));
+});
 await test("U6 only the owner edits site content", async () => {
   await assertFails(setDoc(doc(stu(1), "site/texts"), { t: { x: "hack" } }));
   await assertSucceeds(setDoc(doc(owner(), "site/texts"), { t: { x: "ok" } }));
