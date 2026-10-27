@@ -4,7 +4,7 @@
    Only the owner reads and writes the class lists: the script checks the sign-in with Google on every call.
    The script address lives in private/peatt (owner-only). When the owner switches on "tell in advance"
    (away.js), the address is also put in config/absence so signed-in students can mark their own coming lesson. */
-var PATT={url:'',sheet:'',loaded:false,sum:null,sumAt:0,sumBusy:false,data:{},key:'',date:'',view:'day',busy:{},bulk:false,msg:null,loading:false,err:''};
+var PATT={url:'',sheet:'',yavts:'',loaded:false,sum:null,sumAt:0,sumBusy:false,data:{},key:'',date:'',view:'day',busy:{},bulk:false,msg:null,loading:false,err:''};
 var PACODE=[['И','Ирсэн','ok'],['Х','Хоцорсон','g'],['Т','Тасалсан','o'],['Ч','Чөлөөтэй','t'],['Ө','Өвчтэй','t']];
 var PAERR={'no-url':'Sheet-тэй холбоогүй байна. Доорх "Тохиргоо" хэсэгт холбоосоо оруулна уу.','not-allowed':'Энэ акаунтаар Sheet-ийг ашиглах эрхгүй.','bad-token':'Нэвтрэлт хүчингүй боллоо. Гараад дахин нэвтэрнэ үү.','no-date-column':'Sheet-д энэ өдрийн багана алга (толгойн огноо буруу байж магадгүй).','no-tab':'Sheet-д ийм хуудас алга.','bad-header':'Sheet-ийн толгой мөр (3-р мөр) өөрчлөгдсөн байна.','bad-code':'Зөвшөөрөгдөөгүй тэмдэг.'};
 function paErr(e){var c=String((e&&e.message)||e||'');var k=c.split(':')[0];if(k==='no-student')return 'Sheet-д энэ сурагч олдсонгүй (мөр устсан эсвэл ID өөрчлөгдсөн).';return PAERR[k]||('Sheet-тэй холбогдож чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.'+(c&&c.length<60?' ('+c+')':''))}
@@ -25,7 +25,7 @@ function paKeep(k,v){try{if(v==null)localStorage.removeItem('tpe-patt-'+k);else 
 function paGet(k){try{return localStorage.getItem('tpe-patt-'+k)||''}catch(e){return ''}}
 function paStart(){
   if(MYROLE!=='admin'||!db)return;
-  unsubs.push(db.doc('private/peatt').onSnapshot(function(d){var x=d.exists?d.data():{};var was=PATT.url;PATT.url=x.url||'';PATT.sheet=x.sheet||'';PATT.loaded=true;if(PATT.url!==was){PATT.sum=null;PATT.data={}}paRefresh()},function(){PATT.loaded=true}));
+  unsubs.push(db.doc('private/peatt').onSnapshot(function(d){var x=d.exists?d.data():{};var was=PATT.url;PATT.url=x.url||'';PATT.sheet=x.sheet||'';PATT.yavts=x.yavts||'';PATT.loaded=true;if(PATT.url!==was){PATT.sum=null;PATT.data={}}paRefresh()},function(){PATT.loaded=true}));
 }
 /* Summary of every PE class (one call): class list for the picker and the teacher home. */
 function paLoadSum(force){
@@ -75,7 +75,7 @@ function paSettings(){
     h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold small',id:'pa-save',text:'Хадгалах',onclick:function(){var a=u.value.trim(),b=s.value.trim();
       if(a&&!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(a)){st.className='status err';st.textContent='Холбоос https://script.google.com/macros/s/…/exec хэлбэртэй байна.';return}
       if(b&&!/^https:\/\/docs\.google\.com\/spreadsheets\//.test(b)){st.className='status err';st.textContent='Sheet-ийн холбоос https://docs.google.com/spreadsheets/… хэлбэртэй байна.';return}
-      db.doc('private/peatt').set({url:a,sheet:b,at:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа.';PATT.sum=null;PATT.data={}},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st])]);
+      db.doc('private/peatt').update({url:a,sheet:b,at:Date.now()}).then(function(){st.className='status';st.textContent='Хадгалагдлаа.';PATT.sum=null;PATT.data={}},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'})}}),st])]);
 }
 /* Links to the school's own system (admin.tomujin.edu.mn). Only links for now: reading or writing its data
    needs an access key from the people who run it. Class pages there are /t/class/<class>-pe, e.g. 12a-pe. */

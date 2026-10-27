@@ -337,6 +337,34 @@ service cloud.firestore {
     match /stravaState/{id}   { allow read, write: if false; }
     match /stravaCache/{uid}  { allow read, write: if false; }
 
+    // Term progress grade ("Явц"), one document per student and term (id = term_studentID, for example t1_27103),
+    // copied by the owner from the teacher's working Google Sheet. Teachers read all of them. A student reads only
+    // their own (matched by the verified school email) and only after the owner has opened that class's grades
+    // ("pub"). Teacher notes never go here: they live in gradesStaff below.
+    function gradeShape() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['term', 'sid', 'email', 'first', 'last', 'cls', 'grade', 'c', 'pct', 'lv', 'pts', 'w', 'yavts', 'flag', 'pub', 'at', 'pubAt'])
+        && d.keys().hasAll(['term', 'sid', 'email', 'pub', 'at'])
+        && d.term is string && d.term.matches('t[1-4]')
+        && d.sid is string && d.sid.size() >= 1 && d.sid.size() <= 20
+        && d.email is string && (d.email == '' || d.email.matches('[^@ ]+@tomujin[.]edu[.]mn'))
+        && d.pub is bool
+        && (!('yavts' in d) || d.yavts == null || (d.yavts is number && d.yavts >= 0 && d.yavts <= 100))
+        && shortStr('first', 80) && shortStr('last', 80) && shortStr('cls', 20) && shortStr('grade', 4) && shortStr('flag', 200);
+    }
+    match /grades/{id} {
+      allow read: if isTeacher() || (school() && resource.data.email == myEmail() && resource.data.pub == true);
+      allow create, update: if isOwner() && gradeShape();
+      allow delete: if isOwner();
+    }
+    // The teacher's own note on a student's term grade (from the working sheet). Teachers only, never students.
+    match /gradesStaff/{id} {
+      allow read: if isTeacher();
+      allow create, update: if isOwner() && request.resource.data.keys().hasOnly(['note', 'at'])
+        && request.resource.data.note is string && request.resource.data.note.size() <= 2000;
+      allow delete: if isOwner();
+    }
+
     // Fitness results imported for students who have not signed up yet (doc id = school email).
     // Only the owner writes; the student reads their own once signed in; teachers read.
     match /pending/{email} {

@@ -100,6 +100,7 @@ function cxStudent(uid,keep){
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Ачаалал (8 долоо хоног)'}),weeklyBars(L,8)]));
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Бэлтгэлийн тэмдэглэл ('+L.length+')'}),L.length?cxEntryTable(L.slice(0,40),false):h('p',{cls:'muted',style:'margin:0',text:'Одоогоор тэмдэглэл алга.'}),
       L.length?h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Мөр дээр дарж бүх хариултыг нээнэ.'+(cxOwner()?' Тэндээс засна, тэмдэглэл бичнэ.':'')}):null]));
+    if(typeof yvStudentBox==='function')p.appendChild(yvStudentBox(u));
     p.appendChild(cxResultsBox(uid,u));
     var wbs=WBALL.filter(function(x){return x.uid===uid});
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Өөрийн үнэлсэн сайн сайхан байдал'}),wbs.length?h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},wbs.map(function(x){var s=strand(x.sid);return h('tr',{},[h('td',{text:s?s.n:x.sid}),h('td',{cls:'num',text:'L'+x.level+' '+(WBLV[x.level-1]||[''])[0]}),h('td',{cls:'muted',text:ubDay(x.at)})])}))])]):h('p',{cls:'muted',style:'margin:0',text:'Одоогоор үнэлгээ хийгээгүй.'})]));

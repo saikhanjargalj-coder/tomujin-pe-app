@@ -397,6 +397,53 @@ await test("U6 only the owner edits site content", async () => {
   await assertSucceeds(setDoc(doc(owner(), "site/texts"), { t: { x: "ok" } }));
 });
 
+/* ---------------- term progress grade (Явц) ---------------- */
+const G = (sid, email, pub, extra = {}) => Object.assign({ term: "t1", sid, email, first: "Туршилт", last: "Нэг", cls: "12A", grade: "12",
+  c: { i: 6, x: 1, t: 0, ch: 1, o: 0 }, pct: 1, lv: { a: 4, r: 4, k: 4, u: 4 }, pts: { att: 25, a: 12, r: 8, k: 12, u: 28 },
+  w: { att: 25, a: 15, r: 10, k: 15, u: 35 }, yavts: 85, flag: "", pub, at: 1 }, extra);
+await test("Y1 only the owner writes grades; students and teachers cannot", async () => {
+  await seed((db) => setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }));
+  await assertSucceeds(setDoc(doc(owner(), "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", false)));
+  await assertFails(setDoc(doc(stu(1), "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", true, { yavts: 100 })));
+  await assertFails(setDoc(doc(stu(1), "grades/t1_x"), G("x", "s1@tomujin.edu.mn", true)));
+  await assertFails(setDoc(doc(teacher(), "grades/t1_90002"), G("90002", "s2@tomujin.edu.mn", false)));
+  await assertFails(deleteDoc(doc(stu(1), "grades/t1_90001")));
+  await assertSucceeds(deleteDoc(doc(owner(), "grades/t1_90001")));
+});
+await test("Y2 grade shape: no teacher note, school email only, grade 0-100", async () => {
+  await assertFails(setDoc(doc(owner(), "grades/t1_1"), G("1", "s1@tomujin.edu.mn", false, { note: "teacher only" })));
+  await assertFails(setDoc(doc(owner(), "grades/t1_2"), G("2", "someone@gmail.com", false)));
+  await assertFails(setDoc(doc(owner(), "grades/t1_3"), G("3", "s1@tomujin.edu.mn", false, { yavts: 120 })));
+  await assertFails(setDoc(doc(owner(), "grades/t1_4"), G("4", "s1@tomujin.edu.mn", "yes")));
+  await assertSucceeds(setDoc(doc(owner(), "grades/t1_5"), G("5", "", false, { yavts: null, pct: null })));
+});
+await test("Y3 a student reads only their own grade, and only after the class is opened", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }),
+    setDoc(doc(db, "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", false)),
+    setDoc(doc(db, "grades/t1_90002"), G("90002", "s2@tomujin.edu.mn", true))]));
+  await assertFails(getDoc(doc(stu(1), "grades/t1_90001")));                  // not opened yet
+  await assertFails(getDocs(query(collection(stu(1), "grades"), where("email", "==", "s1@tomujin.edu.mn"))));
+  await assertFails(getDoc(doc(stu(1), "grades/t1_90002")));                  // someone else's, even when opened
+  await assertFails(getDocs(collection(stu(1), "grades")));                   // no listing everyone
+  await assertSucceeds(getDoc(doc(teacher(), "grades/t1_90001")));
+  await assertSucceeds(getDocs(collection(teacher(), "grades")));
+  await assertFails(getDoc(doc(guest(), "grades/t1_90002")));
+  await seed((db) => setDoc(doc(db, "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", true)));
+  await assertSucceeds(getDoc(doc(stu(1), "grades/t1_90001")));
+  const q = await assertSucceeds(getDocs(query(collection(stu(1), "grades"), where("email", "==", "s1@tomujin.edu.mn"), where("pub", "==", true))));
+  ok(q.size === 1, "own published grade not found by query");
+  await assertFails(getDoc(doc(as("s1", "s1@tomujin.edu.mn", false), "grades/t1_90001")));   // unverified email
+});
+await test("Y4 the teacher's grade notes: teachers read, owner writes, students never", async () => {
+  await seed((db) => Promise.all([setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }),
+    setDoc(doc(db, "gradesStaff/t1_90001"), { note: "Хичээлээс гадуур тогтмол гүйдэг", at: 1 })]));
+  await assertFails(getDoc(doc(stu(1), "gradesStaff/t1_90001")));
+  await assertSucceeds(getDoc(doc(teacher(), "gradesStaff/t1_90001")));
+  await assertFails(setDoc(doc(teacher(), "gradesStaff/t1_90001"), { note: "x", at: 2 }));
+  await assertFails(setDoc(doc(owner(), "gradesStaff/t1_90002"), { note: "x", at: 2, email: "s1@tomujin.edu.mn" }));
+  await assertSucceeds(setDoc(doc(owner(), "gradesStaff/t1_90002"), { note: "x", at: 2 }));
+});
+
 await testEnv.cleanup();
 const failed = results.filter((r) => !r[0]);
 console.log(`\n${results.length - failed.length}/${results.length} passed` + (failed.length ? "\nFAILED: " + failed.map((r) => r[1]).join("; ") : ""));

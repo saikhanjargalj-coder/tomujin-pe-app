@@ -13,6 +13,10 @@
  *   approves it does the teacher's own call write "sick" or "excused" here.
  * What it returns: student ID, first and last name, grade, class (10A...), house, school email, the
  * attendance marks and the week labels of row 1 (P1W8...). It never returns phone numbers, photos, parents' data or anything from other tabs.
+ * Term progress grades (owner only, action "yavts"): reads the teacher's separate working sheet
+ * ("PE 1-r uliral Yavts", tabs "6-r angi" ... "12-r angi" and "Tohirgoo") by the link the owner saves on the site, and
+ * returns each student's attendance counts, the teacher's 1-5 levels, the points and the term grade, plus the school
+ * email from the "PE n" tabs here (to match the site account). It never writes to that sheet.
  * What it writes (owner only): attendance cells on "PE n" tabs, found by student ID and by the date in row 3,
  * plus a short fixed note on a cell when it comes from an approved student request (never the student's comment).
  * Only the school's own codes are accepted.
@@ -51,7 +55,7 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 function doGet() {
-  return ContentService.createTextOutput(JSON.stringify({ ok: true, app: 'tomujin-pe-attendance', v: 2 })).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, app: 'tomujin-pe-attendance', v: 3 })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /* Google checks the token; we only accept a verified email. */
@@ -70,6 +74,7 @@ function handle_(q, ss) {
   if (q.action === 'summary') return summary_(ss);
   if (q.action === 'absconf') return absConfSet_(q.set);
   if (q.action === 'tabs') return { ok: true, tabs: ss.getSheets().map(function (s) { return s.getName(); }).filter(function (n) { return TAB_RE.test(n); }) };
+  if (q.action === 'yavts') return yavts_(ss, q.sheet);
   if (!TAB_RE.test(String(q.tab || ''))) throw new Error('bad-tab');
   var sh = ss.getSheetByName(q.tab);
   if (!sh) throw new Error('no-tab');
@@ -282,4 +287,119 @@ function meOut_(me, conf, tz) {
     me: { first: me.x.first, last: me.x.last, cls: me.key, tab: me.sh.getName() },
     days: myDays_(me, conf, tz)
   };
+}
+
+/* ---------- term progress grade ("Yavts") from the teacher's working sheet ----------
+   The working sheet has one tab per grade ("6-r angi" ... "12-r angi", row 1 = headers) and a settings tab
+   ("Tohirgoo") with the weights: labels in column A, numbers in column B. Columns are found by the start of
+   their header, so moving or adding columns keeps working. Read only: nothing is written there. */
+var YV_TAB_RE = /^(\d{1,2})-\u0440 \u0430\u043d\u0433\u0438$/;
+var YV_SET = '\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e';
+var YV_ATT = '\u0418\u0440\u0446', YV_PCT = '\u0418\u0440\u0446 %', YV_PTS = '\u043e\u043d\u043e\u043e';
+var YV_FIRST = '\u041d\u044d\u0440', YV_LAST = '\u041e\u0432\u043e\u0433', YV_CLS = '\u0410\u043d\u0433\u0438';
+var YV_TOTAL = '\u042f\u0412\u0426', YV_FLAG = '\u0410\u043d\u0445\u0430\u0430\u0440\u0430\u0445', YV_NOTE = '\u0411\u0430\u0433\u0448';
+// the four teacher-rated parts: activity, readiness, knowledge, application & habits
+var YV_PARTS = [['a', '\u0418\u0434\u044d\u0432\u0445'], ['r', '\u0411\u044d\u043b\u044d\u043d'], ['k', '\u041c\u044d\u0434\u043b\u044d\u0433'], ['u', '\u0425\u044d\u0440\u044d\u0433\u043b\u044d\u044d']];
+var YV_CODEKEY = ['i', 'x', 't', 'ch', 'o'];   // same order as CODES
+
+function yvSheetId_(s) {
+  s = String(s || '').trim();
+  var m = s.match(/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{20,}$/.test(s)) return s;
+  throw new Error('no-yavts-sheet');
+}
+function yvNum_(v) { return (typeof v === 'number' && isFinite(v)) ? Math.round(v * 1000) / 1000 : null; }
+function yvStarts_(h, s) { return h.slice(0, s.length) === s; }
+
+/* where each value sits on a class tab */
+function yvCols_(head) {
+  var c = { codes: {}, lv: {}, pts: {} };
+  head.forEach(function (raw, i) {
+    var h = String(raw).trim();
+    if (!h) return;
+    var code = CODES.indexOf(h);
+    if (code >= 0) { if (c.codes[YV_CODEKEY[code]] == null) c.codes[YV_CODEKEY[code]] = i; return; }
+    if (h === 'ID') { if (c.id == null) c.id = i; return; }
+    if (yvStarts_(h, YV_PCT)) { if (c.pct == null) c.pct = i; return; }
+    if (yvStarts_(h, YV_ATT) && h.indexOf(YV_PTS) > 0) { if (c.pts.att == null) c.pts.att = i; return; }
+    for (var p = 0; p < YV_PARTS.length; p++) {
+      if (!yvStarts_(h, YV_PARTS[p][1])) continue;
+      var k = YV_PARTS[p][0];
+      if (h.indexOf(YV_PTS) > 0) { if (c.pts[k] == null) c.pts[k] = i; }
+      else if (h.indexOf('(') > 0) { if (c.lv[k] == null) c.lv[k] = i; }
+      return;
+    }
+    if (yvStarts_(h, YV_TOTAL)) { if (c.total == null) c.total = i; return; }
+    if (yvStarts_(h, YV_FIRST)) { if (c.first == null) c.first = i; return; }
+    if (yvStarts_(h, YV_LAST)) { if (c.last == null) c.last = i; return; }
+    if (yvStarts_(h, YV_CLS)) { if (c.cls == null) c.cls = i; return; }
+    if (yvStarts_(h, YV_FLAG)) { if (c.flag == null) c.flag = i; return; }
+    if (yvStarts_(h, YV_NOTE)) { if (c.note == null) c.note = i; return; }
+  });
+  return c;
+}
+
+/* weights from the settings tab: the first number next to each label */
+function yvWeights_(wb) {
+  var w = {}, sh = wb.getSheetByName(YV_SET);
+  if (!sh) return w;
+  var n = Math.min(sh.getLastRow(), 40);
+  if (n < 1) return w;
+  sh.getRange(1, 1, n, 2).getValues().forEach(function (r) {
+    var label = String(r[0]).trim(), v = r[1];
+    if (typeof v !== 'number' || !label) return;
+    if (yvStarts_(label, YV_ATT) && label.indexOf('%') < 0) { if (w.att == null) w.att = v; return; }
+    YV_PARTS.forEach(function (p) { if (yvStarts_(label, p[1]) && w[p[0]] == null) w[p[0]] = v; });
+  });
+  return w;
+}
+
+/* school email of every student on the "PE n" tabs here, by student ID */
+function yvMails_(ss) {
+  var tz = ss.getSpreadsheetTimeZone(), out = {};
+  ss.getSheets().forEach(function (sh) {
+    if (!TAB_RE.test(sh.getName())) return;
+    var L = layout_(sh, tz), n = sh.getLastRow() - FIRST_ROW + 1;
+    if (!L.c.mail || n < 1) return;
+    var ids = sh.getRange(FIRST_ROW, L.c.id, n, 1).getValues(), mails = sh.getRange(FIRST_ROW, L.c.mail, n, 1).getValues();
+    for (var i = 0; i < n; i++) {
+      var id = String(ids[i][0]).trim(), em = String(mails[i][0]).trim().toLowerCase();
+      if (id && SCHOOL_RE.test(em) && !out[id]) out[id] = em;
+    }
+  });
+  return out;
+}
+
+function yavts_(ss, link) {
+  var wb;
+  try { wb = SpreadsheetApp.openById(yvSheetId_(link)); }
+  catch (e) { if (String(e && e.message) === 'no-yavts-sheet') throw e; throw new Error('yavts-open'); }
+  var mails = yvMails_(ss), w = yvWeights_(wb), students = [], tabs = [];
+  wb.getSheets().forEach(function (sh) {
+    var m = sh.getName().match(YV_TAB_RE);
+    if (!m) return;
+    var lastCol = sh.getLastColumn(), lastRow = sh.getLastRow();
+    if (lastCol < 1 || lastRow < 2) return;
+    var v = sh.getRange(1, 1, lastRow, lastCol).getValues(), c = yvCols_(v[0]);
+    if (c.id == null || c.total == null) throw new Error('yavts-header:' + sh.getName());
+    tabs.push(sh.getName());
+    for (var r = 1; r < v.length; r++) {
+      var row = v[r], id = String(row[c.id]).trim();
+      if (!id) continue;
+      var x = {
+        id: id, tab: m[1], first: c.first != null ? String(row[c.first]).trim() : '', last: c.last != null ? String(row[c.last]).trim() : '',
+        cls: c.cls != null ? String(row[c.cls]).trim() : '', email: mails[id] || '',
+        c: {}, pct: c.pct != null ? yvNum_(row[c.pct]) : null, lv: {}, pts: {},
+        yavts: yvNum_(row[c.total]), flag: c.flag != null ? String(row[c.flag]).trim() : '', note: c.note != null ? String(row[c.note]).trim() : ''
+      };
+      if (x.first.charAt(0) === '#') x.first = '';
+      YV_CODEKEY.forEach(function (k) { var j = c.codes[k]; x.c[k] = j != null ? (yvNum_(row[j]) || 0) : 0; });
+      Object.keys(c.lv).forEach(function (k) { x.lv[k] = yvNum_(row[c.lv[k]]); });
+      Object.keys(c.pts).forEach(function (k) { x.pts[k] = yvNum_(row[c.pts[k]]); });
+      students.push(x);
+    }
+  });
+  if (!tabs.length) throw new Error('yavts-no-tabs');
+  return { ok: true, term: 't1', w: w, tabs: tabs, students: students, at: new Date().getTime() };
 }

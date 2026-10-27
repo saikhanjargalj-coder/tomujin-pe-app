@@ -158,7 +158,7 @@
         add: function (d) { if (path === "tnotes" && role !== "admin") return deny(); return wait(apply([{ op: "set", path: path + "/a" + Date.now().toString(36), data: d }])); }
       };
     },
-    batch: function (ops) { if (window.__tpeFailSet && ops.some(function (o) { return /^absreq\//.test(o.path); })) { window.__tpeFailSet = false; return wait().then(deny); } return regCheck(ops, user && user.uid) && absCheck(ops) ? wait(apply(ops)) : deny(); },
+    batch: function (ops) { if (role !== "admin" && ops.some(function (o) { return /^grades(Staff)?\//.test(o.path); })) return deny(); if (window.__tpeFailSet && ops.some(function (o) { return /^absreq\//.test(o.path); })) { window.__tpeFailSet = false; return wait().then(deny); } return regCheck(ops, user && user.uid) && absCheck(ops) ? wait(apply(ops)) : deny(); },
     /* test hooks: __tpeRace = offer id that "someone else" fills just before the transaction,
        __tpeOffline = no connection, __tpeLost = server saved it but the answer never arrived */
     tx: function (reads, decide) {
@@ -228,6 +228,27 @@
     var me = findMe(TABS); if (!me) return fail("not-in-list");
     return wait(JSON.parse(JSON.stringify({ ok: true, today: ymd(clock()), cutoff: conf.cutoff, ahead: conf.ahead, me: { first: me.x.first, last: me.x.last, cls: me.key, tab: me.tab }, days: myDays(me) })));
   }
+  /* Stand-in for the teacher's working sheet "PE 1-р улирлын Явц": attendance from the made-up "PE n" tabs up to today,
+     1-5 levels made up from the student ID (a few 3s and 5s), points and grade with the real weights. */
+  function yavtsMock(TABS) {
+    var w = { att: 25, a: 15, r: 10, k: 15, u: 35 }, td = ymd(Date.now()), out = [];
+    TABS.forEach(function (tab) {
+      var t = sheetTab(tab), g = tab.split(" ")[1], max = {};
+      t.students.forEach(function (x) { var n = Object.keys(x.m).filter(function (d) { return d <= td && d <= "2026-10-30"; }).length, k = x.cls || g; max[k] = Math.max(max[k] || 0, n); });
+      t.students.forEach(function (x, i) {
+        var c = { i: 0, x: 0, t: 0, ch: 0, o: 0 }, map = { "И": "i", "Х": "x", "Т": "t", "Ч": "ch", "Ө": "o" }, n = 0;
+        Object.keys(x.m).forEach(function (d) { if (d <= td && d <= "2026-10-30") { c[map[x.m[d]]]++; n++; } });
+        var seen = c.i + c.x + c.t, pct = seen ? (c.i + c.x) / seen : null, h = +x.id % 7;
+        var lv = { a: h === 3 ? 5 : h === 5 ? 3 : 4, r: h === 1 ? 3 : 4, k: h === 2 ? 5 : 4, u: h === 3 ? 5 : h === 5 ? 2 : h === 6 ? 3 : 4 };
+        var pts = { att: pct == null ? null : Math.round(pct * w.att * 1000) / 1000, a: lv.a / 5 * w.a, r: lv.r / 5 * w.r, k: lv.k / 5 * w.k, u: lv.u / 5 * w.u };
+        var y = pct == null ? null : Math.round(pts.att + pts.a + pts.r + pts.k + pts.u);
+        out.push({ id: x.id, tab: g, first: x.first, last: x.last, cls: x.cls, email: x.email, c: c, pct: pct == null ? null : Math.round(pct * 1000) / 1000, lv: lv, pts: pts, yavts: y,
+          flag: n < (max[x.cls || g] || 0) ? "Ирцийн бүртгэл " + (max[x.cls || g] - n) + " хичээлээр цөөн" : "",
+          note: h === 3 ? "Хичээлээс гадуур тогтмол гүйдэг, Strava-д тэмдэглэдэг." : h === 5 ? "Техникээ давтах хэрэгтэй: squat-д өвдөг дотогшоо орж байна." : "" });
+      });
+    });
+    return JSON.parse(JSON.stringify({ ok: true, term: "t1", w: w, tabs: TABS.map(function (t) { return t.split(" ")[1] + "-р анги"; }), students: out, at: Date.now() }));
+  }
   function sheetCall(q) {
     var TABS = ["PE 6", "PE 7", "PE 8", "PE 9", "PE 10", "PE 11", "PE 12"];
     if (q.action === "me") return studentCall(q, TABS);
@@ -237,6 +258,7 @@
       return wait({ ok: true, absconf: JSON.parse(JSON.stringify(store["mockabs"])) });
     }
     if (q.action === "tabs") return wait({ ok: true, tabs: TABS });
+    if (q.action === "yavts") return wait(yavtsMock(TABS));
     if (q.action === "summary") {
       var td = ymd(Date.now()), from = new Date(Date.parse(td + "T00:00:00Z") - 28 * 864e5).toISOString().slice(0, 10), out = [], watch = [], weeks = {};
       TABS.forEach(function (tab) { var t = sheetTab(tab), by = {}; Object.keys(t.weeks).forEach(function (d) { weeks[d] = t.weeks[d]; });
