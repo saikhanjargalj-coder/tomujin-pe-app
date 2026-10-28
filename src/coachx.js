@@ -14,9 +14,10 @@ function cxOwner(){return MYROLE==='admin'}
 function cxName(uid,fallback){var u=USERS[uid];return u?(u.name||u.email||fallback||'—'):(fallback||'—')}
 function cxId(x){return String(x&&x._p||'').split('/').pop()}
 function cxWhen(ms){var d=ubD(ms);return (d.getUTCMonth()+1)+'/'+d.getUTCDate()+' '+('0'+d.getUTCHours()).slice(-2)+':'+('0'+d.getUTCMinutes()).slice(-2)}
-function cxNotesOf(uid,lid){return TNOTES.filter(function(n){return n.uid===uid&&(lid==null||(n.lid||'')===lid)})}
-function cxSheet(open,build){CXOPEN=open;openSheet(build)}
-function cxRedraw(){if(!CXOPEN||$('sheet').hidden)return;var c=CXOPEN;if(c.k==='student')cxStudent(c.uid,true);else if(c.k==='entry')cxEntry(c.p,true);else if(c.k==='week')cxWeek(true)}
+/* uid may list several keys joined by | (a student's account and their student ID: notes written before they signed up) */
+function cxNotesOf(uid,lid){var ks=String(uid).split('|');return TNOTES.filter(function(n){return ks.indexOf(n.uid)>=0&&(lid==null||(n.lid||'')===lid)})}
+function cxSheet(open,build){openSheet(build);CXOPEN=open}
+function cxRedraw(){if(!CXOPEN||$('sheet').hidden)return;var c=CXOPEN;if(c.k==='student')cxStudent(c.uid,true);else if(c.k==='entry')cxEntry(c.p,true);else if(c.k==='week')cxWeek(true);else if(c.k==='yv'&&typeof yvRedraw==='function')yvRedraw(c)}
 function cxRow(cells,fn,label){return h('tr',{cls:'cxrow',tabindex:'0','aria-label':label||null,onclick:function(e){if(e.target.closest&&e.target.closest('a,button,input,select,textarea'))return;fn()},
   onkeydown:function(e){if((e.key==='Enter'||e.key===' ')&&e.target===e.currentTarget){e.preventDefault();fn()}}},cells)}
 
@@ -104,7 +105,8 @@ function cxStudent(uid,keep){
     p.appendChild(cxResultsBox(uid,u));
     var wbs=WBALL.filter(function(x){return x.uid===uid});
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Өөрийн үнэлсэн сайн сайхан байдал'}),wbs.length?h('div',{cls:'scroll'},[h('table',{cls:'dose'},[h('tbody',{},wbs.map(function(x){var s=strand(x.sid);return h('tr',{},[h('td',{text:s?s.n:x.sid}),h('td',{cls:'num',text:'L'+x.level+' '+(WBLV[x.level-1]||[''])[0]}),h('td',{cls:'muted',text:ubDay(x.at)})])}))])]):h('p',{cls:'muted',style:'margin:0',text:'Одоогоор үнэлгээ хийгээгүй.'})]));
-    p.appendChild(cxNotesBox(uid,null));
+    var sid=typeof yvSidOf==='function'?yvSidOf(u.email):'';
+    p.appendChild(cxNotesBox(uid+(sid?'|sid:'+sid:''),null));
   });
   if(keep)$('panel').scrollTop=sc;
 }
@@ -165,8 +167,8 @@ function cxEntryEdit(x){
 }
 
 /* ---------- notes (teachers read, the owner writes; students never see them) ---------- */
-function cxNotesBox(uid,lid){
-  var box=h('div',{cls:'box cxnotes'},[h('h3',{text:lid?'Багшийн тэмдэглэл энэ бэлтгэл дээр':'Багшийн тэмдэглэл'}),
+function cxNotesBox(uid,lid,title){
+  var box=h('div',{cls:'box cxnotes'},[h('h3',{text:title||(lid?'Багшийн тэмдэглэл энэ бэлтгэл дээр':'Багшийн тэмдэглэл')}),
     h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Зөвхөн багш нар харна. Сурагч харахгүй.'})]);
   var list=h('div',{cls:'cxlist',id:'cxNotes','data-uid':uid,'data-lid':lid==null?'*':lid});box.appendChild(list);cxNotesFill(list);
   if(cxOwner()){
@@ -175,7 +177,7 @@ function cxNotesBox(uid,lid){
     box.appendChild(ta);
     box.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn gold small',text:'Тэмдэглэл нэмэх',onclick:function(){var t=$('cx-newnote').value.trim();if(!t){st.className='status err';st.textContent='Тэмдэглэлээ бичнэ үү.';return}
       st.className='status';st.textContent='Хадгалж байна…';
-      db.collection('tnotes').add({uid:uid,lid:lid||'',text:t.slice(0,2000),at:Date.now()}).then(function(){$('cx-newnote').value='';st.textContent='Нэмэгдлээ.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})}}),st]));
+      db.collection('tnotes').add({uid:String(uid).split('|')[0],lid:lid||'',text:t.slice(0,2000),at:Date.now()}).then(function(){$('cx-newnote').value='';st.textContent='Нэмэгдлээ.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})}}),st]));
   }
   return box;
 }

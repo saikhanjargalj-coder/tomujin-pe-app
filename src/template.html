@@ -503,6 +503,21 @@ a.stvlink{color:var(--orange);font-weight:800;font-size:13.5px;text-decoration:n
 .yvsearch{display:flex;flex-direction:column;gap:8px}.yvq{max-width:320px}
 .clscard[aria-pressed=true]{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand)}
 table.yvtbl td.yvy{font-weight:800}
+.yvpart.yvbtn{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%;transition:border-color .15s,box-shadow .15s}
+.yvpart.yvbtn:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(40,10,70,.08)}
+.yvpart.yvbtn:focus-visible,button.yvbig:focus-visible,.yvlv:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.yvp-go{color:var(--muted);font-weight:800;margin-left:6px;font-style:normal}
+button.yvbig{border:0;cursor:pointer;font:inherit}button.yvbig .yvp-go{color:inherit;opacity:.8}button.yvbig:hover{filter:brightness(1.12)}
+.yvhint{font-size:13px;margin:0}
+.yvinfo{background:var(--tint);border-radius:12px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}.yvinfo[hidden]{display:none}
+.yvback{margin:-4px 0 2px}
+.yvscale{display:flex;flex-direction:column;gap:6px}
+.yvlv{display:grid;grid-template-columns:22px minmax(0,1fr) 62px minmax(48px,120px) 24px;gap:10px;align-items:center;font:inherit;color:inherit;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer}
+.yvlv:hover{border-color:var(--brand)}.yvlv.on{border:2px solid var(--brand);padding:7px 11px}.yvlv[aria-pressed=true]{background:var(--tint)}
+.yvlv .n{font-family:var(--font-num);font-size:18px;font-variant-numeric:tabular-nums}.yvlv small.num{text-align:right;font-weight:800}
+.yvdays{display:flex;flex-wrap:wrap;gap:6px}.yvday{font-size:13px;padding:5px 10px}.yvday.k-x{background:var(--tint)}
+tr.cxrow.me td{background:var(--tint);font-weight:800}
+table.yvtot tfoot th,table.yvtot tfoot td{border-top:2px solid var(--line);font-weight:800}
 </style>
 
 <header class="bar">
@@ -1311,6 +1326,7 @@ function renderLib(){
 /* ---------- sheet ---------- */
 var lastFocus=null;
 function openSheet(build){
+  if(typeof CXOPEN!=='undefined')CXOPEN=null; // a panel that is not a teacher view never gets redrawn as one
   lastFocus=document.activeElement;var p=$('panel');p.innerHTML='';p.removeAttribute('style');
   var close=h('button',{type:'button',cls:'closeb','aria-label':'Хаах',text:'×',onclick:closeSheet});
   p.appendChild(h('div',{cls:'top'},[h('span',{cls:'eyebrow',id:'sheetEyebrow'}),close]));build(p);

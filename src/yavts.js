@@ -6,7 +6,7 @@
    dashboard. A student sees only their own, and only after the owner opens that class ("pub"); the server checks
    both (firestore.rules). The teacher's note on a student is kept apart in gradesStaff and never reaches students. */
 var YVTERM='t1',YVTERMN={t1:'1-р улирал',t2:'2-р улирал',t3:'3-р улирал',t4:'4-р улирал'};
-var GRADES={},GNOTES={},MYGRADES=[],YV={mode:'yavts',cls:'',busy:false,msg:null};
+var GRADES={},GNOTES={},MYGRADES=[],YV={mode:'yavts',cls:'',busy:false,msg:null,info:'',attBusy:{},attErr:{}};
 var YVW={att:25,a:15,r:10,k:15,u:35}; // only when the sheet sent no weights
 var YVPARTS=[
   ['att','Ирц','Хичээлдээ ирсэн байдал. Чөлөөтэй, өвчтэй өдөр тооцогдохгүй.'],
@@ -33,7 +33,7 @@ function yvStart(){
     unsubs.push(db.collection('grades').onSnapshot(function(s){MYGRADES=s.docs.map(function(d){return d.data()});renderTests()},function(){},{where:[['email','==',String(ME.email).toLowerCase()],['pub','==',true]]}));
   }
 }
-function yvStop(){GRADES={};GNOTES={};MYGRADES=[];YV.msg=null;YV.busy=false}
+function yvStop(){GRADES={};GNOTES={};MYGRADES=[];YV.msg=null;YV.busy=false;YV.info='';YV.attBusy={};YV.attErr={}}
 function yvRefresh(){if($('v-tests')&&!$('v-tests').hidden)renderTests();if($('v-coach')&&!$('v-coach').hidden)renderCoach();if(typeof cxRedraw==='function')cxRedraw()}
 function yvList(){return Object.keys(GRADES).filter(function(id){return GRADES[id].term===YVTERM}).map(function(id){return Object.assign({id:id},GRADES[id])})}
 /* same names as the attendance pages: 12B stays, a grade-only tab (PE 6) shows as 6A like the school system */
@@ -113,20 +113,27 @@ function yvExport(list){
 
 /* ---------- one student's grade, part by part ---------- */
 function yvBar(frac,tone){return h('div',{cls:'yvbar','aria-hidden':'true'},[h('i',{style:'width:'+Math.max(0,Math.min(100,Math.round((frac||0)*100)))+'%;background:'+(tone||'var(--brand)')})])}
-function yvBreakdown(g){
-  var w=yvW(g),c=g.c||{},lv=g.lv||{};
+function yvTone(k){return k==='u'?'var(--gold)':k==='att'?'var(--teal)':'var(--brand)'}
+function yvPartName(k){var p=YVPARTS.filter(function(x){return x[0]===k})[0];return p?p[1]:k}
+/* the value and the line under it for one part */
+function yvPartVal(g,k){var c=g.c||{},lv=g.lv||{};
+  if(k==='att')return {val:yvPct(g.pct),sub:'Ирсэн '+((c.i||0)+(c.x||0))+(c.x?' (хоцорсон '+c.x+')':'')+' · тасалсан '+(c.t||0)+(c.ch?' · чөлөөтэй '+c.ch:'')+(c.o?' · өвчтэй '+c.o:'')};
+  var l=lv[k];return {val:typeof l==='number'?l+'/5':'—',sub:typeof l==='number'?(YVLV[Math.round(l)]||''):''}}
+/* pick(k): when given (teachers), every part is a button that opens its detail */
+function yvBreakdown(g,pick){
+  var w=yvW(g);
   var list=h('div',{cls:'yvparts'});
-  YVPARTS.forEach(function(p){var k=p[0],pts=yvPts(g,k),max=w[k],val,sub;
-    if(k==='att'){val=yvPct(g.pct);sub='Ирсэн '+((c.i||0)+(c.x||0))+(c.x?' (хоцорсон '+c.x+')':'')+' · тасалсан '+(c.t||0)+(c.ch?' · чөлөөтэй '+c.ch:'')+(c.o?' · өвчтэй '+c.o:'')}
-    else{var l=lv[k];val=typeof l==='number'?l+'/5':'—';sub=typeof l==='number'?(YVLV[Math.round(l)]||''):''}
-    list.appendChild(h('div',{cls:'yvpart'+(k==='u'?' main':'')},[
-      h('div',{cls:'yvp-h'},[h('b',{text:p[1]}),h('span',{cls:'yvp-v',text:val})]),
+  YVPARTS.forEach(function(p){var k=p[0],pts=yvPts(g,k),max=w[k],v=yvPartVal(g,k);
+    var kids=[h('div',{cls:'yvp-h'},[h('b',{text:p[1]}),h('span',{cls:'yvp-v',text:v.val},[pick?h('span',{cls:'yvp-go','aria-hidden':'true',text:'›'}):null])]),
       h('small',{cls:'muted',text:p[2]}),
-      yvBar(pts!=null&&max?pts/max:0,k==='u'?'var(--gold)':k==='att'?'var(--teal)':'var(--brand)'),
-      h('div',{cls:'yvp-f'},[h('small',{cls:'muted',text:sub}),h('small',{text:(pts==null?'—':yv1(pts))+' / '+max+' оноо'})])]))});
+      yvBar(pts!=null&&max?pts/max:0,yvTone(k)),
+      h('div',{cls:'yvp-f'},[h('small',{cls:'muted',text:v.sub}),h('small',{text:(pts==null?'—':yv1(pts))+' / '+max+' оноо'})])];
+    list.appendChild(pick?h('button',{type:'button',cls:'yvpart yvbtn'+(k==='u'?' main':''),'data-part':k,'aria-label':p[1]+': '+v.val+'. Дэлгэрэнгүйг нээх',onclick:function(){pick(k)}},kids)
+      :h('div',{cls:'yvpart'+(k==='u'?' main':'')},kids))});
   return list;
 }
-function yvBig(g){return h('div',{cls:'yvbig'},[h('b',{text:g.yavts==null?'—':String(Math.round(g.yavts))}),h('span',{text:'/ 100'})])}
+function yvBig(g,onclick){var kids=[h('b',{text:g.yavts==null?'—':String(Math.round(g.yavts))}),h('span',{text:'/ 100'})];
+  return onclick?h('button',{type:'button',cls:'yvbig','aria-label':'ЯВЦ '+(g.yavts==null?'—':Math.round(g.yavts))+' / 100. Хэрхэн бодогдсоныг нээх',onclick:onclick},kids.concat([h('i',{cls:'yvp-go','aria-hidden':'true',text:'›'})])):h('div',{cls:'yvbig'},kids)}
 
 /* the student's own card on the assessment page */
 function yvMyCard(g){
@@ -137,18 +144,164 @@ function yvMyCard(g){
     h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'«Хэрэглээ, дадал» хамгийн их жинтэй: сурсан зүйлээ амьдралдаа хэрэгжүүлэх нь хамгийн чухал. Асуух зүйл байвал Жак багштай ярилцаарай.'})]);
 }
 
-/* the teacher's view of one student (side panel) */
-function yvDetail(g){
-  openSheet(function(p){
+/* ---------- teachers: everything in a student's grade opens ----------
+   The side panel shows one of three views and redraws itself when grades, notes or the sheet change:
+   the student's grade (yvDetail), one part of it (yvPart) and how the 100 points add up (yvTotal).
+   Levels and the sheet note still come from the working sheet only; the owner changes them there. */
+function yvGet(x){if(x&&typeof x==='object')x=x.id;var g=GRADES[x];return g?Object.assign({id:x},g):null}
+function yvClassOf(g){var k=yvKey(g);return yvClasses().filter(function(c){return c.k===k})[0]||{k:k,list:[g]}}
+function yvSidOf(email){var em=String(email||'').toLowerCase();if(!em)return '';var g=yvList().filter(function(x){return x.email===em})[0];return g?String(g.sid):''}
+/* teacher-only notes on the site (tnotes): kept on the student's account when they have one, otherwise on the ID,
+   and both are shown, so notes written before a student signed up are not lost */
+function yvNoteKey(g){var uid=yvUid(g);return (uid?uid+'|':'')+'sid:'+g.sid}
+function yvSiteNotes(g){return typeof cxNotesOf==='function'?cxNotesOf(yvNoteKey(g),null):[]}
+/* redraw keeps the scroll position and a note being typed */
+function yvSheet(open,keep,build){var sc=keep?$('panel').scrollTop:0,ta=keep&&$('cx-newnote'),draft=ta?ta.value:'',foc=ta&&document.activeElement===ta;
+  cxSheet(open,build);if(keep){$('panel').scrollTop=sc;var nt=$('cx-newnote');if(nt&&draft){nt.value=draft;if(foc)nt.focus()}}}
+function yvRedraw(c){if(c.v==='detail')yvDetail(c.id,c.back,true);else if(c.v==='part')yvPart(c.id,c.part,true,c.f);else if(c.v==='total')yvTotal(c.id,true)}
+function yvGone(p){p.appendChild(h('h2',{id:'sheetTitle',text:'Дүн олдсонгүй'}));p.appendChild(h('p',{cls:'muted',text:'Энэ сурагчийн дүн ажлын хүснэгтээс хасагдсан байна.'}))}
+function yvBackBtn(label,fn){return h('div',{cls:'yvback'},[h('button',{type:'button',cls:'btn line small',text:'‹ '+label,onclick:fn})])}
+function yvToStudent(g){return yvBackBtn(yvName(g)+' · Явцын дүн',function(){yvDetail(g.id)})}
+function yvSheetLink(){return PATT.yavts?h('a',{cls:'btn line small',href:PATT.yavts,target:'_blank',rel:'noopener',text:'Хүснэгт нээх ↗'}):null}
+function yvOwnerFix(text){
+  if(MYROLE!=='admin')return null;
+  return h('div',{cls:'box yvfix'},[h('h3',{text:'Засах'}),h('p',{cls:'muted',style:'margin:0;font-size:13px',text:text}),
+    h('div',{cls:'chips',style:'align-items:center'},[yvSheetLink(),h('button',{type:'button',cls:'btn gold small',disabled:YV.busy?'':null,text:YV.busy?'Шинэчилж байна…':'⟳ Sheet-ээс шинэчлэх',onclick:yvSync})]),
+    YV.msg?h('p',{cls:'status'+(YV.msg[0]==='err'?' err':''),role:'status',style:'margin:0',text:YV.msg[1]}):null]);
+}
+/* go to the class on the assessment page */
+function yvGoClass(g){var k=yvKey(g);closeSheet();YV.mode='yavts';YV.cls=k;if($('v-tests').hidden)show('tests');else renderTests();
+  setTimeout(function(){var b=document.querySelector('#testsOut .clsgrid ~ .box');if(b&&b.scrollIntoView)b.scrollIntoView({block:'start',behavior:'smooth'})},60)}
+
+/* the teacher's view of one student (side panel). back: {label, fn} when opened from somewhere else */
+function yvDetail(x,back,keep){
+  var g=yvGet(x);
+  if(!g){if(keep)yvSheet({k:'yv',v:'detail',id:x&&x.id||x},true,yvGone);return}
+  if(!keep)YV.info='';
+  yvSheet({k:'yv',v:'detail',id:g.id,back:back},keep,function(p){
+    var owner=MYROLE==='admin',uid=yvUid(g),c=yvClassOf(g),ps=yvPub(c.list);
     $('sheetEyebrow').textContent=(YVTERMN[g.term]||g.term)+' · Явц · '+yvKey(g);
-    p.appendChild(h('div',{cls:'yvtop'},[h('div',{},[h('h2',{id:'sheetTitle',style:'margin:0',text:yvName(g)}),h('p',{cls:'muted',style:'margin:4px 0 0',text:'ID '+g.sid+(g.email?' · '+g.email:' · сургуулийн имэйл олдсонгүй')})]),yvBig(g)]));
-    p.appendChild(h('div',{cls:'chips'},[h('span',{cls:'tag'+(g.pub?' t':' g'),text:g.pub?'Сурагчид харж байна':'Зөвхөн багшид'}),yvHasAccount(g)?h('span',{cls:'tag',text:'Сайтад бүртгэлтэй'}):h('span',{cls:'tag o',text:'Сайтад бүртгүүлээгүй'})]));
-    p.appendChild(yvBreakdown(g));
+    if(back)p.appendChild(yvBackBtn(back.label,back.fn));
+    p.appendChild(h('div',{cls:'yvtop'},[h('div',{},[h('h2',{id:'sheetTitle',style:'margin:0',text:yvName(g)}),
+      h('p',{cls:'muted',style:'margin:4px 0 0'},['ID '+g.sid+' · ',g.email?h('a',{href:'mailto:'+g.email,text:g.email}):'сургуулийн имэйл олдсонгүй'])]),
+      yvBig(g,function(){yvTotal(g.id)})]));
+    /* the two tags open a short explanation with what can be done */
+    var info=h('div',{cls:'yvinfo',id:'yvInfo',hidden:YV.info?null:''});
+    function tag(key,cls,text){return h('button',{type:'button',cls:'tag'+cls,'aria-expanded':String(YV.info===key),'aria-controls':'yvInfo',text:text+' ▾',onclick:function(){YV.info=YV.info===key?'':key;yvDetail(g.id,back,true)}})}
+    p.appendChild(h('div',{cls:'chips'},[tag('pub',g.pub?' t':' g',g.pub?'Сурагчид харж байна':'Зөвхөн багшид'),uid?tag('acc','','Сайтад бүртгэлтэй'):tag('acc',' o','Сайтад бүртгүүлээгүй')]));
+    if(YV.info==='pub'){var st=h('span',{cls:'status',role:'status'});
+      info.appendChild(h('p',{style:'margin:0',text:g.pub?(yvName(g)+' энэ дүнг сайтын «Үнэлгээ» хуудаснаас өөрөө харж байна (зөвхөн өөрийнхийгөө). Багшийн тэмдэглэл харагдахгүй.'):('Сурагчдад хараахан нээгээгүй: зөвхөн багш нар харна. Ангиараа нээхэд '+c.k+'-ийн сурагч бүр зөвхөн өөрийн дүнгээ харна.')}));
+      info.appendChild(h('div',{cls:'chips',style:'align-items:center'},[owner&&ps!=='all'?h('button',{type:'button',cls:'btn gold small',text:'👁 '+c.k+' ангид нээх',onclick:function(){yvOpen(c,true,st)}}):null,
+        owner&&ps!=='none'?h('button',{type:'button',cls:'btn line small',text:c.k+' ангид хаах',onclick:function(){yvOpen(c,false,st)}}):null,
+        h('button',{type:'button',cls:'btn line small',text:c.k+' ангийн жагсаалт ›',onclick:function(){yvGoClass(g)}}),st]))}
+    if(YV.info==='acc'){
+      if(uid)info.appendChild(h('p',{style:'margin:0',text:'Сайтад '+g.email+' имэйлээр бүртгэлтэй.'+(g.pub?' Өөрийн дүнгээ харж байна.':' Анги нь нээгдсэний дараа өөрийн дүнгээ харна.')}));
+      else info.appendChild(h('p',{style:'margin:0',text:g.email?('Сургуулийн имэйл ('+g.email+') сайтад хараахан бүртгүүлээгүй. Бүртгүүлсний дараа анги нь нээлттэй бол өөрийн дүнгээ харна.'):'Ирцийн Sheet-ийн «И-Мэйл» баганад энэ сурагчийн сургуулийн имэйл алга. Тиймээс сайтад өөрийн дүнгээ харахгүй. Имэйлийг нь нэмээд «Sheet-ээс шинэчлэх» дарна.'}));
+      if(uid&&typeof cxStudent==='function')info.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:'Сурагчийн бүх бүртгэл ›',onclick:function(){cxStudent(uid)}})]))}
+    p.appendChild(info);
+    p.appendChild(h('p',{cls:'muted yvhint',text:'Хэсэг бүр, ЯВЦ-ын оноо, шошго дээр дарж дэлгэрэнгүйг нээнэ.'}));
+    p.appendChild(yvBreakdown(g,function(k){yvPart(g.id,k)}));
     if(g.flag)p.appendChild(h('p',{cls:'status err',style:'margin:0',text:'Анхаарах: '+g.flag}));
     var note=GNOTES[g.id];
-    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Багшийн тэмдэглэл'}),h('p',{style:'margin:0',text:note||'Тэмдэглэл алга.'}),h('small',{cls:'muted',text:'Ажлын хүснэгтийн «Багшийн тэмдэглэл» баганаас. Сурагчид хэзээ ч харахгүй.'})]));
-    var uid=yvUid(g);
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Багшийн тэмдэглэл (ажлын хүснэгтээс)'}),h('p',{style:'margin:0;white-space:pre-wrap',text:note||'Тэмдэглэл алга.'}),
+      h('small',{cls:'muted',text:'Ажлын хүснэгтийн «Багшийн тэмдэглэл» баганаас. Сурагчид хэзээ ч харахгүй.'+(owner?' Засах бол хүснэгтэд засаад «Sheet-ээс шинэчлэх» дарна.':'')}),
+      owner&&PATT.yavts?h('div',{cls:'chips'},[h('a',{cls:'btn line small',href:PATT.yavts,target:'_blank',rel:'noopener',text:'✎ Хүснэгтэд засах ↗'})]):null]));
+    if(typeof cxNotesBox==='function')p.appendChild(cxNotesBox(yvNoteKey(g),null,'Сайт дээрх тэмдэглэл'));
     if(uid&&typeof cxStudent==='function')p.appendChild(h('div',{cls:'editrow'},[h('button',{type:'button',cls:'btn line small',text:'Сурагчийн бүх бүртгэл ›',onclick:function(){cxStudent(uid)}})]));
+  });
+}
+
+/* one part of the grade: what it measures, the 1–5 scale with the class spread, the class list, how to change it */
+function yvPart(id,k,keep,f){
+  var g=yvGet(id);if(!g){if(keep)yvSheet({k:'yv',v:'part',id:id,part:k},true,yvGone);return}
+  if(!keep)f=0;
+  yvSheet({k:'yv',v:'part',id:id,part:k,f:f||0},keep,function(p){
+    var P=YVPARTS.filter(function(x){return x[0]===k})[0],w=yvW(g),max=w[k],pts=yvPts(g,k),v=yvPartVal(g,k),c=yvClassOf(g);
+    $('sheetEyebrow').textContent=(YVTERMN[g.term]||g.term)+' · Явц · '+yvKey(g);
+    p.appendChild(yvToStudent(g));
+    p.appendChild(h('h2',{id:'sheetTitle',style:'margin:0',text:P[1]}));
+    p.appendChild(h('p',{cls:'muted',style:'margin:0',text:yvName(g)+' · '+yvKey(g)+' · ID '+g.sid}));
+    /* the other parts, one tap away */
+    p.appendChild(h('div',{cls:'chips',role:'group','aria-label':'Хэсэг солих'},YVPARTS.map(function(q){return h('button',{type:'button',cls:'chip','aria-pressed':String(q[0]===k),text:q[1],onclick:function(){yvPart(id,q[0])}})})));
+    p.appendChild(h('div',{cls:'yvpart'+(k==='u'?' main':'')},[h('div',{cls:'yvp-h'},[h('b',{text:v.sub||P[1]}),h('span',{cls:'yvp-v',text:v.val})]),
+      h('small',{cls:'muted',text:P[2]}),yvBar(pts!=null&&max?pts/max:0,yvTone(k)),
+      h('div',{cls:'yvp-f'},[h('small',{cls:'muted',text:'Жин '+max+' оноо'}),h('small',{text:(pts==null?'—':yv1(pts))+' / '+max+' оноо'})])]));
+    if(k==='att')yvPartAtt(p,g,c,w,pts);else yvPartLevel(p,g,c,k,w,pts,f||0);
+    var fx=yvOwnerFix(k==='att'?'Ирцийн тоо ажлын хүснэгтээс ирдэг (тэр нь сургуулийн ирцийн Sheet-ээс тоологдоно). Ирцийг «Хичээлийн ирц» хуудсаас засаад, ажлын хүснэгт шинэчлэгдсэний дараа «Sheet-ээс шинэчлэх» дарна.':'Түвшин (1–5) ажлын хүснэгтээс ирдэг. Хүснэгтэд засаад «Sheet-ээс шинэчлэх» дарахад энд шууд солигдоно.');
+    if(fx)p.appendChild(fx);
+  });
+}
+function yvPartLevel(p,g,c,k,w,pts,f){
+  var max=w[k],l=(g.lv||{})[k],mine=typeof l==='number'?Math.round(l):0,cnt=[0,0,0,0,0,0];
+  c.list.forEach(function(x){var v=(x.lv||{})[k];if(typeof v==='number'){var r=Math.max(1,Math.min(5,Math.round(v)));cnt[r]++}});
+  if(typeof l==='number'){var calc=l/5*max;p.appendChild(h('p',{style:'margin:0',text:'Оноо: '+l+' ÷ 5 × '+max+' = '+yv1(typeof pts==='number'?pts:calc)+' оноо'}))}
+  var most=Math.max.apply(null,cnt.slice(1))||1;
+  p.appendChild(h('div',{cls:'box'},[h('h3',{text:'1–5 түвшин · '+c.k+' ангид'}),
+    h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Түвшин дээр дарж тэр түвшний сурагчдыг доор харна. Хүрээтэй мөр нь '+yvName(g)+'-ийн түвшин. Сурагчийн нэр дээр дарвал түүний энэ хэсгийг нээнэ.'}),
+    h('div',{cls:'yvscale'},[5,4,3,2,1].map(function(n){return h('button',{type:'button',cls:'yvlv'+(n===mine?' on':''),'aria-pressed':String(f===n),'data-lv':String(n),
+      'aria-label':n+'-р түвшин, '+YVLV[n]+', '+cnt[n]+' сурагч',onclick:function(){yvPart(g.id,k,true,f===n?0:n)}},[
+      h('b',{cls:'n',text:String(n)}),h('span',{text:YVLV[n]}),h('small',{cls:'muted',text:yv1(n/5*max)+' оноо'}),yvBar(cnt[n]/most,yvTone(k)),h('small',{cls:'num',text:String(cnt[n])})])}))]));
+  var L=c.list.filter(function(x){if(!f)return true;var v=(x.lv||{})[k];return typeof v==='number'&&Math.round(v)===f})
+    .sort(function(a,b){var va=(a.lv||{})[k],vb=(b.lv||{})[k];return (typeof vb==='number'?vb:-1)-(typeof va==='number'?va:-1)||yvName(a).localeCompare(yvName(b))});
+  p.appendChild(h('div',{cls:'box'},[h('div',{cls:'cxhead'},[h('h3',{style:'margin:0',text:c.k+' · '+yvPartName(k)+(f?' · '+f+'-р түвшин':'')}),
+      f?h('button',{type:'button',cls:'btn line small',text:'Бүгдийг харуулах',onclick:function(){yvPart(g.id,k,true,0)}}):null]),
+    L.length?yvMates(L,g,function(x){var v=(x.lv||{})[k];return [typeof v==='number'?v+'/5':'—',typeof v==='number'?(YVLV[Math.round(v)]||''):'',yv1(yvPts(x,k))]},['Түвшин','','Оноо'],k)
+      :h('p',{cls:'muted',style:'margin:0',text:'Энэ түвшинд сурагч алга.'})]));
+}
+/* classmates for one part; a row opens that student's grade */
+function yvMates(L,g,cells,head,k){
+  return h('div',{cls:'scroll'},[h('table',{cls:'dose yvmates'},[h('thead',{},[h('tr',{},['Сурагч'].concat(head).map(function(x){return h('th',{text:x})}))]),
+    h('tbody',{},L.map(function(x){var r=cxRow([h('td',{},[h('button',{type:'button',cls:'exlink',text:yvName(x),onclick:function(){yvPart(x.id,k)}})])].concat(cells(x).map(function(t,i){return h('td',{cls:i===1?'muted':'num',text:t})})),function(){yvPart(x.id,k)},yvName(x));
+      if(x.id===g.id)r.className+=' me';return r}))])]);
+}
+/* attendance: the counts behind the %, every lesson from the school sheet (owner), the class */
+function yvPartAtt(p,g,c,w,pts){
+  var n=g.c||{},att=(n.i||0)+(n.x||0),den=att+(n.t||0);
+  p.appendChild(h('div',{cls:'chips'},PACODE.map(function(k,i){var v=n[['i','x','t','ch','o'][i]]||0;return h('span',{cls:'tag k-'+k[2],text:k[0]+' '+k[1]+' '+v})})));
+  if(den&&typeof g.pct==='number'&&Math.abs(att/den-g.pct)<0.006)p.appendChild(h('p',{style:'margin:0',text:'Ирц % = (И + Х) ÷ (И + Х + Т) = '+att+' ÷ '+den+' = '+yvPct(g.pct)+'. Чөлөөтэй, өвчтэй өдөр тооцогдохгүй. Оноо: '+yvPct(g.pct)+' × '+w.att+' = '+yv1(pts)+' оноо.'}));
+  else p.appendChild(h('p',{style:'margin:0',text:'Ирц '+yvPct(g.pct)+' → '+yv1(pts)+' / '+w.att+' оноо. Чөлөөтэй, өвчтэй өдөр тооцогдохгүй.'}));
+  var box=h('div',{cls:'box'},[h('h3',{text:'Хичээл бүрээр'})]);
+  if(MYROLE==='admin'&&(PATT.url||(window.TPE&&TPE.sheet))){
+    var tab='PE '+String(g.grade||'').replace(/\D/g,''),j=PATT.data[tab],x=j&&(j.students||[]).filter(function(s){return String(s.id)===String(g.sid)})[0];
+    if(!j&&!YV.attErr[tab])yvLoadAtt(tab);
+    if(YV.attErr[tab])box.appendChild(h('p',{cls:'status err',role:'status',style:'margin:0',text:YV.attErr[tab]}));
+    else if(!j)box.appendChild(h('p',{cls:'muted',role:'status',style:'margin:0',text:'Сургуулийн ирцийн Sheet-ээс уншиж байна…'}));
+    else if(!x)box.appendChild(h('p',{cls:'muted',style:'margin:0',text:tab+' хуудсанд ID '+g.sid+' олдсонгүй.'}));
+    else{var key=tab+'|'+(x.cls||x.grade||'?'),ds=Object.keys(x.m||{}).sort().reverse();
+      box.appendChild(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Сургуулийн ирцийн Sheet-ээс одоогийн байдлаар ('+ds.length+' хичээл). Өдөр дээр дарж тэр өдрийн ангийн ирцийг нээнэ.'+(g.at?' Явцын оноо '+yvWhen(g.at)+'-ны тоогоор бодогдсон.':'')}));
+      box.appendChild(ds.length?h('div',{cls:'yvdays'},ds.map(function(d){var code=x.m[d],k=PACODE.filter(function(q){return q[0]===code})[0];
+        return h('button',{type:'button',cls:'tag yvday k-'+(k?k[2]:'x'),'data-date':d,title:k?k[1]:code,'aria-label':paMD(d)+': '+(k?k[1]:code),text:paMD(d)+' · '+code,onclick:function(){closeSheet();paOpen(key,d);show('patt')}})})):h('p',{cls:'muted',style:'margin:0',text:'Тэмдэглэсэн хичээл алга.'}));
+      box.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:'Ангийн ирц нээх ›',onclick:function(){closeSheet();paOpen(key);show('patt')}}),
+        h('button',{type:'button',cls:'btn line small',text:'↻ Дахин унших',onclick:function(){delete PATT.data[tab];delete YV.attErr[tab];yvLoadAtt(tab);yvPart(g.id,'att',true)}})]))}
+  }else box.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Өдөр бүрийн ирцийг Жак багш «Хичээлийн ирц» хуудсаас харна.'}));
+  p.appendChild(box);
+  var L=c.list.slice().sort(function(a,b){return (typeof b.pct==='number'?b.pct:-1)-(typeof a.pct==='number'?a.pct:-1)||yvName(a).localeCompare(yvName(b))});
+  var ps=c.list.map(function(x){return x.pct}).filter(function(v){return typeof v==='number'});
+  p.appendChild(h('div',{cls:'box'},[h('h3',{text:c.k+' · Ирц'+(ps.length?' · дундаж '+yvPct(ps.reduce(function(a,b){return a+b},0)/ps.length):'')}),
+    yvMates(L,g,function(x){var m=x.c||{};return [yvPct(x.pct),m.t?'тасалсан '+m.t:'',yv1(yvPts(x,'att'))]},['Ирц','','Оноо'],'att')]));
+}
+function yvLoadAtt(tab){
+  if(YV.attBusy[tab])return;YV.attBusy[tab]=1;
+  paCall({action:'read',tab:tab}).then(function(j){PATT.data[tab]=j;delete YV.attBusy[tab];if(CXOPEN&&CXOPEN.k==='yv')cxRedraw()},
+    function(e){delete YV.attBusy[tab];YV.attErr[tab]=paErr(e);if(CXOPEN&&CXOPEN.k==='yv')cxRedraw()});
+}
+
+/* how the 100 points add up */
+function yvTotal(id,keep){
+  var g=yvGet(id);if(!g){if(keep)yvSheet({k:'yv',v:'total',id:id},true,yvGone);return}
+  yvSheet({k:'yv',v:'total',id:id},keep,function(p){
+    var w=yvW(g),c=yvClassOf(g),sum=0,any=false,a=yvAvg(c.list);
+    $('sheetEyebrow').textContent=(YVTERMN[g.term]||g.term)+' · Явц · '+yvKey(g);
+    p.appendChild(yvToStudent(g));
+    p.appendChild(h('div',{cls:'yvtop'},[h('div',{},[h('h2',{id:'sheetTitle',style:'margin:0',text:'ЯВЦ хэрхэн бодогдсон'}),h('p',{cls:'muted',style:'margin:4px 0 0',text:yvName(g)+' · '+yvKey(g)+' · ID '+g.sid})]),yvBig(g)]));
+    var rows=YVPARTS.map(function(q){var k=q[0],pts=yvPts(g,k);if(typeof pts==='number'){sum+=pts;any=true}
+      return cxRow([h('td',{},[h('button',{type:'button',cls:'exlink',text:q[1],onclick:function(){yvPart(g.id,k)}})]),h('td',{cls:'num',text:yvPartVal(g,k).val}),h('td',{cls:'num',text:String(w[k])}),h('td',{cls:'num',text:yv1(pts)})],function(){yvPart(g.id,k)},q[1])});
+    p.appendChild(h('div',{cls:'box'},[h('div',{cls:'scroll'},[h('table',{cls:'dose yvtot'},[h('thead',{},[h('tr',{},['Хэсэг','Үнэлгээ','Жин','Оноо'].map(function(x){return h('th',{text:x})}))]),h('tbody',{},rows),
+      h('tfoot',{},[h('tr',{},[h('th',{text:'Нийт'}),h('td',{}),h('td',{cls:'num',text:String(w.att+w.a+w.r+w.k+w.u)}),h('td',{cls:'num yvy',text:any?yv1(sum):'—'})])])])]),
+      h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Мөр дээр дарж тухайн хэсгийг нээнэ. Ирцийн оноо = ирц % × жин, бусад = түвшин ÷ 5 × жин. Жинг ажлын хүснэгтийн «Тохиргоо» хуудаснаас өөрчилнө.'}),
+      any&&g.yavts!=null&&Math.abs(sum-g.yavts)>=0.6?h('p',{cls:'status err',style:'margin:0',text:'Анхаар: ажлын хүснэгтийн ЯВЦ ('+yv1(g.yavts)+') онооны нийлбэрээс ('+yv1(sum)+') өөр байна. Хүснэгтийн томьёог шалгаарай.'}):null]));
+    p.appendChild(h('div',{cls:'box'},[h('h3',{text:c.k+' анги'}),h('p',{style:'margin:0',text:c.list.length+' сурагч · дундаж ЯВЦ '+(a==null?'—':a)}),
+      h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:c.k+' ангийн жагсаалт ›',onclick:function(){yvGoClass(g)}})])]));
   });
 }
 
@@ -174,7 +327,7 @@ function yvTable(list,showCls){
     if(showCls)cells.push(h('td',{text:yvKey(g)}));
     cells=cells.concat([h('td',{cls:'num',text:yvPct(g.pct)}),h('td',{cls:'num',text:lv.a==null?'—':String(lv.a)}),h('td',{cls:'num',text:lv.r==null?'—':String(lv.r)}),h('td',{cls:'num',text:lv.k==null?'—':String(lv.k)}),h('td',{cls:'num',text:lv.u==null?'—':String(lv.u)}),
       h('td',{cls:'num yvy',text:g.yavts==null?'—':String(Math.round(g.yavts))}),
-      h('td',{},[g.flag?h('span',{cls:'tag o',title:g.flag,text:'!'}):null,GNOTES[g.id]?h('span',{cls:'tag',title:'Багшийн тэмдэглэлтэй',text:'💬'}):null,g.email?null:h('span',{cls:'tag g',title:'Сургуулийн имэйл олдсонгүй',text:'@?'})])]);
+      h('td',{},[g.flag?h('span',{cls:'tag o',title:g.flag,text:'!'}):null,(GNOTES[g.id]||yvSiteNotes(g).length)?h('span',{cls:'tag',title:'Багшийн тэмдэглэлтэй',text:'💬'}):null,g.email?null:h('span',{cls:'tag g',title:'Сургуулийн имэйл олдсонгүй',text:'@?'})])]);
     return cxRow(cells,function(){yvDetail(g)},yvName(g))}))])]);
 }
 function yvStaffView(W){
@@ -225,8 +378,10 @@ function yvStudentBox(u){
   var em=String(u&&u.email||'').toLowerCase(),g=yvList().filter(function(x){return x.email&&x.email===em})[0];
   var box=h('div',{cls:'box'},[h('h3',{text:(YVTERMN[YVTERM])+' · Явцын дүн'})]);
   if(!g){box.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Энэ сурагчийн Явцын дүн хараахан ороогүй (эсвэл хүснэгтэд өөр имэйлтэй байна).'}));return box}
-  box.appendChild(h('div',{cls:'yvtop'},[h('p',{cls:'muted',style:'margin:0',text:'ID '+g.sid+' · '+yvKey(g)+' · '+(g.pub?'сурагч харж байна':'зөвхөн багшид')}),yvBig(g)]));
-  box.appendChild(yvBreakdown(g));
+  var uid=u&&u.uid||yvUid(g),back={label:cxName(uid,yvName(g)),fn:function(){cxStudent(uid)}};
+  box.appendChild(h('div',{cls:'yvtop'},[h('p',{cls:'muted',style:'margin:0',text:'ID '+g.sid+' · '+yvKey(g)+' · '+(g.pub?'сурагч харж байна':'зөвхөн багшид')}),yvBig(g,function(){yvTotal(g.id)})]));
+  box.appendChild(yvBreakdown(g,function(k){yvPart(g.id,k)}));
   if(GNOTES[g.id])box.appendChild(h('p',{style:'margin:0',text:'💬 '+GNOTES[g.id]}));
+  box.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:'Явцын дэлгэрэнгүй ›',onclick:function(){yvDetail(g.id,back)}})]));
   return box;
 }
