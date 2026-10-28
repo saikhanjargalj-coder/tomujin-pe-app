@@ -1,0 +1,385 @@
+rules_version = '2';
+// Tomujin PE — who may read and write what.
+// - Only ONE account can add, edit, upload or delete site content: the owner below.
+// - Teachers listed in config/roles may only READ student records (dashboard). They cannot change anything.
+// - Students: read content after login; write only their own entries. Loading Form entries cannot be
+//   edited or deleted after sending. Nobody can touch another person's data.
+// - Only verified @tomujin.edu.mn accounts count.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function myEmail() { return request.auth.token.email.lower(); }
+    function school() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && myEmail().matches('.*@tomujin[.]edu[.]mn$');
+    }
+    function isOwner() { return school() && myEmail() == 'saikhanjargal.j@tomujin.edu.mn'; }
+    function rolesDoc() { return /databases/$(database)/documents/config/roles; }
+    function isTeacher() {
+      return isOwner() || (school() && exists(rolesDoc()) && myEmail() in get(rolesDoc()).data.teachers);
+    }
+    function isMe(uid) { return signedIn() && request.auth.uid == uid; }
+    function shortStr(f, n) { return !(f in request.resource.data) || (request.resource.data[f] is string && request.resource.data[f].size() <= n); }
+
+    // ---------- site content: everyone signed in reads, ONLY the owner writes ----------
+    match /ex/{id}      { allow read: if school(); allow write: if isOwner(); }
+    match /art/{id}     { allow read: if school(); allow write: if isOwner(); }
+    match /lessons/{id} { allow read: if school(); allow write: if isOwner(); }
+    match /plans/{id}   { allow read: if school(); allow write: if isOwner(); }
+    // Public landing page content (class names are needed by the sign-up form).
+    match /classes/{id} { allow read: if true; allow write: if isOwner(); }
+    match /clubs/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    match /teams/{id}   { allow read: if true; allow write: if isOwner() && shortStr('img', 900000); }
+    match /matches/{id} { allow read: if true; allow write: if isOwner() && shortStr('url', 2000) && shortStr('notes', 5000); }
+    match /podcast/{id} { allow read: if true; allow write: if isOwner() && shortStr('img', 900000) && shortStr('url', 2000); }
+    // Daily assignments for classes: signed-in school users read, only the owner writes.
+    match /assign/{id}  { allow read: if school(); allow write: if isOwner(); }
+    // Site texts and lists (page headings, how-it-works, morning routine, daily tips).
+    match /site/{id}    { allow read: if true; allow write: if isOwner(); }
+    // Team rosters per season (team photo + athletes): public only with parent consent.
+    match /rosters/{id} {
+      allow read: if true;
+      allow create, update: if isOwner() && request.resource.data.consent == true
+        && request.resource.data.athletes is list && request.resource.data.athletes.size() <= 40;
+      allow delete: if isOwner();
+    }
+    // Student stories are public only with parent consent.
+    match /stories/{id} {
+      allow read: if true;
+      allow create, update: if isOwner() && request.resource.data.consent == true && shortStr('img', 900000);
+      allow delete: if isOwner();
+    }
+
+
+    // ---------- club registration (дугуйлан) ----------
+    // Times live in site/clubreg as milliseconds: open, p1 (until then only 1 club), close.
+    // offers/{oid}: seat counter {n, cap}. Everyone sees how many seats are left.
+    // offers/{oid}/seats/{uid}: a student's own seat. offers/{oid}/wait/{uid}: waitlist ticket.
+    // regs/{uid}: the student's picks (max 1 before p1, max 2 after). The server checks
+    // that every pick is backed by a seat or waitlist ticket, so nobody can take extra seats.
+    function regDoc() { return get(/databases/$(database)/documents/site/clubreg).data; }
+    function nowMs() { return request.time.toMillis(); }
+    function regOpen() {
+      return exists(/databases/$(database)/documents/site/clubreg)
+        && nowMs() >= regDoc().open && nowMs() < regDoc().close;
+    }
+    function maxPicks() { return nowMs() < regDoc().p1 ? 1 : 2; }
+    function offerP(o) { return /databases/$(database)/documents/offers/$(o); }
+    function seatP(o, u) { return /databases/$(database)/documents/offers/$(o)/seats/$(u); }
+    function waitP(o, u) { return /databases/$(database)/documents/offers/$(o)/wait/$(u); }
+    function regP(u) { return /databases/$(database)/documents/regs/$(u); }
+    function backed(o, u) { return existsAfter(seatP(o, u)) || existsAfter(waitP(o, u)); }
+
+    match /offers/{oid} {
+      allow read: if true;
+      allow write: if isOwner();
+      // A student moves the counter by exactly one, together with their own seat.
+      allow update: if school() && regOpen()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['n'])
+        && ((request.resource.data.n == resource.data.n + 1
+              && request.resource.data.n <= resource.data.cap
+              && !exists(seatP(oid, request.auth.uid)) && existsAfter(seatP(oid, request.auth.uid)))
+          || (request.resource.data.n == resource.data.n - 1
+              && exists(seatP(oid, request.auth.uid)) && !existsAfter(seatP(oid, request.auth.uid))));
+
+      match /seats/{uid} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['at', 'status'])
+          && request.resource.data.status == 'seat' && request.resource.data.at == request.time
+          && getAfter(offerP(oid)).data.n == get(offerP(oid)).data.n + 1
+          && !exists(waitP(oid, uid))
+          && oid in getAfter(regP(uid)).data.picks;
+        allow delete: if (school() && isMe(uid) && regOpen() && resource.data.status == 'seat'
+            && getAfter(offerP(oid)).data.n == get(offerP(oid)).data.n - 1
+            && !(oid in getAfter(regP(uid)).data.picks))
+          || isOwner();
+        allow create, update: if isOwner();
+        // "I can't come" notes from the student; only the owner removes them.
+        match /abs/{day} {
+          allow read: if isMe(uid) || isTeacher();
+          allow create: if school() && isMe(uid)
+            && request.resource.data.keys().hasOnly(['reason', 'at'])
+            && request.resource.data.reason is string && request.resource.data.reason.size() <= 300
+            && request.resource.data.at == request.time;
+          allow delete: if isOwner();
+        }
+      }
+      // Waitlist: only a server time, no names, so any signed-in student may read the order.
+      match /wait/{uid} {
+        allow read: if school();
+        allow create: if school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['at']) && request.resource.data.at == request.time
+          && get(offerP(oid)).data.n >= get(offerP(oid)).data.cap
+          && !exists(seatP(oid, uid))
+          && oid in getAfter(regP(uid)).data.picks;
+        allow delete: if (school() && isMe(uid) && regOpen() && !(oid in getAfter(regP(uid)).data.picks))
+          || isOwner();
+        allow update: if isOwner();
+      }
+      // Session notes ("what we did"): signed-in school users read, only the owner writes.
+      match /log/{id} { allow read: if school(); allow write: if isOwner(); }
+    }
+
+    match /regs/{uid} {
+      allow read: if isMe(uid) || isTeacher();
+      allow create: if school() && isMe(uid) && regOpen()
+        && request.resource.data.keys().hasOnly(['picks'])
+        && request.resource.data.picks is list && request.resource.data.picks.size() == 1
+        && backed(request.resource.data.picks[0], uid);
+      allow update: if (school() && isMe(uid) && regOpen()
+          && request.resource.data.keys().hasOnly(['picks', 'rm'])
+          && request.resource.data.picks is list
+          && (
+            // add one club at the end
+            (request.resource.data.picks.size() == resource.data.picks.size() + 1
+              && request.resource.data.picks.size() <= maxPicks()
+              && request.resource.data.picks.hasAll(resource.data.picks)
+              && !(request.resource.data.picks[request.resource.data.picks.size() - 1] in resource.data.picks)
+              && backed(request.resource.data.picks[request.resource.data.picks.size() - 1], uid)
+              // not both shifts of the same club (jj-a + jj-b): the part before "-" names the club
+              && (request.resource.data.picks.size() < 2
+                || request.resource.data.picks[0].split('-')[0] != request.resource.data.picks[1].split('-')[0]))
+            // or remove one club ("rm") whose seat/ticket is removed in the same write
+            || (request.resource.data.rm is string
+              && request.resource.data.rm in resource.data.picks
+              && request.resource.data.picks == resource.data.picks.removeAll([request.resource.data.rm])
+              && !backed(request.resource.data.rm, uid))
+          ))
+        || isOwner();
+      allow create, delete: if isOwner();
+    }
+
+    // ---------- roles: only the owner manages the read-only teacher list ----------
+    match /config/roles {
+      allow read: if school();
+      allow write: if isOwner()
+        && request.resource.data.keys().hasOnly(['teachers', 'updatedAt'])
+        && request.resource.data.teachers is list
+        && request.resource.data.teachers.size() <= 100;
+    }
+    // ---------- students telling in advance they will miss a PE lesson ----------
+    // Whether it is on, the cut-off time and how far ahead, plus the sheet script address the site calls.
+    // The script itself checks every student request (own row, empty cell, real PE day, time limits).
+    match /config/absence {
+      allow read: if school();
+      allow write: if isOwner()
+        && request.resource.data.keys().hasOnly(['on', 'url', 'cutoff', 'ahead', 'at'])
+        && request.resource.data.on is bool
+        && request.resource.data.url is string
+        && request.resource.data.url.matches('^https://script[.]google[.]com/macros/s/[A-Za-z0-9_-]+/exec$')
+        && request.resource.data.cutoff is string
+        && request.resource.data.cutoff.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.ahead is int && request.resource.data.ahead >= 1 && request.resource.data.ahead <= 60;
+    }
+    // A student's request to miss one PE lesson: reason (sick/excused) and their own comment. Only the student
+    // and the owner read it. Nothing goes into the attendance sheet until the owner approves (status 'ok'),
+    // and the owner's own sheet call writes the mark. The student can withdraw it while it is still waiting.
+    match /absreq/{id} {
+      allow read: if isOwner() || (school() && resource.data.uid == request.auth.uid);
+      allow create: if school()
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'name', 'cls', 'tab', 'date', 'kind', 'reason', 'status', 'at'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == myEmail()
+        && request.resource.data.date is string && request.resource.data.date.matches('^20[0-9]{2}-[01][0-9]-[0-3][0-9]$')
+        && id == request.auth.uid + '_' + request.resource.data.date
+        && request.resource.data.kind in ['sick', 'leave']
+        && request.resource.data.reason is string && request.resource.data.reason.size() >= 2 && request.resource.data.reason.size() <= 300
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.cls is string && request.resource.data.cls.size() <= 20
+        && request.resource.data.tab is string && request.resource.data.tab.matches('^PE [0-9]+$')
+        && request.resource.data.status == 'pending'
+        && request.resource.data.at == request.time;
+      allow update: if isOwner()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'decidedAt'])
+        && request.resource.data.status in ['pending', 'ok', 'no'];
+      allow delete: if isOwner() || (school() && resource.data.uid == request.auth.uid && resource.data.status == 'pending');
+    }
+    match /config/{other} { allow read, write: if false; }
+
+    // ---------- people ----------
+    match /users/{uid} {
+      allow read: if isMe(uid) || isTeacher();
+      allow create: if school() && isMe(uid)
+        && request.resource.data.keys().hasOnly(['email', 'name', 'classId', 'createdAt'])
+        && request.resource.data.email == myEmail()
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.classId is string && request.resource.data.classId.size() <= 40;
+      allow update: if (school() && isMe(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80)
+        || (school() && isMe(uid) && resource.data.classId == ''
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['classId'])
+          && request.resource.data.classId is string && request.resource.data.classId.size() <= 40)
+        || isOwner();
+      allow delete: if isOwner();
+
+      // Assignments a student marked as done (their own ticks only).
+      match /done/{aid} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && request.resource.data.keys().hasOnly(['at']);
+        allow delete: if (school() && isMe(uid)) || isOwner();
+      }
+      // Fitness test results: the student reads their own, only the owner enters them.
+      match /results/{period} {
+        allow read: if isMe(uid) || isTeacher();
+        allow write: if isOwner();
+      }
+      // Exercises a student saved from the library (their own list only).
+      match /saved/{exId} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid) && request.resource.data.keys().hasOnly(['at']);
+        allow delete: if (school() && isMe(uid)) || isOwner();
+      }
+
+      // A student's own training plans (private drafts).
+      match /plans/{id} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create, update: if school() && isMe(uid) && request.resource.data.keys().size() <= 30;
+        allow delete: if (school() && isMe(uid)) || isOwner();
+      }
+      // Loading Form: the student sends it once; it cannot be edited or deleted afterwards (owner can remove mistakes).
+      // Optional "sleep" = hours slept last night (number 0–16).
+      match /loading/{id} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create: if school() && isMe(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
+          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
+          && shortStr('note', 2000)
+          // Optional link to the student's own Strava activity (pasted, or picked from "Миний Strava").
+          && (!('strava' in request.resource.data)
+              || (request.resource.data.strava is string && request.resource.data.strava.size() <= 200
+                  && request.resource.data.strava.matches('https://(www[.])?strava[.]com/activities/[0-9]{1,20}|https://strava[.]app[.]link/[A-Za-z0-9_-]{1,40}')))
+          && (!('sleep' in request.resource.data)
+              || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
+        // Only the owner corrects a wrong answer (same checks; the entry stays the student's and is marked edited).
+        allow update: if isOwner()
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.rpe is number && request.resource.data.rpe >= 1 && request.resource.data.rpe <= 10
+          && request.resource.data.min is number && request.resource.data.min >= 1 && request.resource.data.min <= 300
+          && request.resource.data.editedAt is number
+          && shortStr('note', 2000)
+          && (!('sleep' in request.resource.data)
+              || (request.resource.data.sleep is number && request.resource.data.sleep >= 0 && request.resource.data.sleep <= 16));
+        allow delete: if isOwner();
+      }
+      // "Strava connected" flag. Only the student reads it (teachers do not); only the server writes it.
+      match /strava/{doc} {
+        allow read: if isMe(uid);
+        allow write: if false;
+      }
+      // Wellbeing self-check: the student keeps their current level up to date; no deleting.
+      match /wellbeing/{strand} {
+        allow read: if isMe(uid) || isTeacher();
+        allow create, update: if school() && isMe(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 6;
+        allow delete: if isOwner();
+      }
+    }
+
+    // ---------- beta feedback ("Санал өгөх" button) ----------
+    // Anyone may send a note, even parents who are not signed in. Only the owner reads the inbox,
+    // changes status, replies or deletes. A signed-in sender can read their own notes (to see
+    // "your idea was done") and may only mark the reply as seen.
+    function fbShape() {
+      return request.resource.data.keys().hasOnly(['type', 'text', 'page', 'dev', 'status', 'at', 'who', 'contact', 'uid', 'email', 'name', 'classId'])
+        && request.resource.data.keys().hasAll(['type', 'text', 'page', 'status', 'at', 'who', 'uid'])
+        && request.resource.data.type in ['bug', 'idea', 'confusing', 'like']
+        && request.resource.data.text is string && request.resource.data.text.size() >= 3 && request.resource.data.text.size() <= 2000
+        && request.resource.data.page is string && request.resource.data.page.size() <= 40
+        && request.resource.data.who in ['parent', 'student', 'teacher', 'other']
+        && request.resource.data.status == 'new'
+        && request.resource.data.at == request.time
+        && shortStr('dev', 160) && shortStr('contact', 120) && shortStr('name', 80) && shortStr('classId', 40) && shortStr('email', 120);
+    }
+    match /feedback/{id} {
+      allow create: if fbShape() && (
+          // not signed in with a verified school account: no identity fields
+          (!school() && request.resource.data.uid == ''
+            && !('email' in request.resource.data) && !('name' in request.resource.data) && !('classId' in request.resource.data))
+          // verified school account: must be their own uid and email
+          || (school() && request.resource.data.uid == request.auth.uid && request.resource.data.email == myEmail()));
+      allow read: if isOwner() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if isOwner() || (school() && resource.data.uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+          && request.resource.data.seen == true);
+      allow delete: if isOwner();
+    }
+    // The owner's private notes on feedback (who was called, what is planned). The sender never sees them.
+    match /fbnotes/{id} {
+      allow read, delete: if isOwner();
+      allow create, update: if isOwner() && shortStr('text', 2000);
+    }
+
+    // Owner-only settings that should not be public (for example the attendance Sheet script address).
+    match /private/{id} { allow read, write: if isOwner(); }
+
+    // Teacher notes about a student or one of their log entries: teachers read, only the owner writes.
+    // Students never read them (not even their own).
+    match /tnotes/{id} {
+      allow read: if isTeacher();
+      allow create, update: if isOwner()
+        && request.resource.data.keys().hasOnly(['uid', 'lid', 'text', 'at', 'edited'])
+        && request.resource.data.uid is string && request.resource.data.uid.size() >= 1 && request.resource.data.uid.size() <= 128
+        && request.resource.data.lid is string && request.resource.data.lid.size() <= 80
+        && request.resource.data.text is string && request.resource.data.text.size() >= 1 && request.resource.data.text.size() <= 2000
+        && request.resource.data.at is number;
+      allow delete: if isOwner();
+    }
+
+    // Strava (strava-fn). Tokens, sign-in attempts and the short activity copy are for the server only:
+    // no one can read them from the site, not even the owner. Strava data is shown only to its owner.
+    match /stravaTokens/{uid} { allow read, write: if false; }
+    match /stravaState/{id}   { allow read, write: if false; }
+    match /stravaCache/{uid}  { allow read, write: if false; }
+
+    // Term progress grade ("Явц"), one document per student and term (id = term_studentID, for example t1_27103),
+    // copied by the owner from the teacher's working Google Sheet. Teachers read all of them. A student reads only
+    // their own (matched by the verified school email) and only after the owner has opened that class's grades
+    // ("pub"). Teacher notes never go here: they live in gradesStaff below. What the student may read with the grade:
+    // the teacher's written comment, the baseline test summary, one strength and one area to work on.
+    function gradeShape() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['term', 'sid', 'email', 'first', 'last', 'cls', 'grade', 'c', 'pct', 'lv', 'pts', 'w', 'yavts', 'flag', 'pub', 'at', 'pubAt',
+                               'comment', 'base', 'str', 'weak'])
+        && d.keys().hasAll(['term', 'sid', 'email', 'pub', 'at'])
+        && d.term is string && d.term.matches('t[1-4]')
+        && d.sid is string && d.sid.size() >= 1 && d.sid.size() <= 20
+        && d.email is string && (d.email == '' || d.email.matches('[^@ ]+@tomujin[.]edu[.]mn'))
+        && d.pub is bool
+        && (!('yavts' in d) || d.yavts == null || (d.yavts is number && d.yavts >= 0 && d.yavts <= 100))
+        && shortStr('first', 80) && shortStr('last', 80) && shortStr('cls', 20) && shortStr('grade', 4) && shortStr('flag', 200)
+        && shortStr('comment', 1500) && shortStr('base', 300) && shortStr('str', 80) && shortStr('weak', 80);
+    }
+    match /grades/{id} {
+      allow read: if isTeacher() || (school() && resource.data.email == myEmail() && resource.data.pub == true);
+      allow create, update: if isOwner() && gradeShape();
+      allow delete: if isOwner();
+    }
+    // The teacher's own note on a student's term grade (from the working sheet). Teachers only, never students.
+    match /gradesStaff/{id} {
+      allow read: if isTeacher();
+      allow create, update: if isOwner() && request.resource.data.keys().hasOnly(['note', 'at'])
+        && request.resource.data.note is string && request.resource.data.note.size() <= 2000;
+      allow delete: if isOwner();
+    }
+
+    // Fitness results imported for students who have not signed up yet (doc id = school email).
+    // Only the owner writes; the student reads their own once signed in; teachers read.
+    match /pending/{email} {
+      allow read: if isTeacher() || (school() && myEmail() == email);
+      allow write: if isOwner();
+    }
+
+    // Teacher dashboard reads across all students at once (read only).
+    match /{path=**}/loading/{id}   { allow read: if isTeacher(); }
+    match /{path=**}/done/{id}      { allow read: if isTeacher(); }
+    match /{path=**}/results/{id}   { allow read: if isTeacher(); }
+    match /{path=**}/wellbeing/{id} { allow read: if isTeacher(); }
+    match /{path=**}/abs/{id}       { allow read: if isTeacher(); }
+  }
+}

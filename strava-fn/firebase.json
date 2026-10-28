@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "strava",
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "test.js", "firebase.json"]
+    }
+  ]
+}

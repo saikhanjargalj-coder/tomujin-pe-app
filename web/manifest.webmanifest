@@ -1,0 +1,14 @@
+{
+  "name": "Tomujin PE",
+  "short_name": "Tomujin PE",
+  "description": "Tomujin сургуулийн биеийн тамир: дасгал, даалгавар, бэлтгэлийн тэмдэглэл",
+  "lang": "mn",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf7ff",
+  "theme_color": "#5c1090",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
