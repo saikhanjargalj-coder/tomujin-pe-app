@@ -4,7 +4,9 @@
    "Sheet-ээс шинэчлэх" (owner only) reads it through the attendance script (tools/sheet/attendance.gs, action
    "yavts") and copies every student's grade to grades/t1_<ID>. Teachers see every class here and on the teacher
    dashboard. A student sees only their own, and only after the owner opens that class ("pub"); the server checks
-   both (firestore.rules). The teacher's note on a student is kept apart in gradesStaff and never reaches students. */
+   both (firestore.rules). The teacher's note on a student is kept apart in gradesStaff and never reaches students.
+   With the grade the student also reads (script v4): the teacher's written comment, the baseline test summary,
+   one strength and one area to work on, all from the working sheet. */
 var YVTERM='t1',YVTERMN={t1:'1-р улирал',t2:'2-р улирал',t3:'3-р улирал',t4:'4-р улирал'};
 var GRADES={},GNOTES={},MYGRADES=[],YV={mode:'yavts',cls:'',busy:false,msg:null,info:'',attBusy:{},attErr:{}};
 var YVW={att:25,a:15,r:10,k:15,u:35}; // only when the sheet sent no weights
@@ -52,6 +54,8 @@ function yvHasAccount(g){if(!g.email)return false;return Object.keys(USERS).some
 function yvUid(g){if(!g.email)return '';return Object.keys(USERS).filter(function(u){return String(USERS[u].email||'').toLowerCase()===g.email})[0]||''}
 function yvMine(){return MYGRADES.filter(function(g){return g.term===YVTERM})[0]||null}
 function yvLastAt(){return yvList().reduce(function(a,g){return Math.max(a,+g.at||0)},0)}
+function yvTxt(v,n){return String(v==null?'':v).trim().slice(0,n)}
+function yvCap(s){s=String(s||'');return s.charAt(0).toUpperCase()+s.slice(1)}
 function yvWhen(ms){if(!ms)return '';var d=ubD(ms);return (d.getUTCMonth()+1)+'/'+d.getUTCDate()+' '+('0'+d.getUTCHours()).slice(-2)+':'+('0'+d.getUTCMinutes()).slice(-2)}
 
 /* ---------- owner: copy from the sheet, open or close a class ---------- */
@@ -62,22 +66,24 @@ function yvSync(){
   if(!PATT.url&&!preview){YV.msg=['err','Эхлээд «Хичээлийн ирц» хуудсаар Sheet-ийн скрипттэй холбоно уу.'];yvRefresh();return}
   if(!link){YV.msg=['err','Доорх «Явцын хүснэгтийн холбоос» хэсэгт хүснэгтийнхээ холбоосыг оруулаад хадгална уу.'];yvRefresh();return}
   YV.busy=true;YV.msg=['','Sheet-ээс уншиж байна…'];yvRefresh();
-  var info={n:0,classes:{},noMail:0,noGrade:0,pubCls:{},removed:0};
+  var info={n:0,classes:{},noMail:0,noGrade:0,pubCls:{},removed:0,noComment:0,oldScript:false};
   paCall({action:'yavts',sheet:link}).then(function(j){
     var now=Date.now(),seen={},ops=[],term=/^t[1-4]$/.test(j.term)?j.term:YVTERM,w=j.w||{};
+    info.oldScript=!(j.v>=4);
     (j.students||[]).forEach(function(s){
       var sid=String(s.id||'').trim().slice(0,20);if(!sid)return;
       var id=term+'_'+sid;if(seen[id])return;seen[id]=1;
       var old=GRADES[id],em=String(s.email||'').toLowerCase();em=/^[^@\s]+@tomujin\.edu\.mn$/.test(em)?em:'';
       var y=typeof s.yavts==='number'&&isFinite(s.yavts)?Math.max(0,Math.min(100,s.yavts)):null;
       var d={term:term,sid:sid,email:em,first:String(s.first||'').slice(0,80),last:String(s.last||'').slice(0,80),cls:String(s.cls||'').slice(0,20),grade:String(s.tab||'').slice(0,4),
-        c:s.c||{},pct:typeof s.pct==='number'?s.pct:null,lv:s.lv||{},pts:s.pts||{},w:w,yavts:y,flag:String(s.flag||'').slice(0,200),pub:!!(old&&old.pub),at:now};
+        c:s.c||{},pct:typeof s.pct==='number'?s.pct:null,lv:s.lv||{},pts:s.pts||{},w:w,yavts:y,flag:String(s.flag||'').slice(0,200),pub:!!(old&&old.pub),at:now,
+        comment:yvTxt(s.comment,1500),base:yvTxt(s.base,300),str:yvTxt(s.str,80),weak:yvTxt(s.weak,80)};
       if(old&&old.pubAt)d.pubAt=old.pubAt;
       ops.push({op:'set',path:'grades/'+id,data:d});
       var note=String(s.note||'').trim().slice(0,2000);
       if(note)ops.push({op:'set',path:'gradesStaff/'+id,data:{note:note,at:now}});
       else if(GNOTES[id]!=null)ops.push({op:'delete',path:'gradesStaff/'+id});
-      info.n++;info.classes[yvKey(d)]=1;if(!em)info.noMail++;if(y==null)info.noGrade++;if(d.pub)info.pubCls[yvKey(d)]=1;
+      info.n++;info.classes[yvKey(d)]=1;if(!em)info.noMail++;if(y==null)info.noGrade++;if(d.pub)info.pubCls[yvKey(d)]=1;if(!d.comment)info.noComment++;
     });
     if(!info.n)throw new Error('yavts-no-tabs');
     // students no longer in the sheet leave the site too
@@ -89,6 +95,8 @@ function yvSync(){
     if(info.removed)t+=' Хүснэгтэд байхгүй болсон '+info.removed+' сурагчийн дүнг хаслаа.';
     if(info.noGrade)t+=' '+info.noGrade+' сурагчийн ЯВЦ хоосон байна.';
     if(info.noMail)t+=' '+info.noMail+' сурагчийн сургуулийн имэйл олдсонгүй: тэд сайтад өөрийн дүнгээ харахгүй.';
+    if(info.oldScript)t+=' Сэтгэгдэл, гарааны үнэлгээ ирсэнгүй: Sheet-ийн скрипт хуучин хувилбартай. «Хичээлийн ирц» → «Тохиргоо: Sheet-тэй холбох» → «Кодыг хуулах», Apps Script-д солиод Deploy → Manage deployments → ✎ → New version → Deploy.';
+    else if(info.noComment)t+=' '+info.noComment+' сурагчийн сэтгэгдэл хоосон.';
     t+=pc.length?' Сурагчдад нээлттэй анги ('+pc.join(', ')+'): шинэ дүн тэдэнд шууд харагдана.':' Одоогоор аль ч ангид сурагчдад нээгдээгүй.';
     YV.busy=false;YV.msg=['',t];yvRefresh();
   }).catch(function(e){YV.busy=false;YV.msg=['err',yvErr(e)];yvRefresh()});
@@ -105,9 +113,9 @@ function yvSaveLink(v,st){
   db.doc('private/peatt').update({yavts:v}).then(function(){PATT.yavts=v;st.className='status';st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй.'});
 }
 function yvExport(list){
-  var rows=[['ID','Овог','Нэр','Анги','И','Х','Т','Ч','Ө','Ирц %','Идэвх (1–5)','Бэлэн байдал (1–5)','Мэдлэг (1–5)','Хэрэглээ, дадал (1–5)','Ирц оноо','Идэвх оноо','Бэлэн оноо','Мэдлэг оноо','Хэрэглээ оноо','ЯВЦ','Сурагчдад нээлттэй','Имэйл']];
+  var rows=[['ID','Овог','Нэр','Анги','И','Х','Т','Ч','Ө','Ирц %','Идэвх (1–5)','Бэлэн байдал (1–5)','Мэдлэг (1–5)','Хэрэглээ, дадал (1–5)','Ирц оноо','Идэвх оноо','Бэлэн оноо','Мэдлэг оноо','Хэрэглээ оноо','ЯВЦ','Сурагчдад нээлттэй','Имэйл','Сэтгэгдэл','Гарааны үнэлгээ','Давуу тал','Анхаарах тал']];
   (list||yvList()).slice().sort(function(a,b){return (+a.grade||0)-(+b.grade||0)||yvKey(a).localeCompare(yvKey(b))||String(a.sid).localeCompare(String(b.sid))}).forEach(function(g){var c=g.c||{},lv=g.lv||{};
-    rows.push([g.sid,g.last,g.first,yvKey(g),c.i||0,c.x||0,c.t||0,c.ch||0,c.o||0,typeof g.pct==='number'?Math.round(g.pct*100):'',lv.a==null?'':lv.a,lv.r==null?'':lv.r,lv.k==null?'':lv.k,lv.u==null?'':lv.u].concat(['att','a','r','k','u'].map(function(k){var p=yvPts(g,k);return p==null?'':Math.round(p*10)/10})).concat([g.yavts==null?'':g.yavts,g.pub?'Тийм':'Үгүй',g.email]))});
+    rows.push([g.sid,g.last,g.first,yvKey(g),c.i||0,c.x||0,c.t||0,c.ch||0,c.o||0,typeof g.pct==='number'?Math.round(g.pct*100):'',lv.a==null?'':lv.a,lv.r==null?'':lv.r,lv.k==null?'':lv.k,lv.u==null?'':lv.u].concat(['att','a','r','k','u'].map(function(k){var p=yvPts(g,k);return p==null?'':Math.round(p*10)/10})).concat([g.yavts==null?'':g.yavts,g.pub?'Тийм':'Үгүй',g.email,g.comment||'',g.base||'',g.str||'',g.weak||'']))});
   downloadCSV('yavts-'+YVTERM+'.csv',rows);
 }
 
@@ -135,13 +143,40 @@ function yvBreakdown(g,pick){
 function yvBig(g,onclick){var kids=[h('b',{text:g.yavts==null?'—':String(Math.round(g.yavts))}),h('span',{text:'/ 100'})];
   return onclick?h('button',{type:'button',cls:'yvbig','aria-label':'ЯВЦ '+(g.yavts==null?'—':Math.round(g.yavts))+' / 100. Хэрхэн бодогдсоныг нээх',onclick:onclick},kids.concat([h('i',{cls:'yvp-go','aria-hidden':'true',text:'›'})])):h('div',{cls:'yvbig'},kids)}
 
+/* ---------- what the student reads besides the points ----------
+   The teacher's comment, the baseline tests (the student's own starting point, never a class ranking), one strength and
+   one area to work on. Teachers see the very same boxes on a student's grade, so they know what the student sees. */
+var YVBASE=[ // the label in the sheet's summary → test, quality, how to read the number
+  ['Сунах','Суугаад сунах','Уян хатан чанар','Хөлийн хурууны түвшнээс цааш сунасан зай. Хасах тоо нь хуруундаа хүрэхэд дутсан зай.'],
+  ['Миль','1 миль гүйлт','Тэсвэр','Минут:секунд. Бага байх тусам хурдан.'],
+  ['Суниалт','1 минутын суниалт','Гарын хүч','1 минутад хийсэн тоо.'],
+  ['Харайлт','Байрнаасаа уртын харайлт','Тэсрэлтэт хүч','Сантиметрээр.']];
+function yvBaseItems(s){return String(s||'').split('·').map(function(x){x=x.trim();var m=x.match(/^(\S+)\s+(.+)$/);if(!m)return null;
+  var d=YVBASE.filter(function(b){return b[0]===m[1]})[0];return d?{val:m[2],d:d}:null}).filter(Boolean)}
+function yvHasOwn(g){return !!(g&&(g.comment||g.base||g.str||g.weak))}
+function yvOwnBoxes(g,staff){
+  var out=[];
+  if(g.comment)out.push(h('div',{cls:'box yvcomment'},[h('h3',{text:'Багшийн сэтгэгдэл'}),h('p',{style:'margin:0;white-space:pre-wrap',text:g.comment}),
+    staff?h('small',{cls:'muted',text:'Ажлын хүснэгтийн «Сэтгэгдэл (автомат)» баганаас.'}):null]));
+  if(g.base||g.str||g.weak){
+    var items=yvBaseItems(g.base),kids=[h('h3',{text:staff?'Гарааны үнэлгээ':'Миний гарааны үнэлгээ'}),
+      h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'Улирлын эхэнд хийсэн сорил. Энэ бол эхлэлийн цэг: дараагийн сорилд өөрийн энэ дүнтэй харьцуулж ахицаа харна.'})];
+    if(items.length)kids.push(h('div',{cls:'yvbase'},items.map(function(x){return h('div',{cls:'yvb'},[h('small',{cls:'muted',text:x.d[2]}),h('b',{text:x.val}),h('span',{text:x.d[1]}),h('small',{cls:'muted',text:x.d[3]})])})));
+    else if(g.base)kids.push(h('p',{style:'margin:0',text:g.base}));
+    if(g.str||g.weak)kids.push(h('div',{cls:'yvsw'},[g.str?h('div',{cls:'yvs'},[h('small',{text:'Давуу тал'}),h('b',{text:yvCap(g.str)})]):null,
+      g.weak?h('div',{cls:'yvw'},[h('small',{text:'Цаашид анхаарах'}),h('b',{text:yvCap(g.weak)})]):null]));
+    out.push(h('div',{cls:'box yvown'},kids));
+  }
+  return out;
+}
+
 /* the student's own card on the assessment page */
 function yvMyCard(g){
-  return h('div',{cls:'box yvcard'},[
+  return h('div',{cls:'yvmine'},[h('div',{cls:'box yvcard'},[
     h('div',{cls:'yvtop'},[h('div',{},[h('span',{cls:'eyebrow',text:(YVTERMN[g.term]||g.term)+' · Явцын дүн'}),h('h3',{style:'margin:4px 0 0',text:'Миний улирлын дүн'}),
       h('p',{cls:'muted',style:'margin:4px 0 0;font-size:14px',text:'Ирц, идэвх, бэлэн байдал, мэдлэг, хэрэглээ гэсэн 5 хэсгээс бүрдэнэ.'})]),yvBig(g)]),
     yvBreakdown(g),
-    h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'«Хэрэглээ, дадал» хамгийн их жинтэй: сурсан зүйлээ амьдралдаа хэрэгжүүлэх нь хамгийн чухал. Асуух зүйл байвал Жак багштай ярилцаарай.'})]);
+    h('p',{cls:'muted',style:'margin:0;font-size:13px',text:'«Хэрэглээ, дадал» хамгийн их жинтэй: сурсан зүйлээ амьдралдаа хэрэгжүүлэх нь хамгийн чухал. Асуух зүйл байвал Жак багштай ярилцаарай.'})])].concat(yvOwnBoxes(g,false)));
 }
 
 /* ---------- teachers: everything in a student's grade opens ----------
@@ -202,6 +237,11 @@ function yvDetail(x,back,keep){
     p.appendChild(h('p',{cls:'muted yvhint',text:'Хэсэг бүр, ЯВЦ-ын оноо, шошго дээр дарж дэлгэрэнгүйг нээнэ.'}));
     p.appendChild(yvBreakdown(g,function(k){yvPart(g.id,k)}));
     if(g.flag)p.appendChild(h('p',{cls:'status err',style:'margin:0',text:'Анхаарах: '+g.flag}));
+    p.appendChild(h('h3',{cls:'yvsee',text:'Сурагчид харагдах хэсэг'}));
+    p.appendChild(h('p',{cls:'muted',style:'margin:0;font-size:13px',text:g.pub?(yvName(g)+' дүнтэйгээ хамт доорхыг яг ингэж харж байна.'):('Анги нээгдсэний дараа '+yvName(g)+' дүнтэйгээ хамт доорхыг яг ингэж харна.')}));
+    var own=yvOwnBoxes(g,true);
+    if(own.length)own.forEach(function(b){p.appendChild(b)});
+    else p.appendChild(h('p',{cls:'muted',style:'margin:0',text:'Сэтгэгдэл, гарааны үнэлгээ хараахан ороогүй.'+(owner?' Ажлын хүснэгтийн «Сэтгэгдэл (автомат)», «Гарааны үнэлгээ» баганыг бөглөөд «Sheet-ээс шинэчлэх» дарна.':'')}));
     var note=GNOTES[g.id];
     p.appendChild(h('div',{cls:'box'},[h('h3',{text:'Багшийн тэмдэглэл (ажлын хүснэгтээс)'}),h('p',{style:'margin:0;white-space:pre-wrap',text:note||'Тэмдэглэл алга.'}),
       h('small',{cls:'muted',text:'Ажлын хүснэгтийн «Багшийн тэмдэглэл» баганаас. Сурагчид хэзээ ч харахгүй.'+(owner?' Засах бол хүснэгтэд засаад «Sheet-ээс шинэчлэх» дарна.':'')}),
@@ -381,6 +421,7 @@ function yvStudentBox(u){
   var uid=u&&u.uid||yvUid(g),back={label:cxName(uid,yvName(g)),fn:function(){cxStudent(uid)}};
   box.appendChild(h('div',{cls:'yvtop'},[h('p',{cls:'muted',style:'margin:0',text:'ID '+g.sid+' · '+yvKey(g)+' · '+(g.pub?'сурагч харж байна':'зөвхөн багшид')}),yvBig(g,function(){yvTotal(g.id)})]));
   box.appendChild(yvBreakdown(g,function(k){yvPart(g.id,k)}));
+  if(g.comment)box.appendChild(h('p',{style:'margin:0',text:'Сурагчид харагдах сэтгэгдэл: '+g.comment}));
   if(GNOTES[g.id])box.appendChild(h('p',{style:'margin:0',text:'💬 '+GNOTES[g.id]}));
   box.appendChild(h('div',{cls:'chips'},[h('button',{type:'button',cls:'btn line small',text:'Явцын дэлгэрэнгүй ›',onclick:function(){yvDetail(g.id,back)}})]));
   return box;

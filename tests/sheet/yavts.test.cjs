@@ -49,11 +49,14 @@ const LS = book([fakeSheet("Master", [["ID"]]), pe6, pe12]);
 
 // the working sheet: same headers as the real one, plus a hidden raw tab that must be ignored
 const H = ["ID", "Нэр", "Овог", "Анги", "И", "Х", "Т", "Ч", "Ө", "Бүртгэлтэй хичээл", "Ирц %", "Идэвх, оролцоо (1–5)", "Бэлэн байдал (1–5)", "Мэдлэг (1–5)", "Хэрэглээ, дадал (1–5)", "Ирц оноо", "Идэвх оноо", "Бэлэн оноо", "Мэдлэг оноо", "Хэрэглээ оноо", "ЯВЦ (100)", "Анхаарах", "Багшийн тэмдэглэл"];
-const g12 = fakeSheet("12-р анги", [H,
-  [90001, "Туршилт", "Нэг", "12A", 6, 1, 0, 1, 0, 8, 1, 5, 4, 4, 5, 25, 15, 8, 12, 35, 95, "", "Хичээлээс гадуур тогтмол гүйдэг"],
-  [90002, "", "", "", 0, 0, 0, 0, 0, 0, "", 4, 4, 4, 4, "", 12, 8, 12, 28, "", "Нэр алга (Master-т байхгүй?)", ""],
-  [90003, "Туршилт", "Гурав", "12B", 4, 0, 2, 0, 0, 6, 0.6667, 3, 3, 3, 2, 16.667, 9, 6, 9, 14, 55, "Ирцийн бүртгэл 1 хичээлээр цөөн", ""],
-  ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]);
+// since 28 Oct 2026 the sheet also has the columns a student reads (the 6-р анги tab below keeps the old layout)
+const H4 = H.concat(["Гарааны үнэлгээ (тойм)", "Давуу тал", "Анхаарах тал", "Нэмэлт өгүүлбэр", "Сэтгэгдэл (автомат)"]);
+const g12 = fakeSheet("12-р анги", [H4,
+  [90001, "Туршилт", "Нэг", "12A", 6, 1, 0, 1, 0, 8, 1, 5, 4, 4, 5, 25, 15, 8, 12, 35, 95, "", "Хичээлээс гадуур тогтмол гүйдэг",
+    "Сунах 14 см · Миль 8:10 · Суниалт 22 · Харайлт 185 см", "тэсвэр", "уян хатан чанар", "", "Туршилт хичээл бүрт идэвхтэй оролцож байлаа. Цаашид уян хатан чанар дээрээ ажиллаарай."],
+  [90002, "", "", "", 0, 0, 0, 0, 0, 0, "", 4, 4, 4, 4, "", 12, 8, 12, 28, "", "Нэр алга (Master-т байхгүй?)", "", "", "", "", "", "#N/A"],
+  [90003, "Туршилт", "Гурав", "12B", 4, 0, 2, 0, 0, 6, 0.6667, 3, 3, 3, 2, 16.667, 9, 6, 9, 14, 55, "Ирцийн бүртгэл 1 хичээлээр цөөн", "", "Гарааны дүн бүртгэгдээгүй", "", "", "", "Гурав " + "а".repeat(2000)],
+  ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]]);
 const g6 = fakeSheet("6-р анги", [H, [60001, "Бага", "Анги", "", 8, 0, 0, 0, 0, 8, 1, 4, 4, 4, 4, 25, 12, 8, 12, 28, 85, "", ""]]);
 const set = fakeSheet("Тохиргоо", [["PE 1-р улирлын Явцын дүн — тохиргоо"], ["Бүрэлдэхүүн", "Жин (оноо)", "Тайлбар"],
   ["Ирц", 25, ""], ["Идэвх, оролцоо", 15, ""], ["Бэлэн байдал", 10, ""], ["Мэдлэг", 15, ""], ["Хэрэглээ, дадал", 35, ""], ["Нийт", 100, ""],
@@ -77,6 +80,12 @@ check("a non-school email is never passed on", b.email === "", b.email);
 check("class and grade tab", a.cls === "12A" && a.tab === "12" && six.cls === "" && six.tab === "6", [a.cls, a.tab, six.tab]);
 check("a student without a grade yet has yavts null", z.yavts === null && z.pct === null && z.flag.length > 0, z);
 check("teacher note and flag come along for the owner", a.note === "Хичээлээс гадуур тогтмол гүйдэг" && b.flag.indexOf("цөөн") > 0, [a.note, b.flag]);
+check("script answers with v4", r.v === 4, r.v);
+check("the comment, baseline, strength and area to work on come along", a.comment.indexOf("идэвхтэй") > 0 && a.base.indexOf("Миль 8:10") > 0 && a.str === "тэсвэр" && a.weak === "уян хатан чанар", [a.comment, a.base, a.str, a.weak]);
+check("'Анхаарах тал' does not take the place of the attendance flag", b.flag.indexOf("цөөн") > 0 && a.flag === "" && a.weak === "уян хатан чанар", [a.flag, b.flag]);
+check("a formula error in the comment becomes empty", z.comment === "", z.comment);
+check("a long comment is cut to 1500 characters", b.comment.length === 1500 && b.base === "Гарааны дүн бүртгэгдээгүй", b.comment.length);
+check("a tab without the new columns still works (empty texts)", six.comment === "" && six.base === "" && six.str === "" && six.weak === "" && six.yavts === 85, six);
 check("no phone number from the school sheet", !JSON.stringify(r).includes("99119911"));
 check("the working sheet is never written", [set, g6, g12, raw].every((s) => s.writes === 0) && pe12.writes === 0);
 

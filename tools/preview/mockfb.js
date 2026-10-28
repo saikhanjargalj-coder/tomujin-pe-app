@@ -242,12 +242,18 @@
         var lv = { a: h === 3 ? 5 : h === 5 ? 3 : 4, r: h === 1 ? 3 : 4, k: h === 2 ? 5 : 4, u: h === 3 ? 5 : h === 5 ? 2 : h === 6 ? 3 : 4 };
         var pts = { att: pct == null ? null : Math.round(pct * w.att * 1000) / 1000, a: lv.a / 5 * w.a, r: lv.r / 5 * w.r, k: lv.k / 5 * w.k, u: lv.u / 5 * w.u };
         var y = pct == null ? null : Math.round(pts.att + pts.a + pts.r + pts.k + pts.u);
+        var Q = ["уян хатан чанар", "тэсвэр", "гарын хүч", "харайлтын тэсрэлтэт хүч"], str = h === 0 || h === 4 ? "" : Q[h % 4], weak = h === 0 || h === 4 ? "" : Q[(h + 2) % 4];
+        var base = h === 0 ? "Гарааны дүн бүртгэгдээгүй" : "Сунах " + (h * 5 - 8) + " см · Миль " + (8 + h % 4) + ":" + (10 + h * 7) + " · Суниалт " + (6 + h * 3) + " · Харайлт " + (130 + h * 9) + " см";
         out.push({ id: x.id, tab: g, first: x.first, last: x.last, cls: x.cls, email: x.email, c: c, pct: pct == null ? null : Math.round(pct * 1000) / 1000, lv: lv, pts: pts, yavts: y,
           flag: n < (max[x.cls || g] || 0) ? "Ирцийн бүртгэл " + (max[x.cls || g] - n) + " хичээлээр цөөн" : "",
-          note: h === 3 ? "Хичээлээс гадуур тогтмол гүйдэг, Strava-д тэмдэглэдэг." : h === 5 ? "Техникээ давтах хэрэгтэй: squat-д өвдөг дотогшоо орж байна." : "" });
+          note: h === 3 ? "Хичээлээс гадуур тогтмол гүйдэг, Strava-д тэмдэглэдэг." : h === 5 ? "Техникээ давтах хэрэгтэй: squat-д өвдөг дотогшоо орж байна." : "",
+          // what the student reads (script v4): made-up baseline, strength, area to work on and comment; h 0 has no baseline, h 6 no comment
+          base: base, str: str, weak: weak, comment: h === 6 ? "" : x.first + " " + (lv.a >= 4 ? "ихэнх хичээлд идэвхтэй оролцож, багаараа хамтран ажиллалаа." : "хичээлд оролцдог ч идэвх нь тогтворгүй байлаа.") +
+            " Хичээлдээ тогтмол ирсэн нь сайшаалтай." + (str ? " Гарааны үнэлгээгээр " + str + " нь давуу тал болж байна." : "") + " Шинэ мэдлэгээ сайн ойлгож, асуулт асууж суралцдаг." +
+            (weak ? " Цаашид " + weak + " дээрээ ажиллаарай." : "") + " Гэр бүлээрээ идэвхтэй байх төлөвлөгөөгөө үргэлжлүүлэн хэрэгжүүлээрэй." });
       });
     });
-    return JSON.parse(JSON.stringify({ ok: true, term: "t1", w: w, tabs: TABS.map(function (t) { return t.split(" ")[1] + "-р анги"; }), students: out, at: Date.now() }));
+    return JSON.parse(JSON.stringify({ ok: true, v: 4, term: "t1", w: w, tabs: TABS.map(function (t) { return t.split(" ")[1] + "-р анги"; }), students: out, at: Date.now() }));
   }
   function sheetCall(q) {
     var TABS = ["PE 6", "PE 7", "PE 8", "PE 9", "PE 10", "PE 11", "PE 12"];
@@ -258,7 +264,10 @@
       return wait({ ok: true, absconf: JSON.parse(JSON.stringify(store["mockabs"])) });
     }
     if (q.action === "tabs") return wait({ ok: true, tabs: TABS });
-    if (q.action === "yavts") return wait(yavtsMock(TABS));
+    if (q.action === "yavts") { var yv = yavtsMock(TABS);
+      // tests can play an Apps Script that was not updated yet (v3: no comment, baseline, strength or area to work on)
+      if (window.__tpeOldScript) { delete yv.v; yv.students.forEach(function (x) { delete x.comment; delete x.base; delete x.str; delete x.weak; }); }
+      return wait(yv); }
     if (q.action === "summary") {
       var td = ymd(Date.now()), from = new Date(Date.parse(td + "T00:00:00Z") - 28 * 864e5).toISOString().slice(0, 10), out = [], watch = [], weeks = {};
       TABS.forEach(function (tab) { var t = sheetTab(tab), by = {}; Object.keys(t.weeks).forEach(function (d) { weeks[d] = t.weeks[d]; });

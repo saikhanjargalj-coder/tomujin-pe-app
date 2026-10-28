@@ -16,7 +16,9 @@
  * Term progress grades (owner only, action "yavts"): reads the teacher's separate working sheet
  * ("PE 1-r uliral Yavts", tabs "6-r angi" ... "12-r angi" and "Tohirgoo") by the link the owner saves on the site, and
  * returns each student's attendance counts, the teacher's 1-5 levels, the points and the term grade, plus the school
- * email from the "PE n" tabs here (to match the site account). It never writes to that sheet.
+ * email from the "PE n" tabs here (to match the site account). Since v4 it also returns what the student may read
+ * once the owner opens the class: the written comment, the baseline test summary, one strength and one area to work on.
+ * The teacher's own note column stays for teachers only. It never writes to that sheet.
  * What it writes (owner only): attendance cells on "PE n" tabs, found by student ID and by the date in row 3,
  * plus a short fixed note on a cell when it comes from an approved student request (never the student's comment).
  * Only the school's own codes are accepted.
@@ -55,7 +57,7 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 function doGet() {
-  return ContentService.createTextOutput(JSON.stringify({ ok: true, app: 'tomujin-pe-attendance', v: 3 })).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, app: 'tomujin-pe-attendance', v: 4 })).setMimeType(ContentService.MimeType.JSON);
 }
 
 /* Google checks the token; we only accept a verified email. */
@@ -298,6 +300,9 @@ var YV_SET = '\u0422\u043e\u0445\u0438\u0440\u0433\u043e\u043e';
 var YV_ATT = '\u0418\u0440\u0446', YV_PCT = '\u0418\u0440\u0446 %', YV_PTS = '\u043e\u043d\u043e\u043e';
 var YV_FIRST = '\u041d\u044d\u0440', YV_LAST = '\u041e\u0432\u043e\u0433', YV_CLS = '\u0410\u043d\u0433\u0438';
 var YV_TOTAL = '\u042f\u0412\u0426', YV_FLAG = '\u0410\u043d\u0445\u0430\u0430\u0440\u0430\u0445', YV_NOTE = '\u0411\u0430\u0433\u0448';
+// columns the student reads (v4): "Setgegdel (avtomat)", "Garaany unelgee (toim)", "Davuu tal", "Anhaarah tal".
+// "Anhaarah tal" starts like the attendance flag "Anhaarah", so it is matched first.
+var YV_COMMENT = '\u0421\u044d\u0442\u0433\u044d\u0433\u0434\u044d\u043b', YV_BASE = '\u0413\u0430\u0440\u0430\u0430\u043d\u044b', YV_STR = '\u0414\u0430\u0432\u0443\u0443', YV_WEAK = '\u0410\u043d\u0445\u0430\u0430\u0440\u0430\u0445 \u0442\u0430\u043b';
 // the four teacher-rated parts: activity, readiness, knowledge, application & habits
 var YV_PARTS = [['a', '\u0418\u0434\u044d\u0432\u0445'], ['r', '\u0411\u044d\u043b\u044d\u043d'], ['k', '\u041c\u044d\u0434\u043b\u044d\u0433'], ['u', '\u0425\u044d\u0440\u044d\u0433\u043b\u044d\u044d']];
 var YV_CODEKEY = ['i', 'x', 't', 'ch', 'o'];   // same order as CODES
@@ -308,6 +313,12 @@ function yvSheetId_(s) {
   if (m) return m[1];
   if (/^[A-Za-z0-9_-]{20,}$/.test(s)) return s;
   throw new Error('no-yavts-sheet');
+}
+/* a text cell a student may read: formula errors (#N/A, #REF! ...) become empty, long text is cut */
+function yvText_(row, i, n) {
+  if (i == null) return '';
+  var s = String(row[i] == null ? '' : row[i]).trim();
+  return /^#[A-Z\/0!?]+/.test(s) ? '' : s.slice(0, n);
 }
 function yvNum_(v) { return (typeof v === 'number' && isFinite(v)) ? Math.round(v * 1000) / 1000 : null; }
 function yvStarts_(h, s) { return h.slice(0, s.length) === s; }
@@ -334,6 +345,10 @@ function yvCols_(head) {
     if (yvStarts_(h, YV_FIRST)) { if (c.first == null) c.first = i; return; }
     if (yvStarts_(h, YV_LAST)) { if (c.last == null) c.last = i; return; }
     if (yvStarts_(h, YV_CLS)) { if (c.cls == null) c.cls = i; return; }
+    if (yvStarts_(h, YV_WEAK)) { if (c.weak == null) c.weak = i; return; }
+    if (yvStarts_(h, YV_STR)) { if (c.str == null) c.str = i; return; }
+    if (yvStarts_(h, YV_BASE)) { if (c.base == null) c.base = i; return; }
+    if (yvStarts_(h, YV_COMMENT)) { if (c.comment == null) c.comment = i; return; }
     if (yvStarts_(h, YV_FLAG)) { if (c.flag == null) c.flag = i; return; }
     if (yvStarts_(h, YV_NOTE)) { if (c.note == null) c.note = i; return; }
   });
@@ -391,7 +406,8 @@ function yavts_(ss, link) {
         id: id, tab: m[1], first: c.first != null ? String(row[c.first]).trim() : '', last: c.last != null ? String(row[c.last]).trim() : '',
         cls: c.cls != null ? String(row[c.cls]).trim() : '', email: mails[id] || '',
         c: {}, pct: c.pct != null ? yvNum_(row[c.pct]) : null, lv: {}, pts: {},
-        yavts: yvNum_(row[c.total]), flag: c.flag != null ? String(row[c.flag]).trim() : '', note: c.note != null ? String(row[c.note]).trim() : ''
+        yavts: yvNum_(row[c.total]), flag: c.flag != null ? String(row[c.flag]).trim() : '', note: c.note != null ? String(row[c.note]).trim() : '',
+        comment: yvText_(row, c.comment, 1500), base: yvText_(row, c.base, 300), str: yvText_(row, c.str, 80), weak: yvText_(row, c.weak, 80)
       };
       if (x.first.charAt(0) === '#') x.first = '';
       YV_CODEKEY.forEach(function (k) { var j = c.codes[k]; x.c[k] = j != null ? (yvNum_(row[j]) || 0) : 0; });
@@ -401,5 +417,5 @@ function yavts_(ss, link) {
     }
   });
   if (!tabs.length) throw new Error('yavts-no-tabs');
-  return { ok: true, term: 't1', w: w, tabs: tabs, students: students, at: new Date().getTime() };
+  return { ok: true, v: 4, term: 't1', w: w, tabs: tabs, students: students, at: new Date().getTime() };
 }

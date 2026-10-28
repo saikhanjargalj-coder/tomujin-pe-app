@@ -443,6 +443,20 @@ await test("Y4 the teacher's grade notes: teachers read, owner writes, students 
   await assertFails(setDoc(doc(owner(), "gradesStaff/t1_90002"), { note: "x", at: 2, email: "s1@tomujin.edu.mn" }));
   await assertSucceeds(setDoc(doc(owner(), "gradesStaff/t1_90002"), { note: "x", at: 2 }));
 });
+await test("Y5 the comment and baseline go with the grade: owner writes, the student reads them only once opened", async () => {
+  await seed((db) => setDoc(doc(db, "config/roles"), { teachers: ["t1@tomujin.edu.mn"] }));
+  const C = { comment: "Туршилт ихэнх хичээлд идэвхтэй оролцлоо.", base: "Сунах 14 см · Миль 8:10", str: "тэсвэр", weak: "уян хатан чанар" };
+  await assertSucceeds(setDoc(doc(owner(), "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", false, C)));
+  await assertFails(setDoc(doc(owner(), "grades/t1_6"), G("6", "s1@tomujin.edu.mn", false, { comment: "а".repeat(1501) })));
+  await assertFails(setDoc(doc(owner(), "grades/t1_7"), G("7", "s1@tomujin.edu.mn", false, { str: 5 })));
+  await assertFails(setDoc(doc(owner(), "grades/t1_8"), G("8", "s1@tomujin.edu.mn", false, { weak: "а".repeat(81) })));
+  await assertFails(setDoc(doc(teacher(), "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", true, C)));
+  await assertFails(getDoc(doc(stu(1), "grades/t1_90001")));                  // closed: the comment is hidden too
+  await seed((db) => setDoc(doc(db, "grades/t1_90001"), G("90001", "s1@tomujin.edu.mn", true, C)));
+  const d = await assertSucceeds(getDoc(doc(stu(1), "grades/t1_90001")));
+  ok(d.data().comment === C.comment && d.data().weak === C.weak, "own comment not readable once opened");
+  await assertFails(getDoc(doc(stu(2), "grades/t1_90001")));                  // never another student's comment
+});
 
 await testEnv.cleanup();
 const failed = results.filter((r) => !r[0]);
