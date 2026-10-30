@@ -45,7 +45,13 @@ function crDaysTxt(days){return days.map(function(x){return CRDAY[x]}).join(', '
 function tsMs(x){return x&&typeof x.toMillis==='function'?x.toMillis():typeof x==='number'?x:0}
 function crSet(){var s=(SITE&&SITE.clubreg)||{};return Object.assign({},CRCAL.def,s)}
 function crCfg(k){var s=(SITE&&SITE.clubreg&&SITE.clubreg.clubs)||{};return s[k]||{}}
-function crPhase(){var s=crSet(),t=Date.now();return t<s.open?'before':t<s.p1?'p1':t<s.close?'p2':'closed'}
+/* Owner's switch (site/clubreg.mode): 'auto' = by the times, 'view' = look only, 'live' = open now whatever the times.
+   The "1 club until p1" limit stays in every mode. firestore.rules checks the same thing on the server. */
+function crMode(){var m=crSet().mode;return m==='view'||m==='live'?m:'auto'}
+function crAutoPhase(){var s=crSet(),t=Date.now();return t<s.open?'before':t<s.p1?'p1':t<s.close?'p2':'closed'}
+function crPhase(){var m=crMode(),s=crSet(),t=Date.now();if(m==='view')return 'view';if(m==='live')return t<s.p1?'p1':'p2';return crAutoPhase()}
+function crP1Txt(){var s=crSet();return ubD(s.p1).toISOString().slice(0,10)===ubToday()?crClock(s.p1):crTime(s.p1)}
+function crCloseTxt(){return crMode()==='live'?'Хаагдах цагийг багш зарлана.':'Хаагдах цаг: '+crClock(crSet().close)+'.'}
 function crFind(oid){for(var i=0;i<CRCLUBS.length;i++)for(var j=0;j<CRCLUBS[i].offers.length;j++)if(CRCLUBS[i].offers[j].id===oid)return {c:CRCLUBS[i],o:CRCLUBS[i].offers[j]};return null}
 function crAllOffers(){var a=[];CRCLUBS.forEach(function(c){c.offers.forEach(function(o){a.push(o.id)})});return a}
 function crName(oid){var f=crFind(oid);return f?f.c.n+(f.o.sh?' · '+f.o.sh+' ээлж':''):oid}
@@ -83,12 +89,13 @@ function crErr(e,full){var c=e&&e.code||'';return /permission/.test(c)?(full?'С
 function crCanPick(oid){
   var ph=crPhase(),p=crPicks(),f=crFind(oid);
   if(!ME)return [false,'login'];
+  if(ph==='view')return [false,'Сонголт түр хаалттай'];
   if(ph==='before')return [false,'Бүртгэл '+crTime(crSet().open)+'-д нээгдэнэ'];
   if(ph==='closed')return [false,'Бүртгэл хаагдсан'];
   if(p.indexOf(oid)>=0)return [false,'mine'];
   if(p.some(function(x){var g=crFind(x);return g&&g.c.k===f.c.k}))return [false,'Энэ дугуйлангийн нөгөө ээлжийг сонгосон'];
   var max=ph==='p1'?1:2;
-  if(p.length>=max)return [false,ph==='p1'?crClock(crSet().p1)+'-аас 2 дахь дугуйлангаа нэмнэ':'2 дугуйлан сонгосон байна'];
+  if(p.length>=max)return [false,ph==='p1'?crP1Txt()+'-аас 2 дахь дугуйлангаа нэмнэ':'2 дугуйлан сонгосон байна'];
   return [true,''];
 }
 function crPick(oid,st){
@@ -125,7 +132,7 @@ function crRun(oid,wantWait,st){
   function(e){clearTimeout(slow);crBusy=false;var c=e&&e.code||'';
     if(c==='tpe/full'){crSay(oid,true,'Сүүлийн суудал дөнгөж өөр хүүхдэд оногдлоо.',true);return}
     if(c==='tpe/no-offer'){crSay(oid,true,'Энэ ээлжийн суудлын тоолуур үүсээгүй байна. Багшид мэдэгдэнэ үү.');return}
-    if(/permission/.test(c)){crSay(oid,true,'Одоогоор сонгох боломжгүй байна: бүртгэлийн цаг эсвэл '+crClock(crSet().p1)+'-ийн хязгаар. Хуудсаа шинэчлээд дахин шалгана уу.');return}
+    if(/permission/.test(c)){crSay(oid,true,'Одоогоор сонгох боломжгүй байна: бүртгэлийн цаг эсвэл '+crP1Txt()+'-ийн хязгаар. Хуудсаа шинэчлээд дахин шалгана уу.');return}
     crVerify(oid,st);
   });
 }
@@ -157,8 +164,9 @@ function crLeave(oid,st){
 function crBanner(){
   var s=crSet(),ph=crPhase(),p=crPicks();
   var head={before:['Бүртгэл удахгүй нээгдэнэ','Суудал сонголт '+crTime(s.open)+'-д нээгдэж, '+crClock(s.close)+'-д хаагдана. Эрт сонгосон нь суудал авна.'],
-    p1:['Бүртгэл нээлттэй · 1-р алхам','Одоо 1 дугуйлан сонгоно. '+crClock(s.p1)+'-аас хойш 2 дахь дугуйлангаа нэмж болно. Хаагдах цаг: '+crClock(s.close)+'.'],
-    p2:['Бүртгэл нээлттэй · 2 дахь дугуйлан','2 хүртэл дугуйлан сонгож болно. '+crClock(s.close)+'-д хаагдана.'],
+    p1:['Бүртгэл нээлттэй · 1-р алхам','Одоо 1 дугуйлан сонгоно. '+crP1Txt()+'-аас хойш 2 дахь дугуйлангаа нэмж болно. '+crCloseTxt()],
+    p2:['Бүртгэл нээлттэй · 2 дахь дугуйлан','2 хүртэл дугуйлан сонгож болно. '+crCloseTxt()],
+    view:['Дугуйлантай танилцах үе','Одоогоор дугуйлангууд, үлдсэн суудлын тоог харах боломжтой. Суудал авах, цуцлах түр хаалттай. Нээгдэх үед энд харагдана.'],
     closed:['Суудал сонголт хаагдсан','Баталгаажуулалт '+s.confirm+'-нд явагдана. Статусаа "Миний дугуйлан" хэсгээс харна уу.']}[ph];
   var bx=h('div',{cls:'box crbanner'+(ph==='p1'||ph==='p2'?' live':'')},[
     h('div',{cls:'chips',style:'justify-content:space-between'},[h('h3',{style:'margin:0',text:head[0]}),ME&&p.length?h('a',{href:'#myclubs','data-go':'myclubs',cls:'btn gold small',text:'Миний дугуйлан ('+p.length+')'}):null]),
@@ -210,7 +218,7 @@ function crRulesBox(){
   return h('div',{cls:'box'},[h('h3',{text:'Бүртгэл хэрхэн явагдах вэ'}),
     h('ol',{cls:'tl'},[
       h('li',{},[h('b',{text:'10/26, 10/28 · Assembly'}),h('span',{cls:'muted',text:'Дугуйлангуудтай танилцаж, сайт дээр бүртгэл үүсгэнэ.'})]),
-      h('li',{},[h('b',{text:'1-р шат · '+crTime(s.open)+' – '+crClock(s.close)+' · Суудал авах'}),h('span',{cls:'muted',text:crClock(s.p1)+' хүртэл 1 дугуйлан, дараа нь 2 дахь дугуйлангаа нэмнэ. Төлбөр төлөхгүй.'})]),
+      h('li',{},[h('b',{text:'1-р шат · '+(crMode()==='live'?'Одоо нээлттэй':crMode()==='view'?'Түр хаалттай':crTime(s.open)+' – '+crClock(s.close))+' · Суудал авах'}),h('span',{cls:'muted',text:crP1Txt()+' хүртэл 1 дугуйлан, дараа нь 2 дахь дугуйлангаа нэмнэ. Төлбөр төлөхгүй.'})]),
       h('li',{},[h('b',{text:'2-р шат · '+s.confirm+' · Баталгаажуулалт'}),h('span',{cls:'muted',text:'Багш ярилцаж цагийн давхцлыг шийднэ. Төлбөр эсвэл барьцаагаа '+s.confirmBy+' хүртэл төлнө.'})]),
       h('li',{},[h('b',{text:s.final+' · Эцсийн жагсаалт'}),h('span',{cls:'muted',text:'Зөвхөн баталгаажсан хүүхдүүд. Дугуйлан 11/9 (Да)-нд эхэлнэ.'})])]),
     det('Сонголтын дүрэм',[h('ul',{cls:'cues'},['Хүүхэд 2 хүртэл дугуйлан сонгоно. Нэг дугуйлангийн 2 ээлжийг зэрэг сонгохгүй.','Цаг давхцсан ч сонгож болно. Давхцлыг баталгаажуулалтын үеэр багштай ярилцаж шийднэ.','Эрт сонгосон нь суудал авна. Дүүрвэл хүлээлгийн жагсаалтад орж, хэддүгээрт байгаагаа харна.','Сургуулийн дугуйлан А (Да, Лх) эсвэл Б (Мя, Пү) ээлжтэй. Хоёр дугуйлан хослуулбал 7 хоногт 4 өдөр хөдөлнө.'].map(function(x){return h('li',{text:x})}))]),
@@ -247,7 +255,7 @@ function renderMyClubs(){
   var W=$('myClubsOut');if(!W)return;W.innerHTML='';
   if(!ME){W.appendChild(h('div',{cls:'gate'},[h('h2',{text:'Нэвтэрнэ үү'}),h('p',{cls:'lede',text:'Өөрийн дугуйлангийн мэдээллийг харахын тулд сургуулийн имэйлээр нэвтэрнэ.'}),h('button',{type:'button',cls:'btn gold',text:'Нэвтрэх',onclick:function(){openLogin('in')}})]));return}
   var p=crPicks();
-  if(!p.length){W.appendChild(h('div',{cls:'gate'},[h('h2',{text:'Одоогоор дугуйлан сонгоогүй байна'}),h('p',{cls:'lede',text:crPhase()==='before'?'Суудал сонголт '+crTime(crSet().open)+'-д нээгдэнэ. Дугуйлангуудтай танилцаад аль хоёрыг сонгохоо эцэг эхтэйгээ ярилцаарай.':crPhase()==='closed'?'Суудал сонголт хаагдсан. Асуух зүйл байвал Coach Jack-д хандаарай.':'Бүртгэл нээлттэй байна. Дугуйлангаа сонгоорой.'}),
+  if(!p.length){W.appendChild(h('div',{cls:'gate'},[h('h2',{text:'Одоогоор дугуйлан сонгоогүй байна'}),h('p',{cls:'lede',text:crPhase()==='view'?'Суудал сонголт түр хаалттай. Дугуйлангуудтай танилцаад аль хоёрыг сонгохоо эцэг эхтэйгээ ярилцаарай.':crPhase()==='before'?'Суудал сонголт '+crTime(crSet().open)+'-д нээгдэнэ. Дугуйлангуудтай танилцаад аль хоёрыг сонгохоо эцэг эхтэйгээ ярилцаарай.':crPhase()==='closed'?'Суудал сонголт хаагдсан. Асуух зүйл байвал Coach Jack-д хандаарай.':'Бүртгэл нээлттэй байна. Дугуйлангаа сонгоорой.'}),
     h('a',{href:'#clubs','data-go':'clubs',cls:'btn gold',text:'Дугуйлангууд руу очих',onclick:function(e){e.preventDefault();show('clubs')}})]));return}
   if(crOverlap(p))W.appendChild(h('div',{cls:'box',style:'background:var(--orange-soft);border-color:transparent'},[h('h3',{text:'Хоёр дугуйлангийн өдөр давхцаж байна'}),h('p',{style:'margin:0',text:'Баталгаажуулалтын үеэр ('+crSet().confirm+') багш тантай ярилцаж, ээлж солих эсвэл нэгийг сонгоно.'})]));
   p.forEach(function(oid){var f=crFind(oid);if(f)W.appendChild(crMyCard(oid,f.c,f.o))});
@@ -317,6 +325,7 @@ function crCalendar(days,seat,oid){
 /* -- owner tools: times, seat counters, club info, lists, attendance, session notes -- */
 function crAdminBox(){
   return h('div',{cls:'box',style:'border:2px dashed var(--gold)'},[h('h3',{text:'Удирдлага (зөвхөн танд харагдана)'}),
+    crModeBox(),
     h('div',{cls:'chips'},[
       h('button',{type:'button',cls:'btn gold small',text:'⚙ Бүртгэлийн цаг, суудлын тоо',onclick:crAdminSetup}),
       h('button',{type:'button',cls:'btn line small',text:'✎ Дугуйлангийн мэдээлэл, багш',onclick:function(){crAdminClub(CRCLUBS[0].k)}}),
@@ -326,6 +335,21 @@ function crAdminBox(){
       h('button',{type:'button',cls:'btn line small',text:'⬇ CSV татах',onclick:crCSV})]),
     crFreeWait().length?h('p',{cls:'status err',style:'margin:0',text:'Анхаар: '+crFreeWait().map(function(x){return crName(x)+' · '+crLeft(x)+' суудал чөлөөтэй, хүлээлгэд '+WAITQ[x].length}).join('; ')+'. Хүлээлгийн дарааллаар "👥 Жагсаалт" хэсгээс суудал өгнө үү (автоматаар шилжихгүй).'}):null,
     h('p',{cls:'muted',style:'margin:0;font-size:13px',text:Object.keys(OFFERS).length?'Суудлын тоолуур идэвхтэй ('+Object.keys(OFFERS).length+' ээлж).':'Анхаар: суудлын тоолуур үүсгээгүй байна. "⚙ Бүртгэлийн цаг, суудлын тоо" дээр дарж хадгална уу. Үүнгүйгээр хүүхдүүд суудал авч чадахгүй.'})]);
+}
+var CRMODES={auto:['⏱ Цагаар','Тохируулсан цагаар нээгдэж, хаагдана.'],view:['👁 Зөвхөн харах','Сурагчид дугуйлан, суудлыг харна. Суудал авах, цуцлах түр хаалттай. Авсан суудал хэвээр.'],live:['▶ Одоо идэвхтэй','Цагаас үл хамааран бүртгэл яг одоо нээлттэй. Та солих хүртэл нээлттэй байна.']};
+var CRPHN={before:'Нээгдээгүй',p1:'Нээлттэй · 1 дугуйлан',p2:'Нээлттэй · 2 дугуйлан',closed:'Хаагдсан',view:'Зөвхөн харах'};
+function crModeBox(){
+  var m=crMode(),s=crSet(),st=h('span',{cls:'status',role:'status'});
+  function go(k){if(k===m||!db)return;
+    var after=k==='auto'?crAutoPhase():k==='view'?'view':(Date.now()<s.p1?'p1':'p2');
+    var msg=CRMODES[k][0].replace(/^\S+ /,'')+' горим\n\n'+CRMODES[k][1]+'\n\nАсаасны дараа сурагчдад: '+CRPHN[after]+'.'+(k==='auto'?'\n(Нээгдэх '+crTime(s.open)+', хаагдах '+crTime(s.close)+')':'')+(k==='live'&&after==='p1'?'\n'+crP1Txt()+' хүртэл 1 дугуйлан, дараа нь 2.':'')+'\n\nСолих уу?';
+    if(!confirm(msg))return;
+    st.className='status';st.textContent='Хадгалж байна…';
+    db.batch([{op:'merge',path:'site/clubreg',data:{mode:k,modeAt:new Date().toISOString(),updatedAt:new Date().toISOString()}}]).then(function(){st.textContent='Хадгалагдлаа.'},function(){st.className='status err';st.textContent='Хадгалж чадсангүй. Дахин оролдоно уу.'})}
+  return h('div',{cls:'crstep',style:'background:var(--gold-soft);margin:0 0 10px'},[
+    h('b',{text:'Бүртгэлийн горим · сурагчдад одоо: '+CRPHN[crPhase()]}),
+    h('div',{cls:'chips',role:'group','aria-label':'Бүртгэлийн горим'},Object.keys(CRMODES).map(function(k){return h('button',{type:'button',cls:'chip','data-crmode':k,'aria-pressed':String(k===m),text:CRMODES[k][0],onclick:function(){go(k)}})})),
+    h('small',{cls:'muted',text:CRMODES[m][1]}),st]);
 }
 function crDT(ms){var d=ubD(ms);return d.toISOString().slice(0,16)}
 function crParseDT(v){return Date.parse(v+':00+08:00')}

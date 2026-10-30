@@ -55,15 +55,20 @@ service cloud.firestore {
 
     // ---------- club registration (дугуйлан) ----------
     // Times live in site/clubreg as milliseconds: open, p1 (until then only 1 club), close.
+    // site/clubreg.mode (set only by the owner): 'auto' (or missing) = open by the times above;
+    // 'view' = students can look but nobody picks or cancels; 'live' = open right now whatever the times.
+    // The "1 club until p1" limit stays in every mode.
     // offers/{oid}: seat counter {n, cap}. Everyone sees how many seats are left.
     // offers/{oid}/seats/{uid}: a student's own seat. offers/{oid}/wait/{uid}: waitlist ticket.
     // regs/{uid}: the student's picks (max 1 before p1, max 2 after). The server checks
     // that every pick is backed by a seat or waitlist ticket, so nobody can take extra seats.
     function regDoc() { return get(/databases/$(database)/documents/site/clubreg).data; }
     function nowMs() { return request.time.toMillis(); }
+    function regMode() { return regDoc().get('mode', 'auto'); }
     function regOpen() {
       return exists(/databases/$(database)/documents/site/clubreg)
-        && nowMs() >= regDoc().open && nowMs() < regDoc().close;
+        && (regMode() == 'live'
+          || (regMode() != 'view' && nowMs() >= regDoc().open && nowMs() < regDoc().close));
     }
     function maxPicks() { return nowMs() < regDoc().p1 ? 1 : 2; }
     function offerP(o) { return /databases/$(database)/documents/offers/$(o); }

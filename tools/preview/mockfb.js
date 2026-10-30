@@ -97,7 +97,8 @@
     var touches = writes.some(function (w) { return /^offers\/[^/]+(\/(seats|wait)\/[^/]+)?$/.test(w.path) || /^regs\//.test(w.path); });
     if (!touches || role === "admin") return true;
     var r = store["site/clubreg"]; if (!r) return false;
-    var t = Date.now(); if (!(t >= r.open && t < r.close)) return false;
+    var t = Date.now(), md = r.mode === "view" || r.mode === "live" ? r.mode : "auto";
+    if (md === "view" || (md === "auto" && !(t >= r.open && t < r.close))) return false;
     var max = t < r.p1 ? 1 : 2, ok = true;
     writes.forEach(function (w) {
       var m = w.path.match(/^offers\/([^/]+)$/);

@@ -27,9 +27,10 @@ async function read(path) { let out; await seed(async (db) => { const s = await 
 async function count(path) { let n; await seed(async (db) => { n = (await getDocs(collection(db, path))).size; }); return n; }
 
 /* registration window relative to now (ms): negative = already passed */
-async function setReg({ openIn = -60e3, p1In = -30e3, closeIn = 60e3 } = {}) {
-  const now = Date.now();
-  await seed((db) => setDoc(doc(db, "site/clubreg"), { open: now + openIn, p1: now + p1In, close: now + closeIn }));
+async function setReg({ openIn = -60e3, p1In = -30e3, closeIn = 60e3, mode } = {}) {
+  const now = Date.now(), d = { open: now + openIn, p1: now + p1In, close: now + closeIn };
+  if (mode) d.mode = mode;
+  await seed((db) => setDoc(doc(db, "site/clubreg"), d));
 }
 async function offer(oid, cap, n = 0) { await seed((db) => setDoc(doc(db, "offers/" + oid), { n, cap })); }
 
@@ -177,6 +178,38 @@ await test("R17 both shifts of the same club are refused by the server", async (
   await pick(stu(1), "s1", "jj-a");
   await assertFails(pick(stu(1), "s1", "jj-b"));
   ok(await pick(stu(1), "s1", "fn-a") === "seat", "different club still allowed");
+});
+
+/* registration mode (owner's switch in site/clubreg.mode) */
+await test("R18 view mode: inside the times, nobody picks or cancels", async () => {
+  await setReg(); await offer("bb", 30); await offer("fn-a", 20);
+  await pick(stu(1), "s1", "bb");
+  await setReg({ mode: "view" });
+  await assertFails(pick(stu(2), "s2", "bb"));
+  await assertFails(leave(stu(1), "s1", "bb"));
+  ok((await read("offers/bb")).n === 1, "counter changed");
+  ok(await count("offers/bb/seats") === 1, "seat removed");
+});
+await test("R19 live mode: after closing time a seat is still given", async () => {
+  await setReg({ openIn: -180e3, p1In: -120e3, closeIn: -60e3, mode: "live" }); await offer("bb", 30); await offer("fn-a", 20);
+  ok(await pick(stu(1), "s1", "bb") === "seat", "first");
+  ok(await pick(stu(1), "s1", "fn-a") === "seat", "second after p1");
+  await leave(stu(1), "s1", "fn-a");
+  ok((await read("offers/fn-a")).n === 0, "cancel in live mode");
+});
+await test("R20 live mode before p1: still only 1 club", async () => {
+  await setReg({ openIn: 60e3, p1In: 120e3, closeIn: 180e3, mode: "live" }); await offer("bb", 30); await offer("fn-a", 20);
+  ok(await pick(stu(1), "s1", "bb") === "seat", "first");
+  await assertFails(pick(stu(1), "s1", "fn-a"));
+});
+await test("R21 auto mode (or unknown value) keeps the times; only the owner sets the mode", async () => {
+  await setReg({ openIn: -180e3, p1In: -120e3, closeIn: -60e3, mode: "auto" }); await offer("bb", 30);
+  await assertFails(pick(stu(1), "s1", "bb"));
+  await setReg({ openIn: -180e3, p1In: -120e3, closeIn: -60e3, mode: "whatever" });
+  await assertFails(pick(stu(1), "s1", "bb"));
+  await assertFails(updateDoc(doc(stu(1), "site/clubreg"), { mode: "live" }));
+  await assertFails(updateDoc(doc(teacher(), "site/clubreg"), { mode: "live" }));
+  await assertSucceeds(updateDoc(doc(owner(), "site/clubreg"), { mode: "live" }));
 });
 
 /* ---------------- feedback ---------------- */
