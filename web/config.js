@@ -21,6 +21,20 @@ window.TPE_CONFIG = {
   YOUTUBE_CHANNEL_ID: "UCKOzHIQCjtLCyYj-cJrrRRw",
   // Home page: coach photo and contact footer. Leave "" to hide an item.
   COACH_PHOTO: "",   // full https link to a photo, e.g. "https://.../jack.jpg"
+  // Optional public media. Empty keeps the flat sport icon or the ЖС placeholder.
+  // An admin can replace these from Удирдлагын төв; Firestore site/media wins over these defaults.
+  MEDIA: {
+    hero: "",
+    heroVideo: "",
+    coach: "",
+    basketball: "",
+    handball: "",
+    jiu: "",
+    pickleball: "",
+    strength: "",
+    football: "",
+    volleyball: ""
+  },
   CONTACT: {
     email: "saikhanjargal.j@tomujin.edu.mn",
     phone: "",       // e.g. "+976 9911 2233"

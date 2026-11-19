@@ -21,7 +21,7 @@ var CRCLUBS=[
   offers:[{id:'jj-a',sh:'А',days:[1,3],cap:16},{id:'jj-b',sh:'Б',days:[2,4],cap:16}]},
  /* Pickleball took the place of mini tennis (10/25). Ids 'tn', 'tn-a', 'tn-b' are kept so saved settings,
     seat counters and seats stay where they are; only what people see changed. Time, place, seats, deposit unchanged. */
- {k:'tn',n:'Пиклбол',fig:'pb-dink',cc:'#15803d',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',
+ {k:'tn',n:'Пиклбол',fig:'pb-dink',cc:'#5B1F8F',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',
   d:'Тусгай цохиур, нүхтэй хуванцар бөмбөгөөр бадминтоны хэмжээтэй талбайд тоглоно. Доороос сервис, торны ойрх бүс ("kitchen"), зөөлөн "динк" цохилт, хос тоглолт. Хурдан сурдаг, бүх түвшинд тохиромжтой.',
   offers:[{id:'tn-a',sh:'А',days:[1,3],cap:16},{id:'tn-b',sh:'Б',days:[2,4],cap:16}]},
  {k:'fn',n:'Functional strength training',fig:'burpee',cc:'#5c1090',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',fri:true,
@@ -64,7 +64,7 @@ function crCancel(oid,s){var o=oid&&OFFERS[oid];return (o&&o.off&&o.off[s])||''}
 function crNext(days,oid){var t=ubToday();var all=crDates(days);for(var i=0;i<all.length;i++)if(all[i]>=t&&!crCancel(oid,all[i]))return all[i];return ''}
 function crOverlap(p){if(p.length<2)return false;var a=crFind(p[0]),b=crFind(p[1]);if(!a||!b)return false;return a.o.days.some(function(d){return b.o.days.indexOf(d)>=0})}
 var CRICON={bb:'basketball',hb:'handball',jj:'jiu',tn:'pickleball',fn:'strength'};
-function crPic(c){if(CRICON[c.k]&&typeof sportIcon==='function')return sportIcon(CRICON[c.k],c.cc);var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)})}
+function crPic(c){if(CRICON[c.k]&&typeof mediaPic==='function'){var p=mediaPic(CRICON[c.k],c.n);if(p)return p}if(CRICON[c.k]&&typeof sportIcon==='function')return sportIcon(CRICON[c.k],'var(--brand)');var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)})}
 
 /* -- subscriptions -- */
 function crSubPublic(){if(!db)return;db.collection('offers').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data()});OFFERS=m;renderClubReg();renderMyClubs()},function(){})}

@@ -6,7 +6,7 @@
    (away.js), the address is also put in config/absence so signed-in students can mark their own coming lesson. */
 var PATT={url:'',sheet:'',yavts:'',loaded:false,sum:null,sumAt:0,sumBusy:false,data:{},key:'',date:'',view:'day',busy:{},bulk:false,msg:null,loading:false,err:''};
 var PACODE=[['И','Ирсэн','ok'],['Х','Хоцорсон','g'],['Т','Тасалсан','o'],['Ч','Чөлөөтэй','t'],['Ө','Өвчтэй','t']];
-var PAERR={'no-url':'Sheet-тэй холбоогүй байна. Доорх "Тохиргоо" хэсэгт холбоосоо оруулна уу.','not-allowed':'Энэ акаунтаар Sheet-ийг ашиглах эрхгүй.','bad-token':'Нэвтрэлт хүчингүй боллоо. Гараад дахин нэвтэрнэ үү.','no-date-column':'Sheet-д энэ өдрийн багана алга (толгойн огноо буруу байж магадгүй).','no-tab':'Sheet-д ийм хуудас алга.','bad-header':'Sheet-ийн толгой мөр (3-р мөр) өөрчлөгдсөн байна.','bad-code':'Зөвшөөрөгдөөгүй тэмдэг.'};
+var PAERR={'no-url':'Sheet-тэй холбоогүй байна. Доорх "Тохиргоо" хэсэгт холбоосоо оруулна уу.','not-allowed':'Энэ акаунтаар Sheet-ийг ашиглах эрхгүй.','bad-token':'Нэвтрэлт хүчингүй боллоо. Гараад дахин нэвтэрнэ үү.','no-date-column':'Sheet-д энэ өдрийн багана алга (толгойн огноо буруу байж магадгүй).','no-tab':'Sheet-д ийм хуудас алга.','bad-header':'Sheet-ийн толгой мөр (3-р мөр) өөрчлөгдсөн байна.','bad-code':'Зөвшөөрөгдөөгүй тэмдэг.','timeout':'Холболт удаан байна. Дахин оролдоно уу.'};
 function paErr(e){var c=String((e&&e.message)||e||'');var k=c.split(':')[0];if(k==='no-student')return 'Sheet-д энэ сурагч олдсонгүй (мөр устсан эсвэл ID өөрчлөгдсөн).';return PAERR[k]||('Sheet-тэй холбогдож чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.'+(c&&c.length<60?' ('+c+')':''))}
 function paCall(q){
   if(window.TPE&&TPE.sheet)return TPE.sheet(q);   // preview: made-up class lists
@@ -16,9 +16,9 @@ function paCall(q){
 /* one call to the sheet script with the person's sign-in token (the script checks it with Google) */
 function sheetPost(url,q){
   return TPE.idToken().then(function(t){
-    var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},45000);
+    var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},20000);
     return fetch(url,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({},q,{idToken:t})),signal:ctl?ctl.signal:undefined})
-      .then(function(r){clearTimeout(to);return r.json()},function(e){clearTimeout(to);throw e})
+      .then(function(r){clearTimeout(to);return r.json()},function(e){clearTimeout(to);if(e&&(e.name==='AbortError'||/aborted|timeout/i.test(String(e.message||''))))throw new Error('timeout');throw e})
       .then(function(j){if(!j||!j.ok)throw new Error((j&&j.error)||'bad-answer');return j})});
 }
 function paKeep(k,v){try{if(v==null)localStorage.removeItem('tpe-patt-'+k);else localStorage.setItem('tpe-patt-'+k,v)}catch(e){}}
@@ -40,8 +40,8 @@ function paRefresh(){if(!$('v-patt').hidden)renderPatt();if(!$('v-coach').hidden
 function paKeys(){return ((PATT.sum&&PATT.sum.classes)||[]).map(function(c){return c.tab+'|'+c.cls})}
 function paCls(key){key=key||PATT.key;return ((PATT.sum&&PATT.sum.classes)||[]).filter(function(c){return c.tab+'|'+c.cls===key})[0]||null}
 function paTab(key){return String(key||PATT.key).split('|')[0]}
-/* "12B" stays; a grade-only class on its own tab (PE 6 → 6) shows as 6A like the school system; other grades as "5-р анги". */
-function paLabel(c){if(!c)return '';var g=String(c.cls),t=String(c.tab||'').replace(/\D/g,'');return /^\d+$/.test(g)?(g===t?g+'A':g+'-р анги ('+c.tab+')'):g}
+/* Sheet class text as written. A name that matches a school group (6A + 7A, 10A, …) uses that name. A bare grade is "6-р анги", never an invented "6A". */
+function paLabel(c){if(!c)return '';var g=String(c.cls==null?'':c.cls).trim();var hit=(typeof CLASSDEF!=='undefined'?CLASSDEF:[]).filter(function(d){return d[1]===g||d[0]===g.toLowerCase()})[0];if(hit)return hit[1];if(/^\d+$/.test(g))return g+'-р анги';return g}
 function paOpen(key,date){PATT.key=key;paKeep('key',key);PATT.bulk=false;PATT.msg=null;if(date)PATT.date=date;if(!PATT.data[paTab(key)])paLoadTab(paTab(key),!!date);else{paPickDate(PATT.data[paTab(key)]);renderPatt()}}
 function paPickDate(j){var td=ymd(new Date()),ds=j.dates||[];if(ds.indexOf(PATT.date)<0){var past=ds.filter(function(d){return d<=td});PATT.date=past.length?past[past.length-1]:(ds[0]||td)}}
 function paLoadTab(tab,keepDate){
@@ -103,7 +103,7 @@ function renderPatt(){
   if(!PATT.sum&&!PATT.sumBusy&&!PATT.err){paLoadSum();}
   var top=h('div',{cls:'chips',id:'pa-classes'});
   ((PATT.sum&&PATT.sum.classes)||[]).forEach(function(c){var k=c.tab+'|'+c.cls;top.appendChild(h('button',{type:'button',cls:'chip','aria-pressed':String(k===PATT.key),text:paLabel(c),title:c.n+' сурагч',onclick:function(){paOpen(k)}}))});
-  top.appendChild(h('button',{type:'button',cls:'btn line small',text:'↻ Дахин унших',disabled:(PATT.loading||PATT.sumBusy)?'':null,onclick:function(){PATT.data={};paLoadSum(true);if(PATT.key)paLoadTab(paTab(),true)}}));
+  top.appendChild(h('button',{type:'button',cls:'btn line small',text:PATT.err?'Дахин оролдох':'↻ Дахин унших',disabled:(PATT.err||!(PATT.loading||PATT.sumBusy))?null:'',onclick:function(){PATT.err='';PATT.data={};PATT.sumBusy=false;paLoadSum(true);if(PATT.key)paLoadTab(paTab(),true)}}));
   if(PATT.sheet)top.appendChild(h('a',{cls:'btn line small',href:PATT.sheet,target:'_blank',rel:'noopener',text:'Sheet нээх ↗'}));
   W.appendChild(top);
   if(PATT.err)W.appendChild(h('p',{cls:'status err',role:'status',text:PATT.err}));
@@ -172,7 +172,7 @@ function paHome(){
     if(!go)return h('div',{cls:'tcard'},kids);kids.push(h('span',{cls:'tc-go','aria-hidden':'true',text:(goTxt||'Дэлгэрэнгүй')+' ›'}));return h('button',{type:'button',cls:'tcard',onclick:go},kids)}
   var sheetOk=owner&&!!sum;
   W.appendChild(h('div',{cls:'tcards'},[
-    card('Өнөөдрийн ирц',sheetOk?String(tot.today):'—',sheetOk?(tot.today?tot.tc+' ангид тэмдэглэсэн':'Өнөөдөр ирц бүртгээгүй'):(owner?'Sheet-ээс уншиж байна…':'Зөвхөн Жак багшид'),'✓','p',owner?function(){show('patt')}:null,'Ирц бүртгэх'),
+    card('Өнөөдрийн ирц',sheetOk?String(tot.today):'—',sheetOk?(tot.today?tot.tc+' ангид тэмдэглэсэн':'Өнөөдөр ирц бүртгээгүй'):(owner?(PATT.err||(PATT.sumBusy?'Sheet-ээс уншиж байна…':'Sheet уншигдаагүй. Дахин оролдоно уу.')):'Зөвхөн Жак багшид'),'✓','p',owner?function(){show('patt')}:null,'Ирц бүртгэх'),
     card('Ирцийн хувь',sheetOk&&tot.m?Math.round(tot.p/tot.m*100)+'%':'—','Бүх анги · И + Х','◎','t',sheetOk?function(){cxAttendance(sum)}:null,'Ангиар харах'),
     card('Анхаарах сурагч',sheetOk?String(sum.watch.length):'—','Сүүлийн 4 долоо хоногт 2+ удаа тасалсан','!','g',sheetOk?function(){cxWatch(sum)}:null,'Жагсаалт'),
     card('Бэлтгэлийн тэмдэглэл',String(wkLoads.length),'Энэ 7 хоногт · '+Object.keys(who7).length+' сурагч','✎','o',function(){cxWeek()},'Бүгдийг харах')]));
