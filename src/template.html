@@ -46,6 +46,8 @@ a.step.link .go{margin-top:auto;font-weight:800;color:var(--brand);font-size:14p
 .club{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
 .club .pic{background:var(--tint);border-radius:12px;aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden}
 .club .pic>svg{width:100%;height:100%;display:block}
+.club .pic>svg.sport-ico,.team .pic>svg.sport-ico,.crhead .pic>svg.sport-ico{width:auto;height:68%;max-width:72%}
+.hero .stage svg.sport-ico{width:72%;height:auto;margin:auto}
 .club,.story,.team{align-self:start}
 [role=button].club:focus-visible,[role=button].story:focus-visible,[role=button].team:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .club:hover,.story:hover,.team:hover{border-color:var(--brand)}
@@ -1310,7 +1312,7 @@ function renderContact(){
 }
 function renderHome(){
   renderContact();
-  var st=$('heroStage');st.innerHTML='';['bb-set-shot','vb-set','squat','fb-instep','tn-forehand','a-march'].forEach(function(id,i){st.appendChild(makeVis(byId(id),{phase:i*0.4}).svg)});
+  var st=$('heroStage');st.innerHTML='';[['basketball','#f97316'],['volleyball','#5c1090'],['strength','#5c1090'],['football','#15803d'],['pickleball','#15803d'],['handball','#0e7490']].forEach(function(x){st.appendChild(sportIcon(x[0],x[1]))});
   var hd=$('homeDims');hd.innerHTML='';WBDIM.forEach(function(d){hd.appendChild(dimCard(d,true))});
   var dd=new Date(),tp=TIPS.length?TIPS[(dd.getDate()+dd.getMonth())%TIPS.length]:null;
   $('tip').innerHTML='';if(tp){$('tip').appendChild(h('span',{cls:'tag g',text:'Өнөөдрийн дадал · '+tp[0]}));$('tip').appendChild(h('strong',{text:tp[1]}))}if(editMode)$('tip').appendChild(h('button',{type:'button',cls:'btn line small',text:'✎ Өдрийн дадлууд засах',onclick:function(){editList('tips')}}));
@@ -2300,8 +2302,27 @@ var clubCat='all';
 var CLUBACT={basketball:'bb',volleyball:'hb',pickleball:'tn',functional:'fn'};  // 'hb' = гар бөмбөг, 'tn' = пиклбол (ids kept for saved seats)
 function clubActive(c){var k=c.act||CLUBACT[c.id];if(!k||typeof CRCLUBS==='undefined')return '';return CRCLUBS.some(function(x){return x.k===k})?k:''}
 function tapCard(cls,style,fn,kids){return h('div',{cls:cls,style:style,role:'button',tabindex:'0',onclick:fn,onkeydown:function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fn()}}},kids)}
+var SPORTICON={basketball:'basketball',volleyball:'volleyball',football:'football',pickleball:'pickleball',functional:'strength','table-tennis':'table',conditioning:'cardio',correction:'posture'};
+function sportIcon(kind,color){
+  var c=color||'currentColor';
+  var svg=el('svg',{viewBox:'0 0 64 64',class:'sport-ico',role:'img','aria-hidden':'true'});
+  function add(tag,a){svg.appendChild(el(tag,Object.assign({fill:'none',stroke:c,'stroke-width':'2.2','stroke-linecap':'round','stroke-linejoin':'round'},a)))}
+  if(kind==='basketball'){add('circle',{cx:32,cy:32,r:16});add('path',{d:'M32 16v32M16 32h32'});add('path',{d:'M20.5 20.5c8 6 8 17 0 23'});add('path',{d:'M43.5 20.5c-8 6-8 17 0 23'})}
+  else if(kind==='volleyball'){add('circle',{cx:32,cy:32,r:16});add('path',{d:'M32 16c8 8 8 24 0 32'});add('path',{d:'M32 16c-8 8-8 24 0 32'});add('path',{d:'M17 28c10 6 20 6 30 0'});add('path',{d:'M17 36c10-6 20-6 30 0'})}
+  else if(kind==='football'){add('circle',{cx:32,cy:32,r:16});add('path',{d:'M32 24.5l6.2 4.5-2.4 7.3h-7.6l-2.4-7.3z'});add('path',{d:'M32 16v8.5M18.5 26.5l7.3 2.5M45.5 26.5l-7.3 2.5M22 42.5l3.8-6.2M42 42.5l-3.8-6.2'})}
+  else if(kind==='handball'){add('circle',{cx:46,cy:16,r:9});add('path',{d:'M41 11c5 3 6 8 2 11'});add('path',{d:'M20 30v16c0 6 16 6 16 0V30'});add('path',{d:'M20 34V24c0-3 6-3 6 0v8'});add('path',{d:'M26 32V20c0-3 6-3 6 0v12'});add('path',{d:'M32 32V22c0-3 6-3 6 0v12'});add('path',{d:'M14 38c-4 1-6 6-3 9'})}
+  else if(kind==='pickleball'){add('ellipse',{cx:26,cy:28,rx:12,ry:15});add('path',{d:'M26 43v13'});add('circle',{cx:22,cy:24,r:1.15,fill:c,stroke:'none'});add('circle',{cx:30,cy:24,r:1.15,fill:c,stroke:'none'});add('circle',{cx:26,cy:31,r:1.15,fill:c,stroke:'none'});add('circle',{cx:48,cy:16,r:6})}
+  else if(kind==='strength'){add('path',{d:'M22 32h20','stroke-width':'3'});add('rect',{x:12,y:24,width:8,height:16,rx:2});add('rect',{x:44,y:24,width:8,height:16,rx:2})}
+  else if(kind==='jiu'){add('path',{d:'M10 52h44'});add('circle',{cx:22,cy:16,r:4.5});add('circle',{cx:40,cy:24,r:4.5});add('path',{d:'M22 21v8l8 6'});add('path',{d:'M16 28h12'});add('path',{d:'M22 36l-6 12M26 36l4 8'});add('path',{d:'M40 29c-6 6-12 8-16 6'});add('path',{d:'M40 34l8 8'})}
+  else if(kind==='table'){add('ellipse',{cx:24,cy:30,rx:10,ry:12});add('path',{d:'M24 42v12'});add('circle',{cx:46,cy:18,r:5})}
+  else if(kind==='cardio'){add('path',{d:'M8 34h10l4-10 6 20 5-12 4 6h19'})}
+  else if(kind==='posture'){add('circle',{cx:32,cy:16,r:5});add('path',{d:'M32 21v18M24 30h16M32 39l-6 12M32 39l6 12'})}
+  else{add('circle',{cx:32,cy:32,r:16})}
+  return svg;
+}
 function clubPic(c){
   if(c.img)return h('img',{src:imgSrc(c.img),alt:c.n,loading:'lazy',style:'width:100%;height:100%;object-fit:cover'});
+  if(SPORTICON[c.id])return sportIcon(SPORTICON[c.id],'var(--cc,var(--brand))');
   var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}
   return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)});
 }
@@ -2342,7 +2363,8 @@ var TEAMDEF=[
  {id:'team-volleyball',n:'Волейболын шигшээ баг',fig:'vb-set',cc:'#5c1090',league:'UBAC',div:'U19',d:'Охид, хөвгүүдийн баг UBAC-ын U19 лигт оролцдог. Тосолт, сервис, довтолгоо, хаалт, багийн харилцаа.',ach:[],join:''},
  {id:'team-football',n:'Хөл бөмбөгийн шигшээ баг',fig:'fb-instep',cc:'#15803d',league:'UBAC',div:'',d:'Сургуулиа төлөөлж UBAC-ын хөл бөмбөгийн тэмцээнд оролцдог баг. Тэсвэр, хөлийн ур чадвар, орон зайг унших чадвар.',ach:[],join:''}
 ];
-function teamPic(t){if(t.img)return h('img',{src:imgSrc(t.img),alt:t.n,loading:'lazy'});var e=t.fig&&byId(t.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{text:''})}
+var TEAMICON={'bb-set-shot':'basketball','vb-set':'volleyball','fb-instep':'football'};
+function teamPic(t){if(t.img)return h('img',{src:imgSrc(t.img),alt:t.n,loading:'lazy'});var k=TEAMICON[t.fig];if(k)return sportIcon(k,teamColor(t));var e=t.fig&&byId(t.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{text:''})}
 function teamColor(t){return t.cc||({'bb-set-shot':'#f97316','vb-set':'#5c1090','fb-instep':'#15803d'})[t.fig]||'var(--brand)'}
 function renderTeams(){
   var W=$('teamGrid');if(!W)return;W.innerHTML='';

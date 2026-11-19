@@ -63,7 +63,8 @@ function crRank(oid){var q=WAITQ[oid]||[];var i=ME?q.indexOf(ME.uid):-1;return i
 function crCancel(oid,s){var o=oid&&OFFERS[oid];return (o&&o.off&&o.off[s])||''}
 function crNext(days,oid){var t=ubToday();var all=crDates(days);for(var i=0;i<all.length;i++)if(all[i]>=t&&!crCancel(oid,all[i]))return all[i];return ''}
 function crOverlap(p){if(p.length<2)return false;var a=crFind(p[0]),b=crFind(p[1]);if(!a||!b)return false;return a.o.days.some(function(d){return b.o.days.indexOf(d)>=0})}
-function crPic(c){var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)})}
+var CRICON={bb:'basketball',hb:'handball',jj:'jiu',tn:'pickleball',fn:'strength'};
+function crPic(c){if(CRICON[c.k]&&typeof sportIcon==='function')return sportIcon(CRICON[c.k],c.cc);var e=c.fig&&byId(c.fig);if(e){try{return makeVis(e,{phase:.3}).svg}catch(x){}}return h('span',{cls:'badge',text:c.badge||c.n.slice(0,2)})}
 
 /* -- subscriptions -- */
 function crSubPublic(){if(!db)return;db.collection('offers').onSnapshot(function(s){var m={};s.docs.forEach(function(d){m[d.id]=d.data()});OFFERS=m;renderClubReg();renderMyClubs()},function(){})}
