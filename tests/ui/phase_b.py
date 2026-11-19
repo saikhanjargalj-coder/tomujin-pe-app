@@ -245,7 +245,7 @@ async def home_header(pg):
     how = await pg.locator("#homeHowList li").count()
     check("5.1 PE summary comes from the same 6 steps as the 'how' page", how == 6, how)
     cap = await pg.text_content("#pbCap")
-    check("5.4 Podcast & Broadcast has a Mongolian caption, name unchanged", "Подкаст ба шууд дамжуулалт" in cap and await pg.locator("nav.tabs .mt", has_text="Podcast & Broadcast").count() == 1)
+    check("5.4 podcast menu is Mongolian", "Подкаст ба шууд дамжуулалт" in cap and await pg.locator("nav.tabs .mt", has_text="Подкаст ба шууд дамжуулалт").count() == 1)
     content = await pg.evaluate("()=>getComputedStyle(document.querySelector('.gsteps li'),'::before').content")
     check("5.4 guide step numbers are not read twice", '/ ""' in content or content.endswith('""') or content == 'counter(g) / ""', content)
     await pg.set_viewport_size({"width": 390, "height": 860})

@@ -37,7 +37,29 @@ service cloud.firestore {
     // Daily assignments for classes: signed-in school users read, only the owner writes.
     match /assign/{id}  { allow read: if school(); allow write: if isOwner(); }
     // Site texts and lists (page headings, how-it-works, morning routine, daily tips).
-    match /site/{id}    { allow read: if true; allow write: if isOwner(); }
+    // site/media holds only public image or video URLs the owner can swap. No student fields.
+    function mediaUrl(v) {
+      return v is string && v.size() <= 500 && (v == '' || v.matches('https://.+'));
+    }
+    function mediaDocOk() {
+      return request.resource.data.keys().hasOnly(['hero', 'heroVideo', 'coach', 'basketball', 'handball', 'jiu', 'pickleball', 'strength', 'football', 'volleyball', 'updatedAt'])
+        && mediaUrl(request.resource.data.get('hero', ''))
+        && mediaUrl(request.resource.data.get('heroVideo', ''))
+        && mediaUrl(request.resource.data.get('coach', ''))
+        && mediaUrl(request.resource.data.get('basketball', ''))
+        && mediaUrl(request.resource.data.get('handball', ''))
+        && mediaUrl(request.resource.data.get('jiu', ''))
+        && mediaUrl(request.resource.data.get('pickleball', ''))
+        && mediaUrl(request.resource.data.get('strength', ''))
+        && mediaUrl(request.resource.data.get('football', ''))
+        && mediaUrl(request.resource.data.get('volleyball', ''))
+        && request.resource.data.updatedAt is string
+        && request.resource.data.updatedAt.size() <= 40;
+    }
+    match /site/{id} {
+      allow read: if true;
+      allow write: if isOwner() && (id != 'media' || mediaDocOk());
+    }
     // Team rosters per season (team photo + athletes): public only with parent consent.
     match /rosters/{id} {
       allow read: if true;

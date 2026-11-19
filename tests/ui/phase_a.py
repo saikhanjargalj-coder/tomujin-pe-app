@@ -83,7 +83,7 @@ async def main():
         await pg.wait_for_timeout(600)
         bb = await pg.locator("#crOut .club", has_text="Сагсан бөмбөг").text_content()
         check("4 seat taken, message says it is not final yet", "Таны суудал" in bb and "эцсийн баталгаажуулалт биш" in bb, bb[:300])
-        fn = pg.locator("#crOut .club", has_text="Functional strength").locator("button").filter(has_text="2 дахь дугуйлангаа нэмнэ")
+        fn = pg.locator("#crOut .club", has_text="Функциональ хүчний бэлтгэл").locator("button").filter(has_text="2 дахь дугуйлангаа нэмнэ")
         check("4 before 11:00 a second club is blocked with the time", await fn.count() >= 1)
         await pg.screenshot(path=SHOT + "a3_seat_taken.png")
 
@@ -109,10 +109,10 @@ async def main():
         # offline -> clear 'unknown, check after reconnect' state, no fake seat
         await as_role(pg, "student", phase="p2", hash="clubs", reset=True)
         await pg.evaluate("window.__tpeOffline=true")
-        await pg.locator("#crOut .club", has_text="Functional strength").locator(".crrow", has_text="Б ээлж").locator("button", has_text="Суудал авах").click()
+        await pg.locator("#crOut .club", has_text="Функциональ хүчний бэлтгэл").locator(".crrow", has_text="Б ээлж").locator("button", has_text="Суудал авах").click()
         await pg.wait_for_timeout(1200)
-        fnb = await pg.locator("#crOut .club", has_text="Functional strength").text_content()
-        oktags = await pg.locator("#crOut .club", has_text="Functional strength").locator(".tag.ok").count()
+        fnb = await pg.locator("#crOut .club", has_text="Функциональ хүчний бэлтгэл").text_content()
+        oktags = await pg.locator("#crOut .club", has_text="Функциональ хүчний бэлтгэл").locator(".tag.ok").count()
         check("4 offline: no seat shown, clear next step", oktags == 0 and ("тодорхойгүй" in fnb or "аваагүй" in fnb), fnb[:300])
         await pg.screenshot(path=SHOT + "a5_offline.png")
         await pg.evaluate("window.__tpeOffline=false")
