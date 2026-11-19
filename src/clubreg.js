@@ -22,9 +22,9 @@ var CRCLUBS=[
  /* Pickleball took the place of mini tennis (10/25). Ids 'tn', 'tn-a', 'tn-b' are kept so saved settings,
     seat counters and seats stay where they are; only what people see changed. Time, place, seats, deposit unchanged. */
  {k:'tn',n:'Пиклбол',fig:'pb-dink',cc:'#5B1F8F',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',
-  d:'Тусгай цохиур, нүхтэй хуванцар бөмбөгөөр бадминтоны хэмжээтэй талбайд тоглоно. Доороос сервис, торны ойрх бүс ("kitchen"), зөөлөн "динк" цохилт, хос тоглолт. Хурдан сурдаг, бүх түвшинд тохиромжтой.',
+  d:'Тусгай цохиур, нүхтэй хуванцар бөмбөгөөр бадминтоны хэмжээтэй талбайд тоглоно. Доороос сервис, торны ойрх бүс («китчен»), зөөлөн «динк» цохилт, хос тоглолт. Хурдан сурдаг, бүх түвшинд тохиромжтой.',
   offers:[{id:'tn-a',sh:'А',days:[1,3],cap:16},{id:'tn-b',sh:'Б',days:[2,4],cap:16}]},
- {k:'fn',n:'Functional strength training',fig:'burpee',cc:'#5c1090',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',fri:true,
+ {k:'fn',n:'Функциональ хүчний бэлтгэл',fig:'burpee',cc:'#5c1090',place:'Сургууль · U1 заал',time:'07:00–08:20',pay:'dep',fri:true,
   d:'7 үндсэн хөдөлгөөн, хүч, тэнцвэр, хөдөлгөөний чөлөөт байдал, бие халаалт, сэргэлт.',
   offers:[{id:'fn-a',sh:'А',days:[1,3],cap:20},{id:'fn-b',sh:'Б',days:[2,4],cap:20}]}
 ];
